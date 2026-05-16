@@ -3,9 +3,11 @@ use std::ptr;
 use crate::error::Result;
 use crate::ffi;
 use crate::handle::ObjectHandle;
-use crate::material::Material;
-use crate::types::{BoundingBox, GeometryType, IndexBitDepth, MeshBufferInfo, VertexAttributeInfo};
-use crate::util::{c_string, parse_json, required_handle, take_string};
+use crate::object::Object;
+use crate::submesh::Submesh;
+use crate::types::{BoundingBox, GeometryType, MeshBufferInfo, VertexAttributeInfo};
+use crate::util::{c_string, parse_json, required_handle};
+use crate::vertex_attribute::VertexDescriptor;
 
 #[derive(Debug, Clone)]
 pub struct Mesh {
@@ -230,6 +232,12 @@ impl Mesh {
         BoundingBox { min, max }
     }
 
+    #[must_use]
+    pub fn vertex_descriptor(&self) -> Option<VertexDescriptor> {
+        let ptr = unsafe { ffi::mdl_mesh_vertex_descriptor(self.handle.as_ptr()) };
+        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(VertexDescriptor::from_handle)
+    }
+
     pub fn vertex_attribute_data_named(
         &self,
         attribute_name: &str,
@@ -239,6 +247,11 @@ impl Mesh {
             ffi::mdl_mesh_vertex_attribute_data(self.handle.as_ptr(), attribute_name.as_ptr())
         };
         Ok(unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(VertexAttributeData::from_handle))
+    }
+
+    #[must_use]
+    pub fn as_object(&self) -> Object {
+        Object::from_handle(self.handle.clone())
     }
 }
 
@@ -309,48 +322,5 @@ impl VertexAttributeData {
         } as usize;
         bytes.truncate(written);
         Ok(bytes)
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct Submesh {
-    handle: ObjectHandle,
-}
-
-impl Submesh {
-    pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
-        Self { handle }
-    }
-
-    #[must_use]
-    pub fn name(&self) -> Option<String> {
-        take_string(unsafe { ffi::mdl_submesh_name_string(self.handle.as_ptr()) })
-    }
-
-    #[must_use]
-    pub fn index_count(&self) -> usize {
-        unsafe { ffi::mdl_submesh_index_count(self.handle.as_ptr()) as usize }
-    }
-
-    #[must_use]
-    pub fn index_type(&self) -> Option<IndexBitDepth> {
-        IndexBitDepth::from_raw(unsafe { ffi::mdl_submesh_index_type(self.handle.as_ptr()) })
-    }
-
-    #[must_use]
-    pub fn geometry_type(&self) -> Option<GeometryType> {
-        GeometryType::from_raw(unsafe { ffi::mdl_submesh_geometry_type(self.handle.as_ptr()) })
-    }
-
-    #[must_use]
-    pub fn index_buffer(&self) -> Option<MeshBuffer> {
-        let ptr = unsafe { ffi::mdl_submesh_index_buffer(self.handle.as_ptr()) };
-        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(MeshBuffer::from_handle)
-    }
-
-    #[must_use]
-    pub fn material(&self) -> Option<Material> {
-        let ptr = unsafe { ffi::mdl_submesh_material(self.handle.as_ptr()) };
-        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Material::from_handle)
     }
 }

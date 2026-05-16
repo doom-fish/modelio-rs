@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.0] - 2026-05-16
+
+### Added
+
+- Added `Object`, `Light`, `PhysicallyPlausibleLight`, `Camera`, `VoxelArray`, `Skeleton`, `PackedJointAnimation`, `AnimationBindComponent`, animated value wrappers, `VertexDescriptor`, and `VertexAttribute` safe Rust APIs.
+- Extended `Asset`, `Material`, `Texture`, `Mesh`, and `Submesh` with export, hierarchy, material-mutation, checkerboard-texture, vertex-descriptor, and submesh-material surfaces.
+- Split the Swift bridge into logical files per ModelIO area and expanded the C ABI to cover scene objects, cameras, lights, voxels, animation, and vertex descriptors.
+- Added fixture-backed examples and integration tests for every logical area plus an expanded SDK header audit.
+- Added `COVERAGE.md` documenting the current framework coverage and deferred ModelIO areas.
+
 ## [0.1.0] - 2026-05-16
 
 ### Added

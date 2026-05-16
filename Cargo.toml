@@ -1,11 +1,11 @@
 [package]
 name = "modelio-rs"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/doom-fish/modelio-rs"
 repository = "https://github.com/doom-fish/modelio-rs"
-description = "Safe Rust bindings for Apple's ModelIO framework — 3D assets, meshes, materials, textures, and primitive generators on macOS"
+description = "Safe Rust bindings for Apple's ModelIO framework — assets, meshes, materials, lights, cameras, voxels, textures, and animation on macOS"
 authors = ["Per Johansson <per@doom.fish>"]
 keywords = ["modelio", "3d", "mesh", "macos", "apple"]
 categories = ["api-bindings", "graphics", "multimedia::images", "os::macos-apis"]

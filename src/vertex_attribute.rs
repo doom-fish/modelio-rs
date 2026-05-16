@@ -1,0 +1,156 @@
+use std::ptr;
+
+use crate::error::Result;
+use crate::ffi;
+use crate::handle::ObjectHandle;
+use crate::types::{VertexAttributeDescriptorInfo, VertexDescriptorInfo};
+use crate::util::{c_string, parse_json, required_handle};
+
+#[derive(Debug, Clone)]
+pub struct VertexAttribute {
+    handle: ObjectHandle,
+}
+
+impl VertexAttribute {
+    pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
+        Self { handle }
+    }
+
+    pub fn new(name: &str, format: u32, offset: usize, buffer_index: usize) -> Result<Self> {
+        let name = c_string(name)?;
+        let mut out_attribute = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_vertex_attribute_new(
+                name.as_ptr(),
+                format,
+                offset as u64,
+                buffer_index as u64,
+                &mut out_attribute,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_attribute,
+            "MDLVertexAttribute",
+        )?))
+    }
+
+    pub fn info(&self) -> Result<VertexAttributeDescriptorInfo> {
+        parse_json(
+            unsafe { ffi::mdl_vertex_attribute_info_json(self.handle.as_ptr()) },
+            "MDLVertexAttribute",
+        )
+    }
+
+    pub fn set_name(&self, name: &str) -> Result<()> {
+        let name = c_string(name)?;
+        unsafe { ffi::mdl_vertex_attribute_set_name(self.handle.as_ptr(), name.as_ptr()) };
+        Ok(())
+    }
+
+    pub fn set_format(&self, format: u32) {
+        unsafe { ffi::mdl_vertex_attribute_set_format(self.handle.as_ptr(), format) };
+    }
+
+    pub fn set_offset(&self, offset: usize) {
+        unsafe { ffi::mdl_vertex_attribute_set_offset(self.handle.as_ptr(), offset as u64) };
+    }
+
+    pub fn set_buffer_index(&self, buffer_index: usize) {
+        unsafe {
+            ffi::mdl_vertex_attribute_set_buffer_index(self.handle.as_ptr(), buffer_index as u64);
+        };
+    }
+
+    pub fn set_time(&self, time: f64) {
+        unsafe { ffi::mdl_vertex_attribute_set_time(self.handle.as_ptr(), time) };
+    }
+
+    pub fn set_initialization_value(&self, value: [f32; 4]) {
+        unsafe {
+            ffi::mdl_vertex_attribute_set_initialization_value(
+                self.handle.as_ptr(),
+                value[0],
+                value[1],
+                value[2],
+                value[3],
+            );
+        };
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct VertexDescriptor {
+    handle: ObjectHandle,
+}
+
+impl VertexDescriptor {
+    pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
+        Self { handle }
+    }
+
+    pub fn copy(&self) -> Result<Self> {
+        let mut out_descriptor = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_vertex_descriptor_new_copy(
+                self.handle.as_ptr(),
+                &mut out_descriptor,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_descriptor,
+            "MDLVertexDescriptor",
+        )?))
+    }
+
+    pub fn info(&self) -> Result<VertexDescriptorInfo> {
+        parse_json(
+            unsafe { ffi::mdl_vertex_descriptor_info_json(self.handle.as_ptr()) },
+            "MDLVertexDescriptor",
+        )
+    }
+
+    #[must_use]
+    pub fn attribute_count(&self) -> usize {
+        unsafe { ffi::mdl_vertex_descriptor_attribute_count(self.handle.as_ptr()) as usize }
+    }
+
+    #[must_use]
+    pub fn attribute_at(&self, index: usize) -> Option<VertexAttribute> {
+        let ptr =
+            unsafe { ffi::mdl_vertex_descriptor_attribute_at(self.handle.as_ptr(), index as u64) };
+        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(VertexAttribute::from_handle)
+    }
+
+    pub fn attribute_named(&self, name: &str) -> Result<Option<VertexAttribute>> {
+        let name = c_string(name)?;
+        let ptr = unsafe {
+            ffi::mdl_vertex_descriptor_attribute_named(self.handle.as_ptr(), name.as_ptr())
+        };
+        Ok(unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(VertexAttribute::from_handle))
+    }
+
+    #[must_use]
+    pub fn attributes(&self) -> Vec<VertexAttribute> {
+        (0..self.attribute_count())
+            .filter_map(|index| self.attribute_at(index))
+            .collect()
+    }
+
+    pub fn reset(&self) {
+        unsafe { ffi::mdl_vertex_descriptor_reset(self.handle.as_ptr()) };
+    }
+
+    pub fn set_packed_offsets(&self) {
+        unsafe { ffi::mdl_vertex_descriptor_set_packed_offsets(self.handle.as_ptr()) };
+    }
+
+    pub fn set_packed_strides(&self) {
+        unsafe { ffi::mdl_vertex_descriptor_set_packed_strides(self.handle.as_ptr()) };
+    }
+}

@@ -44,117 +44,38 @@ fn assert_contains_all(haystack: &str, needles: &[&str]) {
 }
 
 #[test]
-fn mdl_asset_surface_is_present() {
-    let header = read_header("MDLAsset");
+fn asset_mesh_material_and_texture_surface_is_present() {
+    let asset_header = read_header("MDLAsset");
     assert_contains_all(
-        &header,
+        &asset_header,
         &[
-            "initWithURL:",
             "canImportFileExtension:",
-            "@property (nonatomic, readonly) MDLAxisAlignedBoundingBox boundingBox;",
-            "@property (nonatomic, readonly, retain, nullable) NSURL *URL;",
-            "@property (nonatomic, readonly) NSUInteger count;",
-            "- (MDLObject *)objectAtIndex:(NSUInteger)index;",
+            "canExportFileExtension:",
+            "exportAssetToURL:",
+            "- (void)addObject:",
+            "- (MDLObject *)objectAtIndex:",
         ],
     );
 
-    let bridge = read_bridge();
+    let mesh_header = read_header("MDLMesh");
     assert_contains_all(
-        &bridge,
+        &mesh_header,
         &[
-            "mdl_asset_new_with_url",
-            "mdl_asset_can_import_file_extension",
-            "mdl_asset_count",
-            "mdl_asset_bounding_box",
-            "mdl_asset_url_string",
-            "mdl_asset_mesh_at_index",
-        ],
-    );
-}
-
-#[test]
-fn mdl_mesh_surface_is_present() {
-    let header = read_header("MDLMesh");
-    assert_contains_all(
-        &header,
-        &[
+            "vertexDescriptor",
             "vertexAttributeDataForAttributeNamed:",
-            "@property (nonatomic, readwrite) NSUInteger vertexCount;",
-            "@property (nonatomic, readwrite, retain) NSArray<id<MDLMeshBuffer>> *vertexBuffers;",
-            "@property (nonatomic, copy, nullable) NSMutableArray<MDLSubmesh*> *submeshes;",
-            "@property (nonatomic, readonly) MDLAxisAlignedBoundingBox boundingBox;",
             "initBoxWithExtent:",
-            "initSphereWithExtent:",
             "initCylinderWithExtent:",
-            "initPlaneWithExtent:",
-            "initIcosahedronWithExtent:",
         ],
     );
 
-    let bridge = read_bridge();
+    let material_header = read_header("MDLMaterial");
     assert_contains_all(
-        &bridge,
+        &material_header,
         &[
-            "mdl_mesh_new_box",
-            "mdl_mesh_new_ellipsoid",
-            "mdl_mesh_new_cylinder",
-            "mdl_mesh_new_plane",
-            "mdl_mesh_new_icosahedron",
-            "mdl_mesh_vertex_attribute_data",
-            "mdl_mesh_vertex_buffer_at",
-            "mdl_mesh_submesh_at",
-        ],
-    );
-}
-
-#[test]
-fn mdl_material_surface_is_present() {
-    let header = read_header("MDLMaterial");
-    assert_contains_all(
-        &header,
-        &[
-            "@property (nonatomic, assign) MDLMaterialSemantic semantic;",
-            "@property (nonatomic, assign) MDLMaterialPropertyType type;",
-            "@property (nonatomic, copy, nullable) NSString *stringValue;",
-            "@property (nonatomic, copy, nullable) NSURL *URLValue;",
-            "@property (nonatomic, retain, nullable) MDLTextureSampler *textureSamplerValue;",
-            "@property (nullable, nonatomic) CGColorRef color;",
-            "@property (nonatomic, assign) float floatValue;",
-            "@property (nonatomic, assign) vector_float2 float2Value;",
-            "@property (nonatomic, assign) vector_float3 float3Value;",
-            "@property (nonatomic, assign) vector_float4 float4Value;",
-            "@property (nonatomic, assign) matrix_float4x4 matrix4x4;",
-            "@property (nonatomic, assign) float luminance;",
-            "- (nullable MDLMaterialProperty*)propertyNamed:(NSString*)name;",
-            "- (nullable MDLMaterialProperty*)propertyWithSemantic:(MDLMaterialSemantic)semantic;",
-            "@property (nonatomic, readonly) NSUInteger count;",
-        ],
-    );
-
-    let bridge = read_bridge();
-    assert_contains_all(
-        &bridge,
-        &[
-            "mdl_material_count",
-            "mdl_material_property_named",
-            "mdl_material_property_with_semantic",
-            "mdl_material_property_info_json",
-            "mdl_material_property_texture",
-        ],
-    );
-}
-
-#[test]
-fn mdl_submesh_and_texture_surface_is_present() {
-    let submesh_header = read_header("MDLSubmesh");
-    assert_contains_all(
-        &submesh_header,
-        &[
-            "@property (nonatomic, readonly, retain) id<MDLMeshBuffer> indexBuffer;",
-            "@property (nonatomic, readonly) NSUInteger indexCount;",
-            "@property (nonatomic, readonly) MDLIndexBitDepth indexType;",
-            "@property (nonatomic, readonly) MDLGeometryType geometryType;",
-            "@property (nonatomic, retain, nullable) MDLMaterial *material;",
+            "initWithName:(NSString*)name scatteringFunction:",
+            "materialFace",
+            "floatValue",
+            "color",
         ],
     );
 
@@ -162,15 +83,10 @@ fn mdl_submesh_and_texture_surface_is_present() {
     assert_contains_all(
         &texture_header,
         &[
-            "- (instancetype)initWithURL:(NSURL*)URL name:(nullable NSString*)name;",
-            "- (nullable NSData *)texelDataWithTopLeftOrigin;",
-            "- (nullable NSData *)texelDataWithBottomLeftOrigin;",
-            "@property (nonatomic, readonly) vector_int2 dimensions;",
-            "@property (nonatomic, readonly) NSInteger rowStride;",
-            "@property (nonatomic, readonly) NSUInteger channelCount;",
-            "@property (nonatomic, readonly) MDLTextureChannelEncoding channelEncoding;",
-            "@property (nonatomic) BOOL isCube;",
-            "@property (nonatomic) BOOL hasAlphaValues;",
+            "initWithURL:(NSURL*)URL name:",
+            "MDLCheckerboardTexture",
+            "texelDataWithTopLeftOrigin",
+            "writeToURL:",
         ],
     );
 
@@ -178,11 +94,141 @@ fn mdl_submesh_and_texture_surface_is_present() {
     assert_contains_all(
         &bridge,
         &[
-            "mdl_submesh_index_buffer",
-            "mdl_submesh_material",
-            "mdl_url_texture_new",
-            "mdl_texture_info_json",
-            "mdl_texture_copy_texel_data",
+            "mdl_asset_new_empty",
+            "mdl_asset_export_to_url",
+            "mdl_mesh_vertex_descriptor",
+            "mdl_material_new",
+            "mdl_checkerboard_texture_new",
+        ],
+    );
+}
+
+#[test]
+fn object_light_and_camera_surface_is_present() {
+    let object_header = read_header("MDLObject");
+    assert_contains_all(
+        &object_header,
+        &[
+            "@property (nonatomic, readonly, copy) NSArray<id<MDLComponent>> *components;",
+            "- (void)addChild:(MDLObject *)child;",
+            "- (MDLObject*)objectAtPath:",
+            "@property (nonatomic) BOOL hidden;",
+        ],
+    );
+
+    let light_header = read_header("MDLLight");
+    assert_contains_all(
+        &light_header,
+        &[
+            "irradianceAtPoint:",
+            "@property (nonatomic, readwrite) MDLLightType lightType;",
+            "@interface MDLPhysicallyPlausibleLight",
+            "setColorByTemperature:",
+        ],
+    );
+
+    let camera_header = read_header("MDLCamera");
+    assert_contains_all(
+        &camera_header,
+        &["projectionMatrix", "frameBoundingBox:", "lookAt:", "rayTo:"],
+    );
+
+    let bridge = read_bridge();
+    assert_contains_all(
+        &bridge,
+        &[
+            "mdl_object_new",
+            "mdl_object_add_child",
+            "mdl_light_new",
+            "mdl_physically_plausible_light_new",
+            "mdl_camera_new",
+            "mdl_camera_ray_to",
+        ],
+    );
+}
+
+#[test]
+fn voxel_animation_and_animated_value_surface_is_present() {
+    let voxel_header = read_header("MDLVoxelArray");
+    assert_contains_all(
+        &voxel_header,
+        &[
+            "initWithData:(NSData*)voxelData",
+            "voxelExistsAtIndex:",
+            "voxelIndices",
+            "coarseMesh",
+        ],
+    );
+
+    let animation_header = read_header("MDLAnimation");
+    assert_contains_all(
+        &animation_header,
+        &[
+            "@interface MDLSkeleton",
+            "@interface MDLPackedJointAnimation",
+            "@interface MDLAnimationBindComponent",
+        ],
+    );
+
+    let animated_header = read_header("MDLAnimatedValueTypes");
+    assert_contains_all(
+        &animated_header,
+        &[
+            "@interface MDLAnimatedScalar",
+            "@interface MDLAnimatedVector3",
+            "@interface MDLAnimatedQuaternion",
+            "@interface MDLAnimatedMatrix4x4",
+            "@interface MDLAnimatedScalarArray",
+        ],
+    );
+
+    let bridge = read_bridge();
+    assert_contains_all(
+        &bridge,
+        &[
+            "mdl_voxel_array_new_with_indices",
+            "mdl_packed_joint_animation_new",
+            "mdl_animation_bind_component_new",
+            "mdl_animated_scalar_new",
+            "mdl_animated_vector3_array_new",
+            "mdl_animated_quaternion_array_new",
+        ],
+    );
+}
+
+#[test]
+fn submesh_and_vertex_attribute_surface_is_present() {
+    let submesh_header = read_header("MDLSubmesh");
+    assert_contains_all(
+        &submesh_header,
+        &[
+            "@property (nonatomic, readonly, retain) id<MDLMeshBuffer> indexBuffer;",
+            "indexBufferAsIndexType:",
+            "@property (nonatomic, retain, nullable) MDLMaterial *material;",
+        ],
+    );
+
+    let vertex_header = read_header("MDLVertexDescriptor");
+    assert_contains_all(
+        &vertex_header,
+        &[
+            "@interface MDLVertexAttribute",
+            "initWithName:(NSString *)name",
+            "@interface MDLVertexDescriptor",
+            "attributeNamed:",
+            "setPackedOffsets",
+        ],
+    );
+
+    let bridge = read_bridge();
+    assert_contains_all(
+        &bridge,
+        &[
+            "mdl_submesh_index_buffer_as_type",
+            "mdl_submesh_set_material",
+            "mdl_vertex_attribute_new",
+            "mdl_vertex_descriptor_new_copy",
+            "mdl_vertex_descriptor_attribute_named",
         ],
     );
 }

@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
 pub struct BoundingBox {
     pub min: [f32; 3],
     pub max: [f32; 3],
@@ -46,6 +46,11 @@ pub enum IndexBitDepth {
 }
 
 impl IndexBitDepth {
+    #[must_use]
+    pub const fn as_raw(self) -> u32 {
+        self as u32
+    }
+
     #[must_use]
     pub const fn from_raw(raw: u32) -> Option<Self> {
         match raw {
@@ -180,6 +185,172 @@ impl MaterialPropertyType {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)]
+pub enum MaterialFace {
+    Front = 0,
+    Back = 1,
+    DoubleSided = 2,
+}
+
+impl MaterialFace {
+    #[must_use]
+    pub const fn as_raw(self) -> u32 {
+        self as u32
+    }
+
+    #[must_use]
+    pub const fn from_raw(raw: u32) -> Option<Self> {
+        match raw {
+            0 => Some(Self::Front),
+            1 => Some(Self::Back),
+            2 => Some(Self::DoubleSided),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)]
+pub enum LightType {
+    Unknown = 0,
+    Ambient = 1,
+    Directional = 2,
+    Spot = 3,
+    Point = 4,
+    Linear = 5,
+    DiscArea = 6,
+    RectangularArea = 7,
+    SuperElliptical = 8,
+    Photometric = 9,
+    Probe = 10,
+    Environment = 11,
+}
+
+impl LightType {
+    #[must_use]
+    pub const fn as_raw(self) -> u32 {
+        self as u32
+    }
+
+    #[must_use]
+    pub const fn from_raw(raw: u32) -> Option<Self> {
+        match raw {
+            0 => Some(Self::Unknown),
+            1 => Some(Self::Ambient),
+            2 => Some(Self::Directional),
+            3 => Some(Self::Spot),
+            4 => Some(Self::Point),
+            5 => Some(Self::Linear),
+            6 => Some(Self::DiscArea),
+            7 => Some(Self::RectangularArea),
+            8 => Some(Self::SuperElliptical),
+            9 => Some(Self::Photometric),
+            10 => Some(Self::Probe),
+            11 => Some(Self::Environment),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)]
+pub enum CameraProjection {
+    Perspective = 0,
+    Orthographic = 1,
+}
+
+impl CameraProjection {
+    #[must_use]
+    pub const fn as_raw(self) -> u32 {
+        self as u32
+    }
+
+    #[must_use]
+    pub const fn from_raw(raw: u32) -> Option<Self> {
+        match raw {
+            0 => Some(Self::Perspective),
+            1 => Some(Self::Orthographic),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)]
+pub enum DataPrecision {
+    Undefined = 0,
+    Float = 1,
+    Double = 2,
+}
+
+impl DataPrecision {
+    #[must_use]
+    pub const fn from_raw(raw: u32) -> Option<Self> {
+        match raw {
+            0 => Some(Self::Undefined),
+            1 => Some(Self::Float),
+            2 => Some(Self::Double),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)]
+pub enum AnimatedValueInterpolation {
+    Constant = 0,
+    Linear = 1,
+}
+
+impl AnimatedValueInterpolation {
+    #[must_use]
+    pub const fn as_raw(self) -> u32 {
+        self as u32
+    }
+
+    #[must_use]
+    pub const fn from_raw(raw: u32) -> Option<Self> {
+        match raw {
+            0 => Some(Self::Constant),
+            1 => Some(Self::Linear),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(i32)]
+pub enum ObjectKind {
+    Unknown = 0,
+    Object = 1,
+    Mesh = 2,
+    Light = 3,
+    PhysicallyPlausibleLight = 4,
+    Camera = 5,
+    VoxelArray = 6,
+    Skeleton = 7,
+    PackedJointAnimation = 8,
+}
+
+impl ObjectKind {
+    #[must_use]
+    pub const fn from_raw(raw: i32) -> Option<Self> {
+        match raw {
+            0 => Some(Self::Unknown),
+            1 => Some(Self::Object),
+            2 => Some(Self::Mesh),
+            3 => Some(Self::Light),
+            4 => Some(Self::PhysicallyPlausibleLight),
+            5 => Some(Self::Camera),
+            6 => Some(Self::VoxelArray),
+            7 => Some(Self::Skeleton),
+            8 => Some(Self::PackedJointAnimation),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
 pub enum TextureChannelEncoding {
     UInt8 = 1,
@@ -233,6 +404,7 @@ pub struct TextureInfo {
     pub dimensions: [i32; 2],
     pub row_stride: isize,
     pub channel_count: usize,
+    pub mip_level_count: usize,
     pub channel_encoding: i32,
     pub is_cube: bool,
     pub has_alpha_values: bool,
@@ -273,6 +445,200 @@ impl MaterialPropertyInfo {
     pub fn property_type_enum(&self) -> Option<MaterialPropertyType> {
         MaterialPropertyType::from_raw(self.property_type)
     }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct MaterialInfo {
+    pub name: String,
+    pub count: usize,
+    pub material_face: u32,
+}
+
+impl MaterialInfo {
+    #[must_use]
+    pub fn material_face_enum(&self) -> Option<MaterialFace> {
+        MaterialFace::from_raw(self.material_face)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct AssetInfo {
+    pub count: usize,
+    pub frame_interval: f64,
+    pub start_time: f64,
+    pub end_time: f64,
+    pub bounding_box: BoundingBox,
+    pub up_axis: [f32; 3],
+    pub url: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ObjectInfo {
+    pub kind: i32,
+    pub name: String,
+    pub path: String,
+    pub hidden: bool,
+    pub component_count: usize,
+    pub child_count: usize,
+    pub has_parent: bool,
+    pub has_instance: bool,
+    pub bounding_box: BoundingBox,
+}
+
+impl ObjectInfo {
+    #[must_use]
+    pub fn kind_enum(&self) -> Option<ObjectKind> {
+        ObjectKind::from_raw(self.kind)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct LightInfo {
+    pub light_type: u32,
+    pub color_space: String,
+}
+
+impl LightInfo {
+    #[must_use]
+    pub fn light_type_enum(&self) -> Option<LightType> {
+        LightType::from_raw(self.light_type)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct PhysicallyPlausibleLightInfo {
+    pub light_type: u32,
+    pub color_space: String,
+    pub color: Option<[f32; 4]>,
+    pub lumens: f32,
+    pub inner_cone_angle: f32,
+    pub outer_cone_angle: f32,
+    pub attenuation_start_distance: f32,
+    pub attenuation_end_distance: f32,
+}
+
+impl PhysicallyPlausibleLightInfo {
+    #[must_use]
+    pub fn light_type_enum(&self) -> Option<LightType> {
+        LightType::from_raw(self.light_type)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CameraInfo {
+    pub projection: u32,
+    pub projection_matrix: [f32; 16],
+    pub near_visibility_distance: f32,
+    pub far_visibility_distance: f32,
+    pub world_to_meters_conversion_scale: f32,
+    pub barrel_distortion: f32,
+    pub fisheye_distortion: f32,
+    pub optical_vignetting: f32,
+    pub chromatic_aberration: f32,
+    pub focal_length: f32,
+    pub focus_distance: f32,
+    pub field_of_view: f32,
+    pub f_stop: f32,
+    pub aperture_blade_count: usize,
+    pub maximum_circle_of_confusion: f32,
+    pub shutter_open_interval: f64,
+    pub sensor_vertical_aperture: f32,
+    pub sensor_aspect: f32,
+    pub sensor_enlargement: [f32; 2],
+    pub sensor_shift: [f32; 2],
+    pub flash: [f32; 3],
+    pub exposure_compression: [f32; 2],
+    pub exposure: [f32; 3],
+}
+
+impl CameraInfo {
+    #[must_use]
+    pub fn projection_enum(&self) -> Option<CameraProjection> {
+        CameraProjection::from_raw(self.projection)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct VoxelIndexExtent {
+    pub minimum_extent: [i32; 4],
+    pub maximum_extent: [i32; 4],
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct VoxelArrayInfo {
+    pub count: usize,
+    pub bounding_box: BoundingBox,
+    pub voxel_index_extent: VoxelIndexExtent,
+    pub is_valid_signed_shell_field: bool,
+    pub shell_field_interior_thickness: f32,
+    pub shell_field_exterior_thickness: f32,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct AnimatedValueInfo {
+    pub is_animated: bool,
+    pub precision: u32,
+    pub time_sample_count: usize,
+    pub minimum_time: f64,
+    pub maximum_time: f64,
+    pub interpolation: u32,
+    pub key_times: Vec<f64>,
+    pub element_count: Option<usize>,
+}
+
+impl AnimatedValueInfo {
+    #[must_use]
+    pub fn precision_enum(&self) -> Option<DataPrecision> {
+        DataPrecision::from_raw(self.precision)
+    }
+
+    #[must_use]
+    pub fn interpolation_enum(&self) -> Option<AnimatedValueInterpolation> {
+        AnimatedValueInterpolation::from_raw(self.interpolation)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct PackedJointAnimationInfo {
+    pub name: String,
+    pub path: String,
+    pub joint_paths: Vec<String>,
+    pub joint_count: usize,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct AnimationBindComponentInfo {
+    pub has_skeleton: bool,
+    pub has_joint_animation: bool,
+    pub joint_paths: Option<Vec<String>>,
+    pub geometry_bind_transform: [f32; 16],
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct SkeletonInfo {
+    pub name: String,
+    pub path: String,
+    pub joint_paths: Vec<String>,
+    pub joint_count: usize,
+    pub joint_bind_transform_count: usize,
+    pub joint_rest_transform_count: usize,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct VertexAttributeDescriptorInfo {
+    pub name: String,
+    pub format: u32,
+    pub offset: usize,
+    pub buffer_index: usize,
+    pub time: f64,
+    pub initialization_value: [f32; 4],
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct VertexDescriptorInfo {
+    pub attribute_count: usize,
+    pub attributes: Vec<VertexAttributeDescriptorInfo>,
+    pub layout_strides: Vec<usize>,
 }
 
 pub mod vertex_format {
