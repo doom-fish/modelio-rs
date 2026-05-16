@@ -73,6 +73,237 @@ public func mdl_checkerboard_texture_new(
     }
 }
 
+@_cdecl("mdl_color_swatch_texture_new_temperature_gradient")
+public func mdl_color_swatch_texture_new_temperature_gradient(
+    _ colorTemperature1: Float,
+    _ colorTemperature2: Float,
+    _ name: UnsafePointer<CChar>?,
+    _ width: Int32,
+    _ height: Int32,
+    _ outTexture: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outTexture else {
+            throw ModelIOBridgeError.invalidArgument("missing output texture pointer")
+        }
+        outTexture.pointee = mdl_retain(
+            MDLColorSwatchTexture(
+                colorTemperatureGradientFrom: colorTemperature1,
+                toColorTemperature: colorTemperature2,
+                name: name.map { String(cString: $0) },
+                textureDimensions: vector_int2(width, height)
+            )
+        )
+    }
+}
+
+@_cdecl("mdl_color_swatch_texture_new_color_gradient")
+public func mdl_color_swatch_texture_new_color_gradient(
+    _ color1R: Float,
+    _ color1G: Float,
+    _ color1B: Float,
+    _ color1A: Float,
+    _ color2R: Float,
+    _ color2G: Float,
+    _ color2B: Float,
+    _ color2A: Float,
+    _ name: UnsafePointer<CChar>?,
+    _ width: Int32,
+    _ height: Int32,
+    _ outTexture: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outTexture else {
+            throw ModelIOBridgeError.invalidArgument("missing output texture pointer")
+        }
+        outTexture.pointee = mdl_retain(
+            MDLColorSwatchTexture(
+                colorGradientFrom: mdl_color(color1R, color1G, color1B, color1A),
+                to: mdl_color(color2R, color2G, color2B, color2A),
+                name: name.map { String(cString: $0) },
+                textureDimensions: vector_int2(width, height)
+            )
+        )
+    }
+}
+
+@_cdecl("mdl_noise_texture_new_vector")
+public func mdl_noise_texture_new_vector(
+    _ smoothness: Float,
+    _ name: UnsafePointer<CChar>?,
+    _ width: Int32,
+    _ height: Int32,
+    _ channelEncodingRaw: Int32,
+    _ outTexture: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outTexture else {
+            throw ModelIOBridgeError.invalidArgument("missing output texture pointer")
+        }
+        outTexture.pointee = mdl_retain(
+            MDLNoiseTexture(
+                vectorNoiseWithSmoothness: smoothness,
+                name: name.map { String(cString: $0) },
+                textureDimensions: vector_int2(width, height),
+                channelEncoding: try mdl_texture_channel_encoding(channelEncodingRaw)
+            )
+        )
+    }
+}
+
+@_cdecl("mdl_noise_texture_new_scalar")
+public func mdl_noise_texture_new_scalar(
+    _ smoothness: Float,
+    _ name: UnsafePointer<CChar>?,
+    _ width: Int32,
+    _ height: Int32,
+    _ channelCount: UInt64,
+    _ channelEncodingRaw: Int32,
+    _ grayscale: Int32,
+    _ outTexture: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outTexture else {
+            throw ModelIOBridgeError.invalidArgument("missing output texture pointer")
+        }
+        outTexture.pointee = mdl_retain(
+            MDLNoiseTexture(
+                scalarNoiseWithSmoothness: smoothness,
+                name: name.map { String(cString: $0) },
+                textureDimensions: vector_int2(width, height),
+                channelCount: Int32(channelCount),
+                channelEncoding: try mdl_texture_channel_encoding(channelEncodingRaw),
+                grayscale: grayscale != 0
+            )
+        )
+    }
+}
+
+@_cdecl("mdl_noise_texture_new_cellular")
+public func mdl_noise_texture_new_cellular(
+    _ frequency: Float,
+    _ name: UnsafePointer<CChar>?,
+    _ width: Int32,
+    _ height: Int32,
+    _ channelEncodingRaw: Int32,
+    _ outTexture: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outTexture else {
+            throw ModelIOBridgeError.invalidArgument("missing output texture pointer")
+        }
+        outTexture.pointee = mdl_retain(
+            MDLNoiseTexture(
+                cellularNoiseWithFrequency: frequency,
+                name: name.map { String(cString: $0) },
+                textureDimensions: vector_int2(width, height),
+                channelEncoding: try mdl_texture_channel_encoding(channelEncodingRaw)
+            )
+        )
+    }
+}
+
+@_cdecl("mdl_normal_map_texture_new")
+public func mdl_normal_map_texture_new(
+    _ sourceTextureHandle: UnsafeMutableRawPointer?,
+    _ name: UnsafePointer<CChar>?,
+    _ smoothness: Float,
+    _ contrast: Float,
+    _ outTexture: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let sourceTexture = mdl_borrow_object(sourceTextureHandle) as? MDLTexture,
+              let outTexture
+        else {
+            throw ModelIOBridgeError.invalidArgument("missing source texture or output pointer")
+        }
+        outTexture.pointee = mdl_retain(
+            MDLNormalMapTexture(
+                byGeneratingNormalMapWith: sourceTexture,
+                name: name.map { String(cString: $0) },
+                smoothness: smoothness,
+                contrast: contrast
+            )
+        )
+    }
+}
+
+@_cdecl("mdl_sky_cube_texture_new")
+public func mdl_sky_cube_texture_new(
+    _ name: UnsafePointer<CChar>?,
+    _ channelEncodingRaw: Int32,
+    _ width: Int32,
+    _ height: Int32,
+    _ turbidity: Float,
+    _ sunElevation: Float,
+    _ upperAtmosphereScattering: Float,
+    _ groundAlbedo: Float,
+    _ outTexture: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outTexture else {
+            throw ModelIOBridgeError.invalidArgument("missing output texture pointer")
+        }
+        outTexture.pointee = mdl_retain(
+            MDLSkyCubeTexture(
+                name: name.map { String(cString: $0) },
+                channelEncoding: try mdl_texture_channel_encoding(channelEncodingRaw),
+                textureDimensions: vector_int2(width, height),
+                turbidity: turbidity,
+                sunElevation: sunElevation,
+                upperAtmosphereScattering: upperAtmosphereScattering,
+                groundAlbedo: groundAlbedo
+            )
+        )
+    }
+}
+
+@_cdecl("mdl_sky_cube_texture_new_with_azimuth")
+public func mdl_sky_cube_texture_new_with_azimuth(
+    _ name: UnsafePointer<CChar>?,
+    _ channelEncodingRaw: Int32,
+    _ width: Int32,
+    _ height: Int32,
+    _ turbidity: Float,
+    _ sunElevation: Float,
+    _ sunAzimuth: Float,
+    _ upperAtmosphereScattering: Float,
+    _ groundAlbedo: Float,
+    _ outTexture: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outTexture else {
+            throw ModelIOBridgeError.invalidArgument("missing output texture pointer")
+        }
+        outTexture.pointee = mdl_retain(
+            MDLSkyCubeTexture(
+                name: name.map { String(cString: $0) },
+                channelEncoding: try mdl_texture_channel_encoding(channelEncodingRaw),
+                textureDimensions: vector_int2(width, height),
+                turbidity: turbidity,
+                sunElevation: sunElevation,
+                sunAzimuth: sunAzimuth,
+                upperAtmosphereScattering: upperAtmosphereScattering,
+                groundAlbedo: groundAlbedo
+            )
+        )
+    }
+}
+
+@_cdecl("mdl_sky_cube_texture_update")
+public func mdl_sky_cube_texture_update(_ handle: UnsafeMutableRawPointer?) {
+    guard let texture = mdl_borrow_object(handle) as? MDLSkyCubeTexture else { return }
+    texture.update()
+}
+
 @_cdecl("mdl_texture_info_json")
 public func mdl_texture_info_json(_ handle: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let texture = mdl_borrow_object(handle) as? MDLTexture else { return nil }

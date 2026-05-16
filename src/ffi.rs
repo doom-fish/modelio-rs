@@ -648,6 +648,453 @@ extern "C" {
     pub fn mdl_vertex_descriptor_reset(handle: *mut c_void);
     pub fn mdl_vertex_descriptor_set_packed_offsets(handle: *mut c_void);
     pub fn mdl_vertex_descriptor_set_packed_strides(handle: *mut c_void);
+
+    pub fn mdl_array_count(handle: *mut c_void) -> u64;
+    pub fn mdl_array_object_at(handle: *mut c_void, index: u64) -> *mut c_void;
+
+    pub fn mdl_asset_resolver_can_resolve_named(handle: *mut c_void, name: *const c_char) -> i32;
+    pub fn mdl_asset_resolver_resolve_named(handle: *mut c_void, name: *const c_char) -> *mut c_char;
+    pub fn mdl_path_asset_resolver_new(
+        path: *const c_char,
+        out_resolver: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_path_asset_resolver_path(handle: *mut c_void) -> *mut c_char;
+    pub fn mdl_path_asset_resolver_set_path(handle: *mut c_void, path: *const c_char);
+    pub fn mdl_bundle_asset_resolver_new(
+        path: *const c_char,
+        out_resolver: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_bundle_asset_resolver_path(handle: *mut c_void) -> *mut c_char;
+    pub fn mdl_bundle_asset_resolver_set_path(handle: *mut c_void, path: *const c_char);
+    pub fn mdl_relative_asset_resolver_new(
+        asset: *mut c_void,
+        out_resolver: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_relative_asset_resolver_asset(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_relative_asset_resolver_set_asset(handle: *mut c_void, asset: *mut c_void);
+
+    pub fn mdl_mesh_buffer_fill_data(
+        handle: *mut c_void,
+        bytes: *const u8,
+        count: u64,
+        offset: u64,
+    );
+    pub fn mdl_mesh_buffer_map(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_mesh_buffer_allocator(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_mesh_buffer_zone(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_mesh_buffer_is_data(handle: *mut c_void) -> i32;
+    pub fn mdl_mesh_buffer_data_new(
+        length: u64,
+        buffer_type: u32,
+        out_buffer: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_mesh_buffer_data_new_with_bytes(
+        bytes: *const u8,
+        count: u64,
+        buffer_type: u32,
+        out_buffer: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_mesh_buffer_data_copy_data(
+        handle: *mut c_void,
+        out_bytes: *mut u8,
+        capacity: u64,
+    ) -> u64;
+    pub fn mdl_mesh_buffer_map_copy_bytes(
+        handle: *mut c_void,
+        length: u64,
+        out_bytes: *mut u8,
+        capacity: u64,
+    ) -> u64;
+    pub fn mdl_mesh_buffer_map_write_bytes(
+        handle: *mut c_void,
+        length: u64,
+        bytes: *const u8,
+        count: u64,
+        offset: u64,
+    ) -> u64;
+    pub fn mdl_mesh_buffer_allocator_new_zone(
+        handle: *mut c_void,
+        capacity: u64,
+        out_zone: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_mesh_buffer_allocator_new_zone_for_buffers_with_size(
+        handle: *mut c_void,
+        sizes: *const u64,
+        types: *const u32,
+        count: u64,
+        out_zone: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_mesh_buffer_allocator_new_buffer(
+        handle: *mut c_void,
+        length: u64,
+        buffer_type: u32,
+        out_buffer: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_mesh_buffer_allocator_new_buffer_with_data(
+        handle: *mut c_void,
+        bytes: *const u8,
+        count: u64,
+        buffer_type: u32,
+        out_buffer: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_mesh_buffer_allocator_new_buffer_from_zone_length(
+        handle: *mut c_void,
+        zone: *mut c_void,
+        length: u64,
+        buffer_type: u32,
+        out_buffer: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_mesh_buffer_allocator_new_buffer_from_zone_data(
+        handle: *mut c_void,
+        zone: *mut c_void,
+        bytes: *const u8,
+        count: u64,
+        buffer_type: u32,
+        out_buffer: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_mesh_buffer_data_allocator_new(
+        out_allocator: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_mesh_buffer_zone_capacity(handle: *mut c_void) -> u64;
+    pub fn mdl_mesh_buffer_zone_allocator(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_mesh_buffer_zone_is_default(handle: *mut c_void) -> i32;
+    pub fn mdl_mesh_buffer_zone_default_new(
+        out_zone: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+
+    pub fn mdl_color_swatch_texture_new_temperature_gradient(
+        color_temperature1: f32,
+        color_temperature2: f32,
+        name: *const c_char,
+        width: i32,
+        height: i32,
+        out_texture: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_color_swatch_texture_new_color_gradient(
+        color1_r: f32,
+        color1_g: f32,
+        color1_b: f32,
+        color1_a: f32,
+        color2_r: f32,
+        color2_g: f32,
+        color2_b: f32,
+        color2_a: f32,
+        name: *const c_char,
+        width: i32,
+        height: i32,
+        out_texture: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_noise_texture_new_vector(
+        smoothness: f32,
+        name: *const c_char,
+        width: i32,
+        height: i32,
+        channel_encoding: i32,
+        out_texture: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_noise_texture_new_scalar(
+        smoothness: f32,
+        name: *const c_char,
+        width: i32,
+        height: i32,
+        channel_count: u64,
+        channel_encoding: i32,
+        grayscale: i32,
+        out_texture: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_noise_texture_new_cellular(
+        frequency: f32,
+        name: *const c_char,
+        width: i32,
+        height: i32,
+        channel_encoding: i32,
+        out_texture: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_normal_map_texture_new(
+        source_texture: *mut c_void,
+        name: *const c_char,
+        smoothness: f32,
+        contrast: f32,
+        out_texture: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_sky_cube_texture_new(
+        name: *const c_char,
+        channel_encoding: i32,
+        width: i32,
+        height: i32,
+        turbidity: f32,
+        sun_elevation: f32,
+        upper_atmosphere_scattering: f32,
+        ground_albedo: f32,
+        out_texture: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_sky_cube_texture_new_with_azimuth(
+        name: *const c_char,
+        channel_encoding: i32,
+        width: i32,
+        height: i32,
+        turbidity: f32,
+        sun_elevation: f32,
+        sun_azimuth: f32,
+        upper_atmosphere_scattering: f32,
+        ground_albedo: f32,
+        out_texture: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_sky_cube_texture_update(handle: *mut c_void);
+
+    pub fn mdl_object_transform_component(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_object_set_transform_component(handle: *mut c_void, component: *mut c_void);
+    pub fn mdl_transform_component_matrix(handle: *mut c_void, out_values: *mut f32);
+    pub fn mdl_transform_component_set_matrix(handle: *mut c_void, values: *const f32);
+    pub fn mdl_transform_component_resets_transform(handle: *mut c_void) -> i32;
+    pub fn mdl_transform_component_set_resets_transform(handle: *mut c_void, resets_transform: i32);
+    pub fn mdl_transform_component_minimum_time(handle: *mut c_void) -> f64;
+    pub fn mdl_transform_component_maximum_time(handle: *mut c_void) -> f64;
+    pub fn mdl_transform_component_key_time_count(handle: *mut c_void) -> u64;
+    pub fn mdl_transform_component_copy_key_times(
+        handle: *mut c_void,
+        out_values: *mut f64,
+        capacity: u64,
+    ) -> u64;
+    pub fn mdl_transform_component_local_transform_at_time(
+        handle: *mut c_void,
+        time: f64,
+        out_values: *mut f32,
+    );
+    pub fn mdl_transform_component_global_transform_with_object(
+        object: *mut c_void,
+        time: f64,
+        out_values: *mut f32,
+    );
+    pub fn mdl_transform_component_is_transform(handle: *mut c_void) -> i32;
+    pub fn mdl_transform_component_is_transform_stack(handle: *mut c_void) -> i32;
+    pub fn mdl_transform_new(
+        out_transform: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_transform_new_with_component(
+        component: *mut c_void,
+        out_transform: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_transform_new_with_component_resets_transform(
+        component: *mut c_void,
+        resets_transform: i32,
+        out_transform: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_transform_new_with_matrix(
+        values: *const f32,
+        out_transform: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_transform_new_with_matrix_resets_transform(
+        values: *const f32,
+        resets_transform: i32,
+        out_transform: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_transform_set_identity(handle: *mut c_void);
+    pub fn mdl_transform_translation_at_time(handle: *mut c_void, time: f64, out_values: *mut f32);
+    pub fn mdl_transform_rotation_at_time(handle: *mut c_void, time: f64, out_values: *mut f32);
+    pub fn mdl_transform_shear_at_time(handle: *mut c_void, time: f64, out_values: *mut f32);
+    pub fn mdl_transform_scale_at_time(handle: *mut c_void, time: f64, out_values: *mut f32);
+    pub fn mdl_transform_set_matrix_for_time(handle: *mut c_void, values: *const f32, time: f64);
+    pub fn mdl_transform_set_translation_for_time(
+        handle: *mut c_void,
+        x: f32,
+        y: f32,
+        z: f32,
+        time: f64,
+    );
+    pub fn mdl_transform_set_rotation_for_time(
+        handle: *mut c_void,
+        x: f32,
+        y: f32,
+        z: f32,
+        time: f64,
+    );
+    pub fn mdl_transform_set_shear_for_time(
+        handle: *mut c_void,
+        x: f32,
+        y: f32,
+        z: f32,
+        time: f64,
+    );
+    pub fn mdl_transform_set_scale_for_time(
+        handle: *mut c_void,
+        x: f32,
+        y: f32,
+        z: f32,
+        time: f64,
+    );
+    pub fn mdl_transform_rotation_matrix_at_time(
+        handle: *mut c_void,
+        time: f64,
+        out_values: *mut f32,
+    );
+    pub fn mdl_transform_translation(handle: *mut c_void, out_values: *mut f32);
+    pub fn mdl_transform_set_translation(handle: *mut c_void, x: f32, y: f32, z: f32);
+    pub fn mdl_transform_rotation(handle: *mut c_void, out_values: *mut f32);
+    pub fn mdl_transform_set_rotation(handle: *mut c_void, x: f32, y: f32, z: f32);
+    pub fn mdl_transform_shear(handle: *mut c_void, out_values: *mut f32);
+    pub fn mdl_transform_set_shear(handle: *mut c_void, x: f32, y: f32, z: f32);
+    pub fn mdl_transform_scale(handle: *mut c_void, out_values: *mut f32);
+    pub fn mdl_transform_set_scale(handle: *mut c_void, x: f32, y: f32, z: f32);
+    pub fn mdl_transform_op_name_string(handle: *mut c_void) -> *mut c_char;
+    pub fn mdl_transform_op_is_inverse(handle: *mut c_void) -> i32;
+    pub fn mdl_transform_op_copy_float4x4_at_time(
+        handle: *mut c_void,
+        time: f64,
+        out_values: *mut f32,
+    );
+    pub fn mdl_transform_rotate_x_op_animated_value(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_transform_rotate_y_op_animated_value(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_transform_rotate_z_op_animated_value(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_transform_rotate_op_animated_value(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_transform_translate_op_animated_value(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_transform_scale_op_animated_value(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_transform_matrix_op_animated_value(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_transform_orient_op_animated_value(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_transform_stack_new(
+        out_stack: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_transform_stack_add_translate_op(
+        handle: *mut c_void,
+        name: *const c_char,
+        inverse: i32,
+    ) -> *mut c_void;
+    pub fn mdl_transform_stack_add_rotate_x_op(
+        handle: *mut c_void,
+        name: *const c_char,
+        inverse: i32,
+    ) -> *mut c_void;
+    pub fn mdl_transform_stack_add_rotate_y_op(
+        handle: *mut c_void,
+        name: *const c_char,
+        inverse: i32,
+    ) -> *mut c_void;
+    pub fn mdl_transform_stack_add_rotate_z_op(
+        handle: *mut c_void,
+        name: *const c_char,
+        inverse: i32,
+    ) -> *mut c_void;
+    pub fn mdl_transform_stack_add_rotate_op(
+        handle: *mut c_void,
+        name: *const c_char,
+        rotation_order: u64,
+        inverse: i32,
+    ) -> *mut c_void;
+    pub fn mdl_transform_stack_add_scale_op(
+        handle: *mut c_void,
+        name: *const c_char,
+        inverse: i32,
+    ) -> *mut c_void;
+    pub fn mdl_transform_stack_add_matrix_op(
+        handle: *mut c_void,
+        name: *const c_char,
+        inverse: i32,
+    ) -> *mut c_void;
+    pub fn mdl_transform_stack_add_orient_op(
+        handle: *mut c_void,
+        name: *const c_char,
+        inverse: i32,
+    ) -> *mut c_void;
+    pub fn mdl_transform_stack_animated_value_named(
+        handle: *mut c_void,
+        name: *const c_char,
+    ) -> *mut c_void;
+    pub fn mdl_transform_stack_copy_float4x4_at_time(
+        handle: *mut c_void,
+        time: f64,
+        out_values: *mut f32,
+    );
+    pub fn mdl_transform_stack_count(handle: *mut c_void) -> u64;
+    pub fn mdl_transform_stack_transform_ops(handle: *mut c_void) -> *mut c_void;
+
+    pub fn mdl_light_probe_new(
+        reflective_texture: *mut c_void,
+        irradiance_texture: *mut c_void,
+        out_probe: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_light_probe_generate_spherical_harmonics_from_irradiance(
+        handle: *mut c_void,
+        spherical_harmonics_level: u64,
+    );
+    pub fn mdl_light_probe_reflective_texture(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_light_probe_irradiance_texture(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_light_probe_spherical_harmonics_level(handle: *mut c_void) -> u64;
+    pub fn mdl_light_probe_spherical_harmonics_coefficient_count(handle: *mut c_void) -> u64;
+    pub fn mdl_light_probe_copy_spherical_harmonics_coefficients(
+        handle: *mut c_void,
+        out_values: *mut f32,
+        capacity: u64,
+    ) -> u64;
+    pub fn mdl_light_probe_irradiance_data_source_new(
+        min_x: f32,
+        min_y: f32,
+        min_z: f32,
+        max_x: f32,
+        max_y: f32,
+        max_z: f32,
+        spherical_harmonics_level: u64,
+        callback_context: *mut c_void,
+        out_data_source: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_light_probe_irradiance_data_source_bounding_box(
+        handle: *mut c_void,
+        out_min_x: *mut f32,
+        out_min_y: *mut f32,
+        out_min_z: *mut f32,
+        out_max_x: *mut f32,
+        out_max_y: *mut f32,
+        out_max_z: *mut f32,
+    );
+    pub fn mdl_light_probe_irradiance_data_source_set_bounding_box(
+        handle: *mut c_void,
+        min_x: f32,
+        min_y: f32,
+        min_z: f32,
+        max_x: f32,
+        max_y: f32,
+        max_z: f32,
+    );
+    pub fn mdl_light_probe_irradiance_data_source_spherical_harmonics_level(
+        handle: *mut c_void,
+    ) -> u64;
+    pub fn mdl_light_probe_irradiance_data_source_set_spherical_harmonics_level(
+        handle: *mut c_void,
+        spherical_harmonics_level: u64,
+    );
+    pub fn mdl_asset_place_light_probes(
+        density: f32,
+        heuristic: i32,
+        data_source: *mut c_void,
+    ) -> *mut c_void;
 }
 
 pub mod status {

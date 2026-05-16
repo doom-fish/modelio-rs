@@ -239,6 +239,23 @@ public func mdl_copy_int32s(
     return UInt64(valueCount)
 }
 
+@_cdecl("mdl_array_count")
+public func mdl_array_count(_ handle: UnsafeMutableRawPointer?) -> UInt64 {
+    guard let array = mdl_borrow_object(handle) as? NSArray else { return 0 }
+    return UInt64(array.count)
+}
+
+@_cdecl("mdl_array_object_at")
+public func mdl_array_object_at(_ handle: UnsafeMutableRawPointer?, _ index: UInt64) -> UnsafeMutableRawPointer? {
+    guard let array = mdl_borrow_object(handle) as? NSArray,
+          index < UInt64(array.count),
+          let object = array[Int(index)] as AnyObject?
+    else {
+        return nil
+    }
+    return mdl_retain(object)
+}
+
 @inline(__always)
 public func mdl_data_from_int32s(
     _ values: UnsafePointer<Int32>?,

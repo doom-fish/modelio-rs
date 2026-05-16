@@ -174,6 +174,7 @@ fn voxel_animation_and_animated_value_surface_is_present() {
     assert_contains_all(
         &animated_header,
         &[
+            "@interface MDLAnimatedValue",
             "@interface MDLAnimatedScalar",
             "@interface MDLAnimatedVector3",
             "@interface MDLAnimatedQuaternion",
@@ -229,6 +230,106 @@ fn submesh_and_vertex_attribute_surface_is_present() {
             "mdl_vertex_attribute_new",
             "mdl_vertex_descriptor_new_copy",
             "mdl_vertex_descriptor_attribute_named",
+        ],
+    );
+}
+
+#[test]
+fn transform_mesh_buffer_resolver_and_light_probe_surface_is_present() {
+    let asset_header = read_header("MDLAsset");
+    assert_contains_all(
+        &asset_header,
+        &[
+            "@protocol MDLLightProbeIrradianceDataSource <NSObject>",
+            "+ (NSArray<MDLLightProbe *> *)placeLightProbesWithDensity:",
+        ],
+    );
+
+    let resolver_header = read_header("MDLAssetResolver");
+    assert_contains_all(
+        &resolver_header,
+        &[
+            "@protocol MDLAssetResolver <NSObject>",
+            "@interface MDLRelativeAssetResolver",
+            "@interface MDLPathAssetResolver",
+            "@interface MDLBundleAssetResolver",
+        ],
+    );
+
+    let transform_header = read_header("MDLTransform");
+    assert_contains_all(
+        &transform_header,
+        &[
+            "@protocol MDLTransformComponent <MDLComponent>",
+            "@interface MDLTransform : NSObject <NSCopying, MDLTransformComponent>",
+            "- (vector_float3)translationAtTime:",
+            "- (void)setScale:(vector_float3)scale forTime:",
+        ],
+    );
+
+    let transform_stack_header = read_header("MDLTransformStack");
+    assert_contains_all(
+        &transform_stack_header,
+        &[
+            "typedef NS_ENUM(NSUInteger, MDLTransformOpRotationOrder)",
+            "@protocol MDLTransformOp",
+            "@interface MDLTransformRotateXOp",
+            "@interface MDLTransformOrientOp",
+            "-(MDLTransformTranslateOp*) addTranslateOp:",
+            "-(MDLAnimatedValue*) animatedValueWithName:",
+        ],
+    );
+
+    let mesh_buffer_header = read_header("MDLMeshBuffer");
+    assert_contains_all(
+        &mesh_buffer_header,
+        &[
+            "@interface MDLMeshBufferMap : NSObject",
+            "@interface MDLMeshBufferData : NSObject <MDLMeshBuffer>",
+            "@protocol MDLMeshBufferAllocator <NSObject>",
+            "@interface MDLMeshBufferDataAllocator: NSObject <MDLMeshBufferAllocator>",
+            "@interface MDLMeshBufferZoneDefault : NSObject <MDLMeshBufferZone>",
+        ],
+    );
+
+    let texture_header = read_header("MDLTexture");
+    assert_contains_all(
+        &texture_header,
+        &[
+            "@interface MDLSkyCubeTexture : MDLTexture",
+            "@interface MDLColorSwatchTexture : MDLTexture",
+            "@interface MDLNoiseTexture : MDLTexture",
+            "@interface MDLNormalMapTexture : MDLTexture",
+        ],
+    );
+
+    let light_header = read_header("MDLLight");
+    assert_contains_all(
+        &light_header,
+        &[
+            "@interface MDLLightProbe : MDLLight",
+            "lightProbeWithTextureSize:",
+            "@property (nonatomic, retain, nullable, readonly) MDLTexture *reflectiveTexture;",
+        ],
+    );
+
+    let bridge = read_bridge();
+    assert_contains_all(
+        &bridge,
+        &[
+            "mdl_asset_resolver_can_resolve_named",
+            "mdl_relative_asset_resolver_new",
+            "mdl_mesh_buffer_allocator_new_zone",
+            "mdl_mesh_buffer_zone_default_new",
+            "mdl_color_swatch_texture_new_temperature_gradient",
+            "mdl_normal_map_texture_new",
+            "mdl_sky_cube_texture_new_with_azimuth",
+            "mdl_transform_component_matrix",
+            "mdl_transform_stack_add_orient_op",
+            "mdl_transform_rotate_op_animated_value",
+            "mdl_light_probe_new",
+            "mdl_light_probe_irradiance_data_source_new",
+            "mdl_asset_place_light_probes",
         ],
     );
 }

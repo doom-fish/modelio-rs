@@ -265,6 +265,10 @@ impl MeshBuffer {
         Self { handle }
     }
 
+    pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
+        self.handle.as_ptr()
+    }
+
     pub fn info(&self) -> Result<MeshBufferInfo> {
         parse_json(
             unsafe { ffi::mdl_mesh_buffer_info_json(self.handle.as_ptr()) },

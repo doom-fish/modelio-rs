@@ -32,6 +32,29 @@ fn convert_vectors<const N: usize>(raw: &[f32]) -> Vec<[f32; N]> {
 }
 
 #[derive(Debug, Clone)]
+pub struct AnimatedValue {
+    handle: ObjectHandle,
+}
+
+impl AnimatedValue {
+    pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
+        Self { handle }
+    }
+
+    pub fn info(&self) -> Result<AnimatedValueInfo> {
+        animated_info(&self.handle, "MDLAnimatedValue")
+    }
+
+    pub fn clear(&self) {
+        animated_clear(&self.handle);
+    }
+
+    pub fn set_interpolation(&self, interpolation: AnimatedValueInterpolation) {
+        animated_set_interpolation(&self.handle, interpolation);
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct AnimatedScalar {
     handle: ObjectHandle,
 }

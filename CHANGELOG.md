@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.1] - 2026-05-16
+
+### Added
+
+- Added `Transform`, `TransformComponent`, `TransformStack`, `TransformOp`, and typed transform-op wrappers for ModelIO transform authoring.
+- Added `MeshBufferData`, `MeshBufferMap`, `MeshBufferAllocator`, `MeshBufferDataAllocator`, `MeshBufferZone`, and `MeshBufferZoneDefault` safe Rust APIs.
+- Added `AssetResolver`, `PathAssetResolver`, `BundleAssetResolver`, and `RelativeAssetResolver` wrappers.
+- Added `LightProbe`, `LightProbeIrradianceDataSource`, and `ProbePlacement`, plus `Asset::place_light_probes`.
+- Extended `Texture` with color-swatch, noise, normal-map, and sky-cube factories.
+- Added examples and integration tests covering transform stacks, mesh-buffer allocation, asset resolvers, procedural textures, and light probes.
+
 ## [0.2.0] - 2026-05-16
 
 ### Added

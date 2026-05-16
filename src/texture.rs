@@ -17,6 +17,10 @@ impl Texture {
         Self { handle }
     }
 
+    pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
+        self.handle.as_ptr()
+    }
+
     pub fn from_url(path: impl AsRef<Path>, name: Option<&str>) -> Result<Self> {
         let path = path_to_c_string(path.as_ref())?;
         let name = name.map(c_string).transpose()?;
@@ -74,6 +78,235 @@ impl Texture {
             out_texture,
             "MDLCheckerboardTexture",
         )?))
+    }
+
+    pub fn new_color_temperature_gradient(
+        color_temperature1: f32,
+        color_temperature2: f32,
+        name: Option<&str>,
+        dimensions: [i32; 2],
+    ) -> Result<Self> {
+        let name = name.map(c_string).transpose()?;
+        let mut out_texture = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_color_swatch_texture_new_temperature_gradient(
+                color_temperature1,
+                color_temperature2,
+                name.as_ref().map_or(ptr::null(), |name| name.as_ptr()),
+                dimensions[0],
+                dimensions[1],
+                &mut out_texture,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_texture,
+            "MDLColorSwatchTexture",
+        )?))
+    }
+
+    pub fn new_color_gradient(
+        color1: [f32; 4],
+        color2: [f32; 4],
+        name: Option<&str>,
+        dimensions: [i32; 2],
+    ) -> Result<Self> {
+        let name = name.map(c_string).transpose()?;
+        let mut out_texture = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_color_swatch_texture_new_color_gradient(
+                color1[0],
+                color1[1],
+                color1[2],
+                color1[3],
+                color2[0],
+                color2[1],
+                color2[2],
+                color2[3],
+                name.as_ref().map_or(ptr::null(), |name| name.as_ptr()),
+                dimensions[0],
+                dimensions[1],
+                &mut out_texture,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_texture,
+            "MDLColorSwatchTexture",
+        )?))
+    }
+
+    pub fn new_vector_noise(
+        smoothness: f32,
+        name: Option<&str>,
+        dimensions: [i32; 2],
+        channel_encoding: TextureChannelEncoding,
+    ) -> Result<Self> {
+        let name = name.map(c_string).transpose()?;
+        let mut out_texture = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_noise_texture_new_vector(
+                smoothness,
+                name.as_ref().map_or(ptr::null(), |name| name.as_ptr()),
+                dimensions[0],
+                dimensions[1],
+                channel_encoding.as_raw(),
+                &mut out_texture,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(out_texture, "MDLNoiseTexture")?))
+    }
+
+    pub fn new_scalar_noise(
+        smoothness: f32,
+        name: Option<&str>,
+        dimensions: [i32; 2],
+        channel_count: usize,
+        channel_encoding: TextureChannelEncoding,
+        grayscale: bool,
+    ) -> Result<Self> {
+        let name = name.map(c_string).transpose()?;
+        let mut out_texture = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_noise_texture_new_scalar(
+                smoothness,
+                name.as_ref().map_or(ptr::null(), |name| name.as_ptr()),
+                dimensions[0],
+                dimensions[1],
+                channel_count as u64,
+                channel_encoding.as_raw(),
+                i32::from(grayscale),
+                &mut out_texture,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(out_texture, "MDLNoiseTexture")?))
+    }
+
+    pub fn new_cellular_noise(
+        frequency: f32,
+        name: Option<&str>,
+        dimensions: [i32; 2],
+        channel_encoding: TextureChannelEncoding,
+    ) -> Result<Self> {
+        let name = name.map(c_string).transpose()?;
+        let mut out_texture = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_noise_texture_new_cellular(
+                frequency,
+                name.as_ref().map_or(ptr::null(), |name| name.as_ptr()),
+                dimensions[0],
+                dimensions[1],
+                channel_encoding.as_raw(),
+                &mut out_texture,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(out_texture, "MDLNoiseTexture")?))
+    }
+
+    pub fn new_normal_map(
+        source_texture: &Self,
+        name: Option<&str>,
+        smoothness: f32,
+        contrast: f32,
+    ) -> Result<Self> {
+        let name = name.map(c_string).transpose()?;
+        let mut out_texture = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_normal_map_texture_new(
+                source_texture.as_ptr(),
+                name.as_ref().map_or(ptr::null(), |name| name.as_ptr()),
+                smoothness,
+                contrast,
+                &mut out_texture,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_texture,
+            "MDLNormalMapTexture",
+        )?))
+    }
+
+    pub fn new_sky_cube(
+        name: Option<&str>,
+        dimensions: [i32; 2],
+        channel_encoding: TextureChannelEncoding,
+        turbidity: f32,
+        sun_elevation: f32,
+        upper_atmosphere_scattering: f32,
+        ground_albedo: f32,
+    ) -> Result<Self> {
+        let name = name.map(c_string).transpose()?;
+        let mut out_texture = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_sky_cube_texture_new(
+                name.as_ref().map_or(ptr::null(), |name| name.as_ptr()),
+                channel_encoding.as_raw(),
+                dimensions[0],
+                dimensions[1],
+                turbidity,
+                sun_elevation,
+                upper_atmosphere_scattering,
+                ground_albedo,
+                &mut out_texture,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(out_texture, "MDLSkyCubeTexture")?))
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn new_sky_cube_with_azimuth(
+        name: Option<&str>,
+        dimensions: [i32; 2],
+        channel_encoding: TextureChannelEncoding,
+        turbidity: f32,
+        sun_elevation: f32,
+        sun_azimuth: f32,
+        upper_atmosphere_scattering: f32,
+        ground_albedo: f32,
+    ) -> Result<Self> {
+        let name = name.map(c_string).transpose()?;
+        let mut out_texture = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_sky_cube_texture_new_with_azimuth(
+                name.as_ref().map_or(ptr::null(), |name| name.as_ptr()),
+                channel_encoding.as_raw(),
+                dimensions[0],
+                dimensions[1],
+                turbidity,
+                sun_elevation,
+                sun_azimuth,
+                upper_atmosphere_scattering,
+                ground_albedo,
+                &mut out_texture,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(out_texture, "MDLSkyCubeTexture")?))
+    }
+
+    pub fn update_sky_cube(&self) {
+        unsafe { ffi::mdl_sky_cube_texture_update(self.as_ptr()) };
     }
 
     pub fn info(&self) -> Result<TextureInfo> {

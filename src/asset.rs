@@ -19,6 +19,10 @@ impl Asset {
         Self { handle }
     }
 
+    pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
+        self.handle.as_ptr()
+    }
+
     pub fn new() -> Result<Self> {
         let mut out_asset = ptr::null_mut();
         let mut out_error = ptr::null_mut();

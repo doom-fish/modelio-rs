@@ -38,6 +38,29 @@ impl GeometryType {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(i32)]
+pub enum ProbePlacement {
+    UniformGrid = 0,
+    IrradianceDistribution = 1,
+}
+
+impl ProbePlacement {
+    #[must_use]
+    pub const fn as_raw(self) -> i32 {
+        self as i32
+    }
+
+    #[must_use]
+    pub const fn from_raw(raw: i32) -> Option<Self> {
+        match raw {
+            0 => Some(Self::UniformGrid),
+            1 => Some(Self::IrradianceDistribution),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
 pub enum IndexBitDepth {
     UInt8 = 8,
@@ -71,6 +94,11 @@ pub enum MeshBufferType {
 }
 
 impl MeshBufferType {
+    #[must_use]
+    pub const fn as_raw(self) -> u32 {
+        self as u32
+    }
+
     #[must_use]
     pub const fn from_raw(raw: u32) -> Option<Self> {
         match raw {
@@ -319,6 +347,37 @@ impl AnimatedValueInterpolation {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u64)]
+pub enum TransformOpRotationOrder {
+    Xyz = 1,
+    Xzy = 2,
+    Yxz = 3,
+    Yzx = 4,
+    Zxy = 5,
+    Zyx = 6,
+}
+
+impl TransformOpRotationOrder {
+    #[must_use]
+    pub const fn as_raw(self) -> u64 {
+        self as u64
+    }
+
+    #[must_use]
+    pub const fn from_raw(raw: u64) -> Option<Self> {
+        match raw {
+            1 => Some(Self::Xyz),
+            2 => Some(Self::Xzy),
+            3 => Some(Self::Yxz),
+            4 => Some(Self::Yzx),
+            5 => Some(Self::Zxy),
+            6 => Some(Self::Zyx),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
 pub enum ObjectKind {
     Unknown = 0,
@@ -363,6 +422,11 @@ pub enum TextureChannelEncoding {
 }
 
 impl TextureChannelEncoding {
+    #[must_use]
+    pub const fn as_raw(self) -> i32 {
+        self as i32
+    }
+
     #[must_use]
     pub const fn from_raw(raw: i32) -> Option<Self> {
         match raw {
