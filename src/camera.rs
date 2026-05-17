@@ -163,7 +163,7 @@ impl StereoscopicCamera {
 
     pub fn set_inter_pupillary_distance(&self, value: f32) {
         unsafe {
-            ffi::mdl_stereoscopic_camera_set_inter_pupillary_distance(self.handle.as_ptr(), value)
+            ffi::mdl_stereoscopic_camera_set_inter_pupillary_distance(self.handle.as_ptr(), value);
         };
     }
 

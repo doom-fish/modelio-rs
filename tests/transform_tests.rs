@@ -1,6 +1,7 @@
 use modelio::prelude::*;
 
 #[test]
+#[allow(clippy::too_many_lines)]
 fn transform_and_transform_stack_round_trip() {
     let object = Object::new().expect("object");
     let transform = Transform::new().expect("transform");

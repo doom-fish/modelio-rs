@@ -325,7 +325,7 @@ impl Transform {
 
     pub fn set_matrix_for_time(&self, matrix: [f32; 16], time: f64) {
         unsafe {
-            ffi::mdl_transform_set_matrix_for_time(self.handle.as_ptr(), matrix.as_ptr(), time)
+            ffi::mdl_transform_set_matrix_for_time(self.handle.as_ptr(), matrix.as_ptr(), time);
         };
     }
 
@@ -486,7 +486,7 @@ impl TransformOp {
                 self.handle.as_ptr(),
                 time,
                 matrix.as_mut_ptr(),
-            )
+            );
         };
         matrix
     }
@@ -776,7 +776,7 @@ impl TransformStack {
                 self.handle.as_ptr(),
                 time,
                 matrix.as_mut_ptr(),
-            )
+            );
         };
         matrix
     }

@@ -16,6 +16,7 @@ impl Matrix4x4Array {
         Self { handle }
     }
 
+    #[allow(dead_code)]
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }

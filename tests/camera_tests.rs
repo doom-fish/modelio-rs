@@ -1,6 +1,7 @@
 use modelio::prelude::*;
 
 #[test]
+#[allow(clippy::float_cmp)]
 fn camera_look_at_and_ray_generation_work() {
     let camera = Camera::new().expect("camera");
     camera.set_projection(CameraProjection::Perspective);

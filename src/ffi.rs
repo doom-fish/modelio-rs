@@ -575,11 +575,13 @@ extern "C" {
     pub fn mdl_voxel_array_convert_to_signed_shell_field(handle: *mut c_void);
     pub fn mdl_voxel_array_set_shell_field_interior_thickness(handle: *mut c_void, value: f32);
     pub fn mdl_voxel_array_set_shell_field_exterior_thickness(handle: *mut c_void, value: f32);
+    #[allow(dead_code)]
     pub fn mdl_voxel_array_coarse_mesh(handle: *mut c_void) -> *mut c_void;
     pub fn mdl_voxel_array_coarse_mesh_with_allocator(
         handle: *mut c_void,
         allocator: *mut c_void,
     ) -> *mut c_void;
+    #[allow(dead_code)]
     pub fn mdl_voxel_array_mesh(handle: *mut c_void) -> *mut c_void;
     pub fn mdl_voxel_array_mesh_with_allocator(
         handle: *mut c_void,
