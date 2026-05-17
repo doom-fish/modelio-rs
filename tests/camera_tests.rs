@@ -13,4 +13,14 @@ fn camera_look_at_and_ray_generation_work() {
         camera.info().expect("info").projection_enum(),
         Some(CameraProjection::Perspective)
     );
+
+    let stereo = StereoscopicCamera::new().expect("stereoscopic camera");
+    stereo.set_inter_pupillary_distance(64.0);
+    stereo.set_left_vergence(1.0);
+    stereo.set_right_vergence(1.0);
+    stereo.set_overlap(0.1);
+    assert_eq!(
+        stereo.info().expect("stereo info").inter_pupillary_distance,
+        64.0
+    );
 }

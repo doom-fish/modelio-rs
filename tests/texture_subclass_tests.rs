@@ -2,9 +2,13 @@ use modelio::prelude::*;
 
 #[test]
 fn texture_subclass_factories_create_textures() {
-    let color_temperature = Texture::new_color_temperature_gradient(2000.0, 6500.0, Some("temp"), [2, 8])
-        .expect("color temperature gradient");
-    assert_eq!(color_temperature.info().expect("temp info").dimensions, [2, 8]);
+    let color_temperature =
+        Texture::new_color_temperature_gradient(2000.0, 6500.0, Some("temp"), [2, 8])
+            .expect("color temperature gradient");
+    assert_eq!(
+        color_temperature.info().expect("temp info").dimensions,
+        [2, 8]
+    );
 
     let color_gradient = Texture::new_color_gradient(
         [1.0, 0.0, 0.0, 1.0],
@@ -13,15 +17,14 @@ fn texture_subclass_factories_create_textures() {
         [2, 8],
     )
     .expect("color gradient");
-    assert_eq!(color_gradient.info().expect("gradient info").dimensions, [2, 8]);
+    assert_eq!(
+        color_gradient.info().expect("gradient info").dimensions,
+        [2, 8]
+    );
 
-    let vector_noise = Texture::new_vector_noise(
-        0.2,
-        Some("vector"),
-        [4, 4],
-        TextureChannelEncoding::UInt8,
-    )
-    .expect("vector noise");
+    let vector_noise =
+        Texture::new_vector_noise(0.2, Some("vector"), [4, 4], TextureChannelEncoding::UInt8)
+            .expect("vector noise");
     assert_eq!(vector_noise.info().expect("vector info").dimensions, [4, 4]);
 
     let scalar_noise = Texture::new_scalar_noise(
@@ -42,7 +45,10 @@ fn texture_subclass_factories_create_textures() {
         TextureChannelEncoding::UInt8,
     )
     .expect("cellular noise");
-    assert_eq!(cellular_noise.info().expect("cellular info").dimensions, [4, 4]);
+    assert_eq!(
+        cellular_noise.info().expect("cellular info").dimensions,
+        [4, 4]
+    );
 
     let checkerboard = Texture::new_checkerboard(
         4.0,
@@ -54,8 +60,8 @@ fn texture_subclass_factories_create_textures() {
         [1.0, 1.0, 1.0, 1.0],
     )
     .expect("checkerboard");
-    let normal_map = Texture::new_normal_map(&checkerboard, Some("normal"), 0.5, 0.75)
-        .expect("normal map");
+    let normal_map =
+        Texture::new_normal_map(&checkerboard, Some("normal"), 0.5, 0.75).expect("normal map");
     assert_eq!(normal_map.info().expect("normal info").dimensions, [4, 4]);
 
     let sky = Texture::new_sky_cube(

@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.2] - 2026-05-17
+
+### Added
+
+- Added `TextureFilter`, `TextureSampler`, `MaterialPropertyConnection`, `MaterialPropertyNode`, `MaterialPropertyGraph`, and standalone `MaterialProperty::new` support.
+- Added `ObjectContainer`, `SubmeshTopology`, `VertexBufferLayout`, `Matrix4x4Array`, `StereoscopicCamera`, `AreaLight`, `PhotometricLight`, `Utility`, and runtime SDK constant helpers.
+- Extended `VoxelArray` with asset/mesh voxelization and allocator-aware coarse/smooth mesh extraction.
+- Added integration coverage for material graphs/samplers, SDK constants, matrix arrays, and USDZ conversion.
+
+### Changed
+
+- Raised the SDK audit from 76/117 to 117/117 top-level ModelIO symbols covered (100%).
+- Reworked the coverage docs to reflect complete top-level ModelIO symbol coverage in v0.2.2.
+
 ## [0.2.1] - 2026-05-16
 
 ### Added

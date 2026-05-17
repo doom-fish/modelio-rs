@@ -50,7 +50,11 @@ fn release_callback_context(context: *mut core::ffi::c_void) {
     mdlx_light_probe_irradiance_data_source_release(context);
 }
 
-fn array_objects<T, F>(array_ptr: *mut core::ffi::c_void, context: &'static str, mut map: F) -> Result<Vec<T>>
+fn array_objects<T, F>(
+    array_ptr: *mut core::ffi::c_void,
+    context: &'static str,
+    mut map: F,
+) -> Result<Vec<T>>
 where
     F: FnMut(ObjectHandle) -> T,
 {
@@ -91,7 +95,10 @@ impl LightProbe {
             )
         };
         crate::util::status_result(status, out_error)?;
-        Ok(Self::from_handle(required_handle(out_probe, "MDLLightProbe")?))
+        Ok(Self::from_handle(required_handle(
+            out_probe,
+            "MDLLightProbe",
+        )?))
     }
 
     pub fn generate_spherical_harmonics_from_irradiance(&self, level: usize) {
@@ -123,7 +130,8 @@ impl LightProbe {
     #[must_use]
     pub fn spherical_harmonics_coefficients(&self) -> Vec<f32> {
         let count = unsafe {
-            ffi::mdl_light_probe_spherical_harmonics_coefficient_count(self.handle.as_ptr()) as usize
+            ffi::mdl_light_probe_spherical_harmonics_coefficient_count(self.handle.as_ptr())
+                as usize
         };
         let mut values = vec![0.0_f32; count];
         if values.is_empty() {
@@ -264,11 +272,7 @@ impl Asset {
         data_source: &LightProbeIrradianceDataSource,
     ) -> Result<Vec<LightProbe>> {
         let ptr = unsafe {
-            ffi::mdl_asset_place_light_probes(
-                density,
-                heuristic.as_raw(),
-                data_source.as_ptr(),
-            )
+            ffi::mdl_asset_place_light_probes(density, heuristic.as_raw(), data_source.as_ptr())
         };
         if ptr.is_null() {
             return Ok(Vec::new());

@@ -33,6 +33,10 @@ fn main() -> modelio::Result<()> {
     )?;
     let probes = Asset::place_light_probes(0.5, ProbePlacement::UniformGrid, &data_source)?;
 
-    println!("generated {} light probes (sky cube? {})", probes.len(), sky.info()?.is_cube);
+    println!(
+        "generated {} light probes (sky cube? {})",
+        probes.len(),
+        sky.info()?.is_cube
+    );
     Ok(())
 }

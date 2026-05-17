@@ -333,3 +333,94 @@ fn transform_mesh_buffer_resolver_and_light_probe_surface_is_present() {
         ],
     );
 }
+
+#[test]
+fn extended_surface_and_sdk_constants_are_present() {
+    let animation_header = read_header("MDLAnimation");
+    assert_contains_all(&animation_header, &["@protocol MDLJointAnimation"]);
+
+    let camera_header = read_header("MDLCamera");
+    assert_contains_all(&camera_header, &["@interface MDLStereoscopicCamera"]);
+
+    let light_header = read_header("MDLLight");
+    assert_contains_all(
+        &light_header,
+        &["@interface MDLAreaLight", "@interface MDLPhotometricLight"],
+    );
+
+    let material_header = read_header("MDLMaterial");
+    assert_contains_all(
+        &material_header,
+        &[
+            "@interface MDLTextureFilter",
+            "@interface MDLTextureSampler",
+            "@interface MDLMaterialPropertyConnection",
+            "@interface MDLMaterialPropertyNode",
+            "@interface MDLMaterialPropertyGraph",
+            "MDLMaterialTextureWrapMode",
+            "MDLMaterialTextureFilterMode",
+            "MDLMaterialMipMapFilterMode",
+        ],
+    );
+
+    let object_header = read_header("MDLObject");
+    assert_contains_all(&object_header, &["@interface MDLObjectContainer"]);
+
+    let submesh_header = read_header("MDLSubmesh");
+    assert_contains_all(&submesh_header, &["@interface MDLSubmeshTopology"]);
+
+    let types_header = read_header("MDLTypes");
+    assert_contains_all(
+        &types_header,
+        &[
+            "@protocol MDLComponent <NSObject>",
+            "@protocol MDLNamed",
+            "@protocol MDLObjectContainerComponent <MDLComponent, NSFastEnumeration>",
+            "kUTTypeAlembic",
+            "kUTType3dObject",
+            "kUTTypePolygon",
+            "kUTTypeStereolithography",
+            "kUTTypeUniversalSceneDescription",
+            "kUTTypeUniversalSceneDescriptionMobile",
+        ],
+    );
+
+    let utility_header = read_header("MDLUtility");
+    assert_contains_all(&utility_header, &["@interface MDLUtility"]);
+
+    let value_types_header = read_header("MDLValueTypes");
+    assert_contains_all(&value_types_header, &["@interface MDLMatrix4x4Array"]);
+
+    let vertex_header = read_header("MDLVertexDescriptor");
+    assert_contains_all(
+        &vertex_header,
+        &[
+            "@interface MDLVertexBufferLayout",
+            "MDLVertexAttributePosition",
+            "MDLVertexAttributeNormal",
+            "MDLVertexAttributeTextureCoordinate",
+        ],
+    );
+
+    let bridge = read_bridge();
+    assert_contains_all(
+        &bridge,
+        &[
+            "mdl_material_property_new",
+            "mdl_named_name_string",
+            "mdl_texture_filter_new",
+            "mdl_texture_sampler_new",
+            "mdl_material_property_connection_new",
+            "mdl_material_property_node_new",
+            "mdl_material_property_graph_new",
+            "mdl_object_container_new",
+            "mdl_submesh_topology_new",
+            "mdl_sdk_constant_string",
+            "mdl_matrix4x4_array_new",
+            "mdl_stereoscopic_camera_new",
+            "mdl_area_light_new",
+            "mdl_photometric_light_new",
+            "mdl_utility_convert_to_usdz",
+        ],
+    );
+}

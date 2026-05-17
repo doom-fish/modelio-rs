@@ -160,7 +160,30 @@ extern "C" {
     pub fn mdl_submesh_index_buffer(handle: *mut c_void) -> *mut c_void;
     pub fn mdl_submesh_index_buffer_as_type(handle: *mut c_void, index_type: u32) -> *mut c_void;
     pub fn mdl_submesh_material(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_submesh_topology(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_submesh_set_topology(handle: *mut c_void, topology: *mut c_void);
     pub fn mdl_submesh_set_material(handle: *mut c_void, material: *mut c_void);
+    pub fn mdl_submesh_topology_new(
+        submesh: *mut c_void,
+        out_topology: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_submesh_topology_face_topology(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_submesh_topology_set_face_topology(handle: *mut c_void, buffer: *mut c_void);
+    pub fn mdl_submesh_topology_face_count(handle: *mut c_void) -> u64;
+    pub fn mdl_submesh_topology_set_face_count(handle: *mut c_void, count: u64);
+    pub fn mdl_submesh_topology_vertex_crease_indices(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_submesh_topology_set_vertex_crease_indices(handle: *mut c_void, buffer: *mut c_void);
+    pub fn mdl_submesh_topology_vertex_creases(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_submesh_topology_set_vertex_creases(handle: *mut c_void, buffer: *mut c_void);
+    pub fn mdl_submesh_topology_vertex_crease_count(handle: *mut c_void) -> u64;
+    pub fn mdl_submesh_topology_set_vertex_crease_count(handle: *mut c_void, count: u64);
+    pub fn mdl_submesh_topology_edge_crease_indices(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_submesh_topology_set_edge_crease_indices(handle: *mut c_void, buffer: *mut c_void);
+    pub fn mdl_submesh_topology_edge_creases(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_submesh_topology_set_edge_creases(handle: *mut c_void, buffer: *mut c_void);
+    pub fn mdl_submesh_topology_edge_crease_count(handle: *mut c_void) -> u64;
+    pub fn mdl_submesh_topology_set_edge_crease_count(handle: *mut c_void, count: u64);
 
     pub fn mdl_material_new(
         name: *const c_char,
@@ -171,9 +194,11 @@ extern "C" {
     pub fn mdl_material_info_json(handle: *mut c_void) -> *mut c_char;
     pub fn mdl_material_count(handle: *mut c_void) -> u64;
     pub fn mdl_material_name_string(handle: *mut c_void) -> *mut c_char;
+    pub fn mdl_material_set_name(handle: *mut c_void, name: *const c_char);
     pub fn mdl_material_material_face(handle: *mut c_void) -> u32;
     pub fn mdl_material_set_material_face(handle: *mut c_void, face: u32);
     pub fn mdl_material_remove_all_properties(handle: *mut c_void);
+    pub fn mdl_material_load_textures_using_resolver(handle: *mut c_void, resolver: *mut c_void);
     pub fn mdl_material_property_at(handle: *mut c_void, index: u64) -> *mut c_void;
     pub fn mdl_material_property_named(
         handle: *mut c_void,
@@ -181,7 +206,68 @@ extern "C" {
     ) -> *mut c_void;
     pub fn mdl_material_property_with_semantic(handle: *mut c_void, semantic: u32) -> *mut c_void;
     pub fn mdl_material_property_info_json(handle: *mut c_void) -> *mut c_char;
+    pub fn mdl_material_property_new(
+        name: *const c_char,
+        semantic: u32,
+        out_property: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_named_name_string(handle: *mut c_void) -> *mut c_char;
+    pub fn mdl_named_set_name(handle: *mut c_void, name: *const c_char);
     pub fn mdl_material_property_texture(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_material_property_texture_sampler(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_material_property_set_texture_sampler(handle: *mut c_void, sampler: *mut c_void);
+    pub fn mdl_texture_filter_new(
+        out_filter: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_texture_filter_info_json(handle: *mut c_void) -> *mut c_char;
+    pub fn mdl_texture_filter_set_s_wrap_mode(handle: *mut c_void, raw_value: u32);
+    pub fn mdl_texture_filter_set_t_wrap_mode(handle: *mut c_void, raw_value: u32);
+    pub fn mdl_texture_filter_set_r_wrap_mode(handle: *mut c_void, raw_value: u32);
+    pub fn mdl_texture_filter_set_min_filter(handle: *mut c_void, raw_value: u32);
+    pub fn mdl_texture_filter_set_mag_filter(handle: *mut c_void, raw_value: u32);
+    pub fn mdl_texture_filter_set_mip_filter(handle: *mut c_void, raw_value: u32);
+    pub fn mdl_texture_sampler_new(
+        out_sampler: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_texture_sampler_info_json(handle: *mut c_void) -> *mut c_char;
+    pub fn mdl_texture_sampler_texture(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_texture_sampler_set_texture(handle: *mut c_void, texture: *mut c_void);
+    pub fn mdl_texture_sampler_hardware_filter(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_texture_sampler_set_hardware_filter(handle: *mut c_void, filter: *mut c_void);
+    pub fn mdl_texture_sampler_transform(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_texture_sampler_set_transform(handle: *mut c_void, transform: *mut c_void);
+    pub fn mdl_material_property_connection_new(
+        output: *mut c_void,
+        input: *mut c_void,
+        out_connection: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_material_property_connection_output(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_material_property_connection_input(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_material_property_node_new(
+        inputs: *const *mut c_void,
+        input_count: u64,
+        outputs: *const *mut c_void,
+        output_count: u64,
+        out_node: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_material_property_node_inputs(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_material_property_node_outputs(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_material_property_graph_new(
+        nodes: *const *mut c_void,
+        node_count: u64,
+        connections: *const *mut c_void,
+        connection_count: u64,
+        out_graph: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_material_property_graph_evaluate(handle: *mut c_void);
+    pub fn mdl_material_property_graph_nodes(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_material_property_graph_connections(handle: *mut c_void) -> *mut c_void;
     pub fn mdl_material_property_set_float(handle: *mut c_void, value: f32);
     pub fn mdl_material_property_set_float2(handle: *mut c_void, x: f32, y: f32);
     pub fn mdl_material_property_set_float3(handle: *mut c_void, x: f32, y: f32, z: f32);
@@ -246,6 +332,8 @@ extern "C" {
     pub fn mdl_object_hidden(handle: *mut c_void) -> i32;
     pub fn mdl_object_set_hidden(handle: *mut c_void, hidden: i32);
     pub fn mdl_object_add_child(handle: *mut c_void, child: *mut c_void);
+    pub fn mdl_object_children_container(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_object_set_children_container(handle: *mut c_void, container: *mut c_void);
     pub fn mdl_object_child_count(handle: *mut c_void) -> u64;
     pub fn mdl_object_child_at(handle: *mut c_void, index: u64) -> *mut c_void;
     pub fn mdl_object_at_path(handle: *mut c_void, path: *const c_char) -> *mut c_void;
@@ -259,6 +347,14 @@ extern "C" {
         out_max_y: *mut f32,
         out_max_z: *mut f32,
     );
+    pub fn mdl_object_container_new(
+        out_container: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_object_container_count(handle: *mut c_void) -> u64;
+    pub fn mdl_object_container_object_at(handle: *mut c_void, index: u64) -> *mut c_void;
+    pub fn mdl_object_container_add_object(handle: *mut c_void, object: *mut c_void);
+    pub fn mdl_object_container_remove_object(handle: *mut c_void, object: *mut c_void);
 
     pub fn mdl_light_new(out_light: *mut *mut c_void, out_error_message: *mut *mut c_char) -> i32;
     pub fn mdl_light_info_json(handle: *mut c_void) -> *mut c_char;
@@ -302,6 +398,37 @@ extern "C" {
         handle: *mut c_void,
         distance: f32,
     );
+    pub fn mdl_area_light_new(
+        out_light: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_area_light_info_json(handle: *mut c_void) -> *mut c_char;
+    pub fn mdl_area_light_set_area_radius(handle: *mut c_void, value: f32);
+    pub fn mdl_area_light_set_super_elliptic_power(handle: *mut c_void, x: f32, y: f32);
+    pub fn mdl_area_light_set_aspect(handle: *mut c_void, value: f32);
+    pub fn mdl_photometric_light_new(
+        out_light: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_photometric_light_new_with_ies_profile(
+        path: *const c_char,
+        out_light: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_photometric_light_info_json(handle: *mut c_void) -> *mut c_char;
+    pub fn mdl_photometric_light_generate_spherical_harmonics_from_light(
+        handle: *mut c_void,
+        level: u64,
+    );
+    pub fn mdl_photometric_light_generate_cubemap_from_light(
+        handle: *mut c_void,
+        texture_size: u64,
+    );
+    pub fn mdl_photometric_light_generate_texture(
+        handle: *mut c_void,
+        texture_size: u64,
+    ) -> *mut c_void;
+    pub fn mdl_photometric_light_light_cube_map(handle: *mut c_void) -> *mut c_void;
 
     pub fn mdl_camera_new(out_camera: *mut *mut c_void, out_error_message: *mut *mut c_char)
         -> i32;
@@ -344,7 +471,23 @@ extern "C" {
         out_z: *mut f32,
     );
     pub fn mdl_camera_bokeh_kernel(handle: *mut c_void, width: i32, height: i32) -> *mut c_void;
+    pub fn mdl_stereoscopic_camera_new(
+        out_camera: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_stereoscopic_camera_info_json(handle: *mut c_void) -> *mut c_char;
+    pub fn mdl_stereoscopic_camera_set_inter_pupillary_distance(handle: *mut c_void, value: f32);
+    pub fn mdl_stereoscopic_camera_set_left_vergence(handle: *mut c_void, value: f32);
+    pub fn mdl_stereoscopic_camera_set_right_vergence(handle: *mut c_void, value: f32);
+    pub fn mdl_stereoscopic_camera_set_overlap(handle: *mut c_void, value: f32);
 
+    pub fn mdl_voxel_array_new_with_asset(
+        asset: *mut c_void,
+        divisions: i32,
+        patch_radius: f32,
+        out_voxel_array: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
     pub fn mdl_voxel_array_new_with_indices(
         values: *const i32,
         count: u64,
@@ -360,6 +503,12 @@ extern "C" {
     ) -> i32;
     pub fn mdl_voxel_array_info_json(handle: *mut c_void) -> *mut c_char;
     pub fn mdl_voxel_array_count(handle: *mut c_void) -> u64;
+    pub fn mdl_voxel_array_set_voxels_for_mesh(
+        handle: *mut c_void,
+        mesh: *mut c_void,
+        divisions: i32,
+        patch_radius: f32,
+    );
     pub fn mdl_voxel_array_set_voxel(handle: *mut c_void, x: i32, y: i32, z: i32, shell: i32);
     pub fn mdl_voxel_array_voxel_exists(
         handle: *mut c_void,
@@ -427,7 +576,33 @@ extern "C" {
     pub fn mdl_voxel_array_set_shell_field_interior_thickness(handle: *mut c_void, value: f32);
     pub fn mdl_voxel_array_set_shell_field_exterior_thickness(handle: *mut c_void, value: f32);
     pub fn mdl_voxel_array_coarse_mesh(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_voxel_array_coarse_mesh_with_allocator(
+        handle: *mut c_void,
+        allocator: *mut c_void,
+    ) -> *mut c_void;
     pub fn mdl_voxel_array_mesh(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_voxel_array_mesh_with_allocator(
+        handle: *mut c_void,
+        allocator: *mut c_void,
+    ) -> *mut c_void;
+
+    pub fn mdl_matrix4x4_array_new(
+        element_count: u64,
+        out_array: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_matrix4x4_array_info_json(handle: *mut c_void) -> *mut c_char;
+    pub fn mdl_matrix4x4_array_clear(handle: *mut c_void);
+    pub fn mdl_matrix4x4_array_set_float_matrices(
+        handle: *mut c_void,
+        values: *const f32,
+        count: u64,
+    );
+    pub fn mdl_matrix4x4_array_copy_float_matrices(
+        handle: *mut c_void,
+        out_values: *mut f32,
+        capacity_matrices: u64,
+    ) -> u64;
 
     pub fn mdl_animated_value_info_json(handle: *mut c_void) -> *mut c_char;
     pub fn mdl_animated_value_clear(handle: *mut c_void);
@@ -601,6 +776,8 @@ extern "C" {
         out_error_message: *mut *mut c_char,
     ) -> i32;
     pub fn mdl_skeleton_info_json(handle: *mut c_void) -> *mut c_char;
+    pub fn mdl_skeleton_joint_bind_transform_array(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_skeleton_joint_rest_transform_array(handle: *mut c_void) -> *mut c_void;
     pub fn mdl_skeleton_copy_joint_bind_transforms(
         handle: *mut c_void,
         out_values: *mut f32,
@@ -638,6 +815,13 @@ extern "C" {
         out_descriptor: *mut *mut c_void,
         out_error_message: *mut *mut c_char,
     ) -> i32;
+    pub fn mdl_vertex_buffer_layout_new(
+        stride: u64,
+        out_layout: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_vertex_buffer_layout_stride(handle: *mut c_void) -> u64;
+    pub fn mdl_vertex_buffer_layout_set_stride(handle: *mut c_void, stride: u64);
     pub fn mdl_vertex_descriptor_info_json(handle: *mut c_void) -> *mut c_char;
     pub fn mdl_vertex_descriptor_attribute_count(handle: *mut c_void) -> u64;
     pub fn mdl_vertex_descriptor_attribute_at(handle: *mut c_void, index: u64) -> *mut c_void;
@@ -645,15 +829,21 @@ extern "C" {
         handle: *mut c_void,
         name: *const c_char,
     ) -> *mut c_void;
+    pub fn mdl_vertex_descriptor_layout_count(handle: *mut c_void) -> u64;
+    pub fn mdl_vertex_descriptor_layout_at(handle: *mut c_void, index: u64) -> *mut c_void;
     pub fn mdl_vertex_descriptor_reset(handle: *mut c_void);
     pub fn mdl_vertex_descriptor_set_packed_offsets(handle: *mut c_void);
     pub fn mdl_vertex_descriptor_set_packed_strides(handle: *mut c_void);
 
     pub fn mdl_array_count(handle: *mut c_void) -> u64;
     pub fn mdl_array_object_at(handle: *mut c_void, index: u64) -> *mut c_void;
+    pub fn mdl_sdk_constant_string(code: u32) -> *mut c_char;
 
     pub fn mdl_asset_resolver_can_resolve_named(handle: *mut c_void, name: *const c_char) -> i32;
-    pub fn mdl_asset_resolver_resolve_named(handle: *mut c_void, name: *const c_char) -> *mut c_char;
+    pub fn mdl_asset_resolver_resolve_named(
+        handle: *mut c_void,
+        name: *const c_char,
+    ) -> *mut c_char;
     pub fn mdl_path_asset_resolver_new(
         path: *const c_char,
         out_resolver: *mut *mut c_void,
@@ -675,6 +865,11 @@ extern "C" {
     ) -> i32;
     pub fn mdl_relative_asset_resolver_asset(handle: *mut c_void) -> *mut c_void;
     pub fn mdl_relative_asset_resolver_set_asset(handle: *mut c_void, asset: *mut c_void);
+    pub fn mdl_utility_convert_to_usdz(
+        input_url: *const c_char,
+        output_url: *const c_char,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
 
     pub fn mdl_mesh_buffer_fill_data(
         handle: *mut c_void,
@@ -935,20 +1130,8 @@ extern "C" {
         z: f32,
         time: f64,
     );
-    pub fn mdl_transform_set_shear_for_time(
-        handle: *mut c_void,
-        x: f32,
-        y: f32,
-        z: f32,
-        time: f64,
-    );
-    pub fn mdl_transform_set_scale_for_time(
-        handle: *mut c_void,
-        x: f32,
-        y: f32,
-        z: f32,
-        time: f64,
-    );
+    pub fn mdl_transform_set_shear_for_time(handle: *mut c_void, x: f32, y: f32, z: f32, time: f64);
+    pub fn mdl_transform_set_scale_for_time(handle: *mut c_void, x: f32, y: f32, z: f32, time: f64);
     pub fn mdl_transform_rotation_matrix_at_time(
         handle: *mut c_void,
         time: f64,

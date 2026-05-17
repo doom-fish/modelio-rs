@@ -102,7 +102,10 @@ impl MeshBufferAllocator {
             ));
         }
         let raw_sizes = sizes.iter().map(|size| *size as u64).collect::<Vec<_>>();
-        let raw_types = types.iter().map(|buffer_type| buffer_type.as_raw()).collect::<Vec<_>>();
+        let raw_types = types
+            .iter()
+            .map(|buffer_type| buffer_type.as_raw())
+            .collect::<Vec<_>>();
         let mut out_zone = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         let status = unsafe {
@@ -141,7 +144,11 @@ impl MeshBufferAllocator {
         )?))
     }
 
-    pub fn new_buffer_with_data(&self, data: &[u8], buffer_type: MeshBufferType) -> Result<MeshBuffer> {
+    pub fn new_buffer_with_data(
+        &self,
+        data: &[u8],
+        buffer_type: MeshBufferType,
+    ) -> Result<MeshBuffer> {
         let mut out_buffer = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         let status = unsafe {
@@ -252,7 +259,8 @@ impl MeshBufferZoneDefault {
     pub fn new() -> Result<Self> {
         let mut out_zone = ptr::null_mut();
         let mut out_error = ptr::null_mut();
-        let status = unsafe { ffi::mdl_mesh_buffer_zone_default_new(&mut out_zone, &mut out_error) };
+        let status =
+            unsafe { ffi::mdl_mesh_buffer_zone_default_new(&mut out_zone, &mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_zone,
@@ -361,9 +369,8 @@ impl MeshBufferDataAllocator {
     pub fn new() -> Result<Self> {
         let mut out_allocator = ptr::null_mut();
         let mut out_error = ptr::null_mut();
-        let status = unsafe {
-            ffi::mdl_mesh_buffer_data_allocator_new(&mut out_allocator, &mut out_error)
-        };
+        let status =
+            unsafe { ffi::mdl_mesh_buffer_data_allocator_new(&mut out_allocator, &mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self {
             handle: required_handle(out_allocator, "MDLMeshBufferDataAllocator")?,
@@ -403,7 +410,10 @@ impl MeshBuffer {
     pub fn map(&self) -> Result<MeshBufferMap> {
         let length = self.info()?.length;
         let ptr = unsafe { ffi::mdl_mesh_buffer_map(self.as_ptr()) };
-        Ok(MeshBufferMap::from_handle(required_handle(ptr, "MDLMeshBufferMap")?, length))
+        Ok(MeshBufferMap::from_handle(
+            required_handle(ptr, "MDLMeshBufferMap")?,
+            length,
+        ))
     }
 
     #[must_use]

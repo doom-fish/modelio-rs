@@ -147,6 +147,49 @@ public func mdl_vertex_descriptor_attribute_named(_ handle: UnsafeMutableRawPoin
     return mdl_retain(attribute)
 }
 
+@_cdecl("mdl_vertex_buffer_layout_new")
+public func mdl_vertex_buffer_layout_new(
+    _ stride: UInt64,
+    _ outLayout: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outLayout else {
+            throw ModelIOBridgeError.invalidArgument("missing output vertex buffer layout pointer")
+        }
+        outLayout.pointee = mdl_retain(MDLVertexBufferLayout(stride: Int(stride)))
+    }
+}
+
+@_cdecl("mdl_vertex_buffer_layout_stride")
+public func mdl_vertex_buffer_layout_stride(_ handle: UnsafeMutableRawPointer?) -> UInt64 {
+    guard let layout = mdl_borrow_object(handle) as? MDLVertexBufferLayout else { return 0 }
+    return UInt64(layout.stride)
+}
+
+@_cdecl("mdl_vertex_buffer_layout_set_stride")
+public func mdl_vertex_buffer_layout_set_stride(_ handle: UnsafeMutableRawPointer?, _ stride: UInt64) {
+    guard let layout = mdl_borrow_object(handle) as? MDLVertexBufferLayout else { return }
+    layout.stride = Int(stride)
+}
+
+@_cdecl("mdl_vertex_descriptor_layout_count")
+public func mdl_vertex_descriptor_layout_count(_ handle: UnsafeMutableRawPointer?) -> UInt64 {
+    guard let descriptor = mdl_borrow_object(handle) as? MDLVertexDescriptor else { return 0 }
+    return UInt64(descriptor.layouts.count)
+}
+
+@_cdecl("mdl_vertex_descriptor_layout_at")
+public func mdl_vertex_descriptor_layout_at(_ handle: UnsafeMutableRawPointer?, _ index: UInt64) -> UnsafeMutableRawPointer? {
+    guard let descriptor = mdl_borrow_object(handle) as? MDLVertexDescriptor,
+          index < UInt64(descriptor.layouts.count),
+          let layout = descriptor.layouts[Int(index)] as? MDLVertexBufferLayout
+    else {
+        return nil
+    }
+    return mdl_retain(layout)
+}
+
 @_cdecl("mdl_vertex_descriptor_reset")
 public func mdl_vertex_descriptor_reset(_ handle: UnsafeMutableRawPointer?) {
     guard let descriptor = mdl_borrow_object(handle) as? MDLVertexDescriptor else { return }

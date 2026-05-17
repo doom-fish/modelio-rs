@@ -27,6 +27,24 @@ private func mdl_voxel_indices(_ data: Data?) -> [Int32] {
     }
 }
 
+@_cdecl("mdl_voxel_array_new_with_asset")
+public func mdl_voxel_array_new_with_asset(
+    _ assetHandle: UnsafeMutableRawPointer?,
+    _ divisions: Int32,
+    _ patchRadius: Float,
+    _ outVoxelArray: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let asset = mdl_borrow_object(assetHandle) as? MDLAsset,
+              let outVoxelArray
+        else {
+            throw ModelIOBridgeError.invalidArgument("missing asset or output voxel array pointer")
+        }
+        outVoxelArray.pointee = mdl_retain(MDLVoxelArray(asset: asset, divisions: divisions, patchRadius: patchRadius))
+    }
+}
+
 @_cdecl("mdl_voxel_array_new_with_indices")
 public func mdl_voxel_array_new_with_indices(
     _ values: UnsafePointer<Int32>?,
@@ -64,6 +82,21 @@ public func mdl_voxel_array_info_json(_ handle: UnsafeMutableRawPointer?) -> Uns
 public func mdl_voxel_array_count(_ handle: UnsafeMutableRawPointer?) -> UInt64 {
     guard let voxelArray = mdl_borrow_object(handle) as? MDLVoxelArray else { return 0 }
     return UInt64(voxelArray.count)
+}
+
+@_cdecl("mdl_voxel_array_set_voxels_for_mesh")
+public func mdl_voxel_array_set_voxels_for_mesh(
+    _ handle: UnsafeMutableRawPointer?,
+    _ meshHandle: UnsafeMutableRawPointer?,
+    _ divisions: Int32,
+    _ patchRadius: Float
+) {
+    guard let voxelArray = mdl_borrow_object(handle) as? MDLVoxelArray,
+          let mesh = mdl_borrow_object(meshHandle) as? MDLMesh
+    else {
+        return
+    }
+    voxelArray.setVoxelsFor(mesh, divisions: divisions, patchRadius: patchRadius)
 }
 
 @_cdecl("mdl_voxel_array_set_voxel")
@@ -268,20 +301,32 @@ public func mdl_voxel_array_set_shell_field_exterior_thickness(_ handle: UnsafeM
 
 @_cdecl("mdl_voxel_array_coarse_mesh")
 public func mdl_voxel_array_coarse_mesh(_ handle: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
-    guard let voxelArray = mdl_borrow_object(handle) as? MDLVoxelArray,
-          let mesh = voxelArray.coarseMesh()
-    else {
-        return nil
-    }
+    mdl_voxel_array_coarse_mesh_with_allocator(handle, nil)
+}
+
+@_cdecl("mdl_voxel_array_coarse_mesh_with_allocator")
+public func mdl_voxel_array_coarse_mesh_with_allocator(
+    _ handle: UnsafeMutableRawPointer?,
+    _ allocatorHandle: UnsafeMutableRawPointer?
+) -> UnsafeMutableRawPointer? {
+    guard let voxelArray = mdl_borrow_object(handle) as? MDLVoxelArray else { return nil }
+    let allocator = mdl_borrow_object(allocatorHandle) as? any MDLMeshBufferAllocator
+    guard let mesh = voxelArray.coarseMesh(using: allocator) else { return nil }
     return mdl_retain(mesh)
 }
 
 @_cdecl("mdl_voxel_array_mesh")
 public func mdl_voxel_array_mesh(_ handle: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
-    guard let voxelArray = mdl_borrow_object(handle) as? MDLVoxelArray,
-          let mesh = voxelArray.mesh(using: nil)
-    else {
-        return nil
-    }
+    mdl_voxel_array_mesh_with_allocator(handle, nil)
+}
+
+@_cdecl("mdl_voxel_array_mesh_with_allocator")
+public func mdl_voxel_array_mesh_with_allocator(
+    _ handle: UnsafeMutableRawPointer?,
+    _ allocatorHandle: UnsafeMutableRawPointer?
+) -> UnsafeMutableRawPointer? {
+    guard let voxelArray = mdl_borrow_object(handle) as? MDLVoxelArray else { return nil }
+    let allocator = mdl_borrow_object(allocatorHandle) as? any MDLMeshBufferAllocator
+    guard let mesh = voxelArray.mesh(using: allocator) else { return nil }
     return mdl_retain(mesh)
 }

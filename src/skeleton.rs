@@ -7,6 +7,7 @@ use crate::handle::ObjectHandle;
 use crate::object::Object;
 use crate::types::SkeletonInfo;
 use crate::util::{c_string, parse_json, required_handle};
+use crate::value_types::Matrix4x4Array;
 
 fn c_string_vec(values: &[&str]) -> Result<(Vec<CString>, Vec<*const i8>)> {
     let c_strings = values
@@ -74,6 +75,22 @@ impl Skeleton {
             unsafe { ffi::mdl_skeleton_info_json(self.handle.as_ptr()) },
             "MDLSkeleton",
         )
+    }
+
+    pub fn joint_bind_transform_array(&self) -> Result<Matrix4x4Array> {
+        let ptr = unsafe { ffi::mdl_skeleton_joint_bind_transform_array(self.handle.as_ptr()) };
+        Ok(Matrix4x4Array::from_handle(required_handle(
+            ptr,
+            "MDLSkeleton jointBindTransforms",
+        )?))
+    }
+
+    pub fn joint_rest_transform_array(&self) -> Result<Matrix4x4Array> {
+        let ptr = unsafe { ffi::mdl_skeleton_joint_rest_transform_array(self.handle.as_ptr()) };
+        Ok(Matrix4x4Array::from_handle(required_handle(
+            ptr,
+            "MDLSkeleton jointRestTransforms",
+        )?))
     }
 
     pub fn joint_bind_transforms(&self) -> Result<Vec<[f32; 16]>> {

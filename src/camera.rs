@@ -5,7 +5,7 @@ use crate::ffi;
 use crate::handle::ObjectHandle;
 use crate::object::Object;
 use crate::texture::Texture;
-use crate::types::{BoundingBox, CameraInfo, CameraProjection};
+use crate::types::{BoundingBox, CameraInfo, CameraProjection, StereoscopicCameraInfo};
 use crate::util::{parse_json, required_handle};
 
 #[derive(Debug, Clone)]
@@ -125,6 +125,63 @@ impl Camera {
     pub fn bokeh_kernel(&self, size: [i32; 2]) -> Option<Texture> {
         let ptr = unsafe { ffi::mdl_camera_bokeh_kernel(self.handle.as_ptr(), size[0], size[1]) };
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Texture::from_handle)
+    }
+
+    #[must_use]
+    pub fn as_object(&self) -> Object {
+        Object::from_handle(self.handle.clone())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct StereoscopicCamera {
+    handle: ObjectHandle,
+}
+
+impl StereoscopicCamera {
+    pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
+        Self { handle }
+    }
+
+    pub fn new() -> Result<Self> {
+        let mut out_camera = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe { ffi::mdl_stereoscopic_camera_new(&mut out_camera, &mut out_error) };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_camera,
+            "MDLStereoscopicCamera",
+        )?))
+    }
+
+    pub fn info(&self) -> Result<StereoscopicCameraInfo> {
+        parse_json(
+            unsafe { ffi::mdl_stereoscopic_camera_info_json(self.handle.as_ptr()) },
+            "MDLStereoscopicCamera",
+        )
+    }
+
+    pub fn set_inter_pupillary_distance(&self, value: f32) {
+        unsafe {
+            ffi::mdl_stereoscopic_camera_set_inter_pupillary_distance(self.handle.as_ptr(), value)
+        };
+    }
+
+    pub fn set_left_vergence(&self, value: f32) {
+        unsafe { ffi::mdl_stereoscopic_camera_set_left_vergence(self.handle.as_ptr(), value) };
+    }
+
+    pub fn set_right_vergence(&self, value: f32) {
+        unsafe { ffi::mdl_stereoscopic_camera_set_right_vergence(self.handle.as_ptr(), value) };
+    }
+
+    pub fn set_overlap(&self, value: f32) {
+        unsafe { ffi::mdl_stereoscopic_camera_set_overlap(self.handle.as_ptr(), value) };
+    }
+
+    #[must_use]
+    pub fn as_camera(&self) -> Camera {
+        Camera::from_handle(self.handle.clone())
     }
 
     #[must_use]

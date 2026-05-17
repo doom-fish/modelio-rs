@@ -14,7 +14,10 @@ fn mesh_buffer_allocator_and_data_round_trip() {
     let buffer = generic_allocator
         .new_buffer_with_data(&[1, 2, 3, 4], MeshBufferType::Vertex)
         .expect("buffer");
-    assert_eq!(buffer.info().expect("info").buffer_type_enum(), Some(MeshBufferType::Vertex));
+    assert_eq!(
+        buffer.info().expect("info").buffer_type_enum(),
+        Some(MeshBufferType::Vertex)
+    );
     assert!(buffer.allocator().is_some());
 
     let mapped = buffer.map().expect("map");
@@ -34,7 +37,10 @@ fn mesh_buffer_allocator_and_data_round_trip() {
         .new_buffer_from_zone(Some(&zone), 4, MeshBufferType::Custom)
         .expect("zone buffer result")
         .expect("zone buffer");
-    assert_eq!(zone_buffer.info().expect("zone info").buffer_type_enum(), Some(MeshBufferType::Custom));
+    assert_eq!(
+        zone_buffer.info().expect("zone info").buffer_type_enum(),
+        Some(MeshBufferType::Custom)
+    );
     assert!(zone_buffer.zone().is_some());
     assert!(zone_buffer.as_data_buffer().is_some());
 }

@@ -31,10 +31,13 @@ fn asset_resolvers_handle_fixture_paths() {
     relative_resolver.set_asset(Some(&asset));
     assert!(relative_resolver.asset().is_some());
 
-    let bundle_resolver = BundleAssetResolver::new(env!("CARGO_MANIFEST_DIR"))
-        .expect("bundle resolver");
+    let bundle_resolver =
+        BundleAssetResolver::new(env!("CARGO_MANIFEST_DIR")).expect("bundle resolver");
     bundle_resolver
         .set_path(env!("CARGO_MANIFEST_DIR"))
         .expect("bundle path");
     assert!(bundle_resolver.path().is_some());
+
+    let material = Material::new("ResolverMaterial", true).expect("material");
+    material.load_textures_using_resolver(&path_resolver.as_asset_resolver());
 }

@@ -59,6 +59,18 @@ public func mdl_skeleton_info_json(_ handle: UnsafeMutableRawPointer?) -> Unsafe
     return mdl_string(mdl_json_string(from: mdl_skeleton_info(skeleton)) ?? "{}")
 }
 
+@_cdecl("mdl_skeleton_joint_bind_transform_array")
+public func mdl_skeleton_joint_bind_transform_array(_ handle: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
+    guard let skeleton = mdl_borrow_object(handle) as? MDLSkeleton else { return nil }
+    return mdl_retain(skeleton.jointBindTransforms)
+}
+
+@_cdecl("mdl_skeleton_joint_rest_transform_array")
+public func mdl_skeleton_joint_rest_transform_array(_ handle: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
+    guard let skeleton = mdl_borrow_object(handle) as? MDLSkeleton else { return nil }
+    return mdl_retain(skeleton.jointRestTransforms)
+}
+
 @_cdecl("mdl_skeleton_copy_joint_bind_transforms")
 public func mdl_skeleton_copy_joint_bind_transforms(_ handle: UnsafeMutableRawPointer?, _ outValues: UnsafeMutablePointer<Float>?, _ capacityMatrices: UInt64) -> UInt64 {
     guard let skeleton = mdl_borrow_object(handle) as? MDLSkeleton else { return 0 }

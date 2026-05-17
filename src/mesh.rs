@@ -19,6 +19,10 @@ impl Mesh {
         Self { handle }
     }
 
+    pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
+        self.handle.as_ptr()
+    }
+
     pub fn new_box(
         extent: [f32; 3],
         segments: [u32; 3],

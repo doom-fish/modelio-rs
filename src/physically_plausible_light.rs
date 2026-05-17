@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::ptr;
 
 use crate::error::Result;
@@ -5,8 +6,9 @@ use crate::ffi;
 use crate::handle::ObjectHandle;
 use crate::light::Light;
 use crate::object::Object;
-use crate::types::PhysicallyPlausibleLightInfo;
-use crate::util::{parse_json, required_handle};
+use crate::texture::Texture;
+use crate::types::{AreaLightInfo, PhotometricLightInfo, PhysicallyPlausibleLightInfo};
+use crate::util::{parse_json, path_to_c_string, required_handle};
 
 #[derive(Debug, Clone)]
 pub struct PhysicallyPlausibleLight {
@@ -90,6 +92,158 @@ impl PhysicallyPlausibleLight {
                 distance,
             );
         };
+    }
+
+    #[must_use]
+    pub fn as_light(&self) -> Light {
+        Light::from_handle(self.handle.clone())
+    }
+
+    #[must_use]
+    pub fn as_object(&self) -> Object {
+        Object::from_handle(self.handle.clone())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct AreaLight {
+    handle: ObjectHandle,
+}
+
+impl AreaLight {
+    pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
+        Self { handle }
+    }
+
+    pub fn new() -> Result<Self> {
+        let mut out_light = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe { ffi::mdl_area_light_new(&mut out_light, &mut out_error) };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_light,
+            "MDLAreaLight",
+        )?))
+    }
+
+    pub fn info(&self) -> Result<AreaLightInfo> {
+        parse_json(
+            unsafe { ffi::mdl_area_light_info_json(self.handle.as_ptr()) },
+            "MDLAreaLight",
+        )
+    }
+
+    pub fn set_area_radius(&self, value: f32) {
+        unsafe { ffi::mdl_area_light_set_area_radius(self.handle.as_ptr(), value) };
+    }
+
+    pub fn set_super_elliptic_power(&self, value: [f32; 2]) {
+        unsafe {
+            ffi::mdl_area_light_set_super_elliptic_power(self.handle.as_ptr(), value[0], value[1]);
+        };
+    }
+
+    pub fn set_aspect(&self, value: f32) {
+        unsafe { ffi::mdl_area_light_set_aspect(self.handle.as_ptr(), value) };
+    }
+
+    #[must_use]
+    pub fn as_physically_plausible_light(&self) -> PhysicallyPlausibleLight {
+        PhysicallyPlausibleLight::from_handle(self.handle.clone())
+    }
+
+    #[must_use]
+    pub fn as_light(&self) -> Light {
+        Light::from_handle(self.handle.clone())
+    }
+
+    #[must_use]
+    pub fn as_object(&self) -> Object {
+        Object::from_handle(self.handle.clone())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct PhotometricLight {
+    handle: ObjectHandle,
+}
+
+impl PhotometricLight {
+    pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
+        Self { handle }
+    }
+
+    pub fn new() -> Result<Self> {
+        let mut out_light = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe { ffi::mdl_photometric_light_new(&mut out_light, &mut out_error) };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_light,
+            "MDLPhotometricLight",
+        )?))
+    }
+
+    pub fn from_ies_profile(path: impl AsRef<Path>) -> Result<Self> {
+        let path = path_to_c_string(path.as_ref())?;
+        let mut out_light = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_photometric_light_new_with_ies_profile(
+                path.as_ptr(),
+                &mut out_light,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_light,
+            "MDLPhotometricLight",
+        )?))
+    }
+
+    pub fn info(&self) -> Result<PhotometricLightInfo> {
+        parse_json(
+            unsafe { ffi::mdl_photometric_light_info_json(self.handle.as_ptr()) },
+            "MDLPhotometricLight",
+        )
+    }
+
+    pub fn generate_spherical_harmonics_from_light(&self, level: usize) {
+        unsafe {
+            ffi::mdl_photometric_light_generate_spherical_harmonics_from_light(
+                self.handle.as_ptr(),
+                level as u64,
+            );
+        };
+    }
+
+    pub fn generate_cubemap_from_light(&self, texture_size: usize) {
+        unsafe {
+            ffi::mdl_photometric_light_generate_cubemap_from_light(
+                self.handle.as_ptr(),
+                texture_size as u64,
+            );
+        };
+    }
+
+    #[must_use]
+    pub fn generate_texture(&self, texture_size: usize) -> Option<Texture> {
+        let ptr = unsafe {
+            ffi::mdl_photometric_light_generate_texture(self.handle.as_ptr(), texture_size as u64)
+        };
+        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Texture::from_handle)
+    }
+
+    #[must_use]
+    pub fn light_cube_map(&self) -> Option<Texture> {
+        let ptr = unsafe { ffi::mdl_photometric_light_light_cube_map(self.handle.as_ptr()) };
+        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Texture::from_handle)
+    }
+
+    #[must_use]
+    pub fn as_physically_plausible_light(&self) -> PhysicallyPlausibleLight {
+        PhysicallyPlausibleLight::from_handle(self.handle.clone())
     }
 
     #[must_use]

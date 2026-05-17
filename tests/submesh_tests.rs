@@ -19,4 +19,9 @@ fn submesh_sets_material_and_exposes_index_buffers() {
         .index_buffer_as_type(IndexBitDepth::UInt32)
         .is_some());
     assert!(submesh.material().is_some());
+
+    let topology = SubmeshTopology::new(&submesh).expect("submesh topology");
+    assert!(topology.face_count() > 0);
+    submesh.set_topology(Some(&topology));
+    assert!(submesh.topology().is_some());
 }

@@ -154,6 +154,19 @@ public func mdl_camera_ray_to(
     outZ?.pointee = ray.z
 }
 
+private func mdl_stereoscopic_camera_info(_ camera: MDLStereoscopicCamera) -> [String: Any] {
+    [
+        "inter_pupillary_distance": camera.interPupillaryDistance,
+        "left_vergence": camera.leftVergence,
+        "right_vergence": camera.rightVergence,
+        "overlap": camera.overlap,
+        "left_view_matrix": mdl_matrix_to_array(camera.leftViewMatrix),
+        "right_view_matrix": mdl_matrix_to_array(camera.rightViewMatrix),
+        "left_projection_matrix": mdl_matrix_to_array(camera.leftProjectionMatrix),
+        "right_projection_matrix": mdl_matrix_to_array(camera.rightProjectionMatrix),
+    ]
+}
+
 @_cdecl("mdl_camera_bokeh_kernel")
 public func mdl_camera_bokeh_kernel(
     _ handle: UnsafeMutableRawPointer?,
@@ -162,4 +175,47 @@ public func mdl_camera_bokeh_kernel(
 ) -> UnsafeMutableRawPointer? {
     guard let camera = mdl_borrow_object(handle) as? MDLCamera else { return nil }
     return mdl_retain(camera.bokehKernel(withSize: vector_int2(width, height)))
+}
+
+@_cdecl("mdl_stereoscopic_camera_new")
+public func mdl_stereoscopic_camera_new(
+    _ outCamera: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outCamera else {
+            throw ModelIOBridgeError.invalidArgument("missing output stereoscopic camera pointer")
+        }
+        outCamera.pointee = mdl_retain(MDLStereoscopicCamera())
+    }
+}
+
+@_cdecl("mdl_stereoscopic_camera_info_json")
+public func mdl_stereoscopic_camera_info_json(_ handle: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+    guard let camera = mdl_borrow_object(handle) as? MDLStereoscopicCamera else { return nil }
+    return mdl_string(mdl_json_string(from: mdl_stereoscopic_camera_info(camera)) ?? "{}")
+}
+
+@_cdecl("mdl_stereoscopic_camera_set_inter_pupillary_distance")
+public func mdl_stereoscopic_camera_set_inter_pupillary_distance(_ handle: UnsafeMutableRawPointer?, _ value: Float) {
+    guard let camera = mdl_borrow_object(handle) as? MDLStereoscopicCamera else { return }
+    camera.interPupillaryDistance = value
+}
+
+@_cdecl("mdl_stereoscopic_camera_set_left_vergence")
+public func mdl_stereoscopic_camera_set_left_vergence(_ handle: UnsafeMutableRawPointer?, _ value: Float) {
+    guard let camera = mdl_borrow_object(handle) as? MDLStereoscopicCamera else { return }
+    camera.leftVergence = value
+}
+
+@_cdecl("mdl_stereoscopic_camera_set_right_vergence")
+public func mdl_stereoscopic_camera_set_right_vergence(_ handle: UnsafeMutableRawPointer?, _ value: Float) {
+    guard let camera = mdl_borrow_object(handle) as? MDLStereoscopicCamera else { return }
+    camera.rightVergence = value
+}
+
+@_cdecl("mdl_stereoscopic_camera_set_overlap")
+public func mdl_stereoscopic_camera_set_overlap(_ handle: UnsafeMutableRawPointer?, _ value: Float) {
+    guard let camera = mdl_borrow_object(handle) as? MDLStereoscopicCamera else { return }
+    camera.overlap = value
 }

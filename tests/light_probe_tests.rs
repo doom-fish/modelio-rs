@@ -19,7 +19,12 @@ fn light_probe_and_irradiance_data_source_surface_is_available() {
     assert!(probe.irradiance_texture().is_some());
     probe.generate_spherical_harmonics_from_irradiance(1);
     let _ = probe.spherical_harmonics_coefficients();
-    assert!(probe.as_light().info().expect("light info").light_type_enum().is_some());
+    assert!(probe
+        .as_light()
+        .info()
+        .expect("light info")
+        .light_type_enum()
+        .is_some());
 
     let data_source = LightProbeIrradianceDataSource::new(
         BoundingBox {
@@ -27,7 +32,13 @@ fn light_probe_and_irradiance_data_source_surface_is_available() {
             max: [1.0, 1.0, 1.0],
         },
         1,
-        |position| vec![position[0], position[1], position[2], 1.0].into_iter().cycle().take(12).collect(),
+        |position| {
+            vec![position[0], position[1], position[2], 1.0]
+                .into_iter()
+                .cycle()
+                .take(12)
+                .collect()
+        },
     )
     .expect("irradiance data source");
     assert!(data_source

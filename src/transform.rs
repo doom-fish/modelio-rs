@@ -7,6 +7,7 @@ use crate::error::Result;
 use crate::ffi;
 use crate::handle::ObjectHandle;
 use crate::object::Object;
+use crate::protocols::Component;
 use crate::types::TransformOpRotationOrder;
 use crate::util::{c_string, required_handle, take_string};
 
@@ -19,7 +20,11 @@ fn copy_matrix(
     matrix
 }
 
-fn array_objects<T, F>(array_ptr: *mut core::ffi::c_void, context: &'static str, mut map: F) -> Result<Vec<T>>
+fn array_objects<T, F>(
+    array_ptr: *mut core::ffi::c_void,
+    context: &'static str,
+    mut map: F,
+) -> Result<Vec<T>>
 where
     F: FnMut(ObjectHandle) -> T,
 {
@@ -84,7 +89,8 @@ impl TransformComponent {
 
     #[must_use]
     pub fn key_times(&self) -> Vec<f64> {
-        let count = unsafe { ffi::mdl_transform_component_key_time_count(self.handle.as_ptr()) as usize };
+        let count =
+            unsafe { ffi::mdl_transform_component_key_time_count(self.handle.as_ptr()) as usize };
         let mut values = vec![0.0_f64; count];
         if values.is_empty() {
             return values;
@@ -144,9 +150,15 @@ pub struct Transform {
     handle: ObjectHandle,
 }
 
+impl Component for Transform {}
+
 impl Transform {
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
+        self.handle.as_ptr()
     }
 
     pub fn new() -> Result<Self> {
@@ -154,7 +166,10 @@ impl Transform {
         let mut out_error = ptr::null_mut();
         let status = unsafe { ffi::mdl_transform_new(&mut out_transform, &mut out_error) };
         crate::util::status_result(status, out_error)?;
-        Ok(Self::from_handle(required_handle(out_transform, "MDLTransform")?))
+        Ok(Self::from_handle(required_handle(
+            out_transform,
+            "MDLTransform",
+        )?))
     }
 
     pub fn from_component(component: &TransformComponent) -> Result<Self> {
@@ -168,7 +183,10 @@ impl Transform {
             )
         };
         crate::util::status_result(status, out_error)?;
-        Ok(Self::from_handle(required_handle(out_transform, "MDLTransform")?))
+        Ok(Self::from_handle(required_handle(
+            out_transform,
+            "MDLTransform",
+        )?))
     }
 
     pub fn from_component_with_resets_transform(
@@ -186,21 +204,23 @@ impl Transform {
             )
         };
         crate::util::status_result(status, out_error)?;
-        Ok(Self::from_handle(required_handle(out_transform, "MDLTransform")?))
+        Ok(Self::from_handle(required_handle(
+            out_transform,
+            "MDLTransform",
+        )?))
     }
 
     pub fn from_matrix(matrix: [f32; 16]) -> Result<Self> {
         let mut out_transform = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         let status = unsafe {
-            ffi::mdl_transform_new_with_matrix(
-                matrix.as_ptr(),
-                &mut out_transform,
-                &mut out_error,
-            )
+            ffi::mdl_transform_new_with_matrix(matrix.as_ptr(), &mut out_transform, &mut out_error)
         };
         crate::util::status_result(status, out_error)?;
-        Ok(Self::from_handle(required_handle(out_transform, "MDLTransform")?))
+        Ok(Self::from_handle(required_handle(
+            out_transform,
+            "MDLTransform",
+        )?))
     }
 
     pub fn from_matrix_with_resets_transform(
@@ -218,7 +238,10 @@ impl Transform {
             )
         };
         crate::util::status_result(status, out_error)?;
-        Ok(Self::from_handle(required_handle(out_transform, "MDLTransform")?))
+        Ok(Self::from_handle(required_handle(
+            out_transform,
+            "MDLTransform",
+        )?))
     }
 
     #[must_use]
@@ -236,7 +259,8 @@ impl Transform {
     }
 
     pub fn set_resets_transform(&self, resets_transform: bool) {
-        self.as_transform_component().set_resets_transform(resets_transform);
+        self.as_transform_component()
+            .set_resets_transform(resets_transform);
     }
 
     #[must_use]
@@ -300,7 +324,9 @@ impl Transform {
     }
 
     pub fn set_matrix_for_time(&self, matrix: [f32; 16], time: f64) {
-        unsafe { ffi::mdl_transform_set_matrix_for_time(self.handle.as_ptr(), matrix.as_ptr(), time) };
+        unsafe {
+            ffi::mdl_transform_set_matrix_for_time(self.handle.as_ptr(), matrix.as_ptr(), time)
+        };
     }
 
     pub fn set_translation_for_time(&self, translation: [f32; 3], time: f64) {
@@ -409,12 +435,7 @@ impl Transform {
 
     pub fn set_shear(&self, shear: [f32; 3]) {
         unsafe {
-            ffi::mdl_transform_set_shear(
-                self.handle.as_ptr(),
-                shear[0],
-                shear[1],
-                shear[2],
-            );
+            ffi::mdl_transform_set_shear(self.handle.as_ptr(), shear[0], shear[1], shear[2]);
         }
     }
 
@@ -427,12 +448,7 @@ impl Transform {
 
     pub fn set_scale(&self, scale: [f32; 3]) {
         unsafe {
-            ffi::mdl_transform_set_scale(
-                self.handle.as_ptr(),
-                scale[0],
-                scale[1],
-                scale[2],
-            );
+            ffi::mdl_transform_set_scale(self.handle.as_ptr(), scale[0], scale[1], scale[2]);
         }
     }
 
@@ -465,7 +481,13 @@ impl TransformOp {
     #[must_use]
     pub fn float4x4_at_time(&self, time: f64) -> [f32; 16] {
         let mut matrix = [0.0_f32; 16];
-        unsafe { ffi::mdl_transform_op_copy_float4x4_at_time(self.handle.as_ptr(), time, matrix.as_mut_ptr()) };
+        unsafe {
+            ffi::mdl_transform_op_copy_float4x4_at_time(
+                self.handle.as_ptr(),
+                time,
+                matrix.as_mut_ptr(),
+            )
+        };
         matrix
     }
 }
@@ -511,14 +533,46 @@ macro_rules! define_transform_op {
     };
 }
 
-define_transform_op!(TransformRotateXOp, mdl_transform_rotate_x_op_animated_value, AnimatedScalar);
-define_transform_op!(TransformRotateYOp, mdl_transform_rotate_y_op_animated_value, AnimatedScalar);
-define_transform_op!(TransformRotateZOp, mdl_transform_rotate_z_op_animated_value, AnimatedScalar);
-define_transform_op!(TransformRotateOp, mdl_transform_rotate_op_animated_value, AnimatedVector3);
-define_transform_op!(TransformTranslateOp, mdl_transform_translate_op_animated_value, AnimatedVector3);
-define_transform_op!(TransformScaleOp, mdl_transform_scale_op_animated_value, AnimatedVector3);
-define_transform_op!(TransformMatrixOp, mdl_transform_matrix_op_animated_value, AnimatedMatrix4x4);
-define_transform_op!(TransformOrientOp, mdl_transform_orient_op_animated_value, AnimatedQuaternion);
+define_transform_op!(
+    TransformRotateXOp,
+    mdl_transform_rotate_x_op_animated_value,
+    AnimatedScalar
+);
+define_transform_op!(
+    TransformRotateYOp,
+    mdl_transform_rotate_y_op_animated_value,
+    AnimatedScalar
+);
+define_transform_op!(
+    TransformRotateZOp,
+    mdl_transform_rotate_z_op_animated_value,
+    AnimatedScalar
+);
+define_transform_op!(
+    TransformRotateOp,
+    mdl_transform_rotate_op_animated_value,
+    AnimatedVector3
+);
+define_transform_op!(
+    TransformTranslateOp,
+    mdl_transform_translate_op_animated_value,
+    AnimatedVector3
+);
+define_transform_op!(
+    TransformScaleOp,
+    mdl_transform_scale_op_animated_value,
+    AnimatedVector3
+);
+define_transform_op!(
+    TransformMatrixOp,
+    mdl_transform_matrix_op_animated_value,
+    AnimatedMatrix4x4
+);
+define_transform_op!(
+    TransformOrientOp,
+    mdl_transform_orient_op_animated_value,
+    AnimatedQuaternion
+);
 
 #[derive(Debug, Clone)]
 pub struct TransformStack {
@@ -556,7 +610,8 @@ impl TransformStack {
     }
 
     pub fn set_resets_transform(&self, resets_transform: bool) {
-        self.as_transform_component().set_resets_transform(resets_transform);
+        self.as_transform_component()
+            .set_resets_transform(resets_transform);
     }
 
     #[must_use]
@@ -707,14 +762,22 @@ impl TransformStack {
 
     pub fn animated_value_named(&self, name: &str) -> Result<Option<AnimatedValue>> {
         let name = c_string(name)?;
-        let ptr = unsafe { ffi::mdl_transform_stack_animated_value_named(self.handle.as_ptr(), name.as_ptr()) };
+        let ptr = unsafe {
+            ffi::mdl_transform_stack_animated_value_named(self.handle.as_ptr(), name.as_ptr())
+        };
         Ok(unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(AnimatedValue::from_handle))
     }
 
     #[must_use]
     pub fn float4x4_at_time(&self, time: f64) -> [f32; 16] {
         let mut matrix = [0.0_f32; 16];
-        unsafe { ffi::mdl_transform_stack_copy_float4x4_at_time(self.handle.as_ptr(), time, matrix.as_mut_ptr()) };
+        unsafe {
+            ffi::mdl_transform_stack_copy_float4x4_at_time(
+                self.handle.as_ptr(),
+                time,
+                matrix.as_mut_ptr(),
+            )
+        };
         matrix
     }
 
@@ -728,7 +791,11 @@ impl TransformStack {
         if ptr.is_null() {
             return Ok(Vec::new());
         }
-        array_objects(ptr, "MDLTransformStack transformOps", TransformOp::from_handle)
+        array_objects(
+            ptr,
+            "MDLTransformStack transformOps",
+            TransformOp::from_handle,
+        )
     }
 
     #[must_use]

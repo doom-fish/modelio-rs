@@ -1,0 +1,58 @@
+attempt 2026-05-16T11:54:06Z
+    Updating crates.io index
+   Packaging modelio-rs v0.1.0 (/Users/perjohansson/dev/modelio-rs)
+    Updating crates.io index
+    Packaged 24 files, 94.7KiB (20.6KiB compressed)
+   Verifying modelio-rs v0.1.0 (/Users/perjohansson/dev/modelio-rs)
+   Compiling modelio-rs v0.1.0 (/Users/perjohansson/dev/modelio-rs/target/package/modelio-rs-0.1.0)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.98s
+   Uploading modelio-rs v0.1.0 (/Users/perjohansson/dev/modelio-rs)
+error: failed to publish modelio-rs v0.1.0 to registry at https://crates.io
+
+Caused by:
+  the remote server responded with an error (status 429 Too Many Requests): You have published too many new crates in a short period of time. Please try again after Sat, 16 May 2026 11:54:33 GMT and see https://crates.io/docs/rate-limits for more details.
+sleeping 600s 2026-05-16T11:54:09Z
+initial-sleep 369s 2026-05-16T12:10:23Z
+attempt 2026-05-16T12:16:32Z
+    Updating crates.io index
+   Packaging modelio-rs v0.1.0 (/Users/perjohansson/dev/modelio-rs)
+    Updating crates.io index
+    Packaged 24 files, 94.7KiB (20.6KiB compressed)
+   Verifying modelio-rs v0.1.0 (/Users/perjohansson/dev/modelio-rs)
+   Compiling modelio-rs v0.1.0 (/Users/perjohansson/dev/modelio-rs/target/package/modelio-rs-0.1.0)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.56s
+   Uploading modelio-rs v0.1.0 (/Users/perjohansson/dev/modelio-rs)
+error: failed to publish modelio-rs v0.1.0 to registry at https://crates.io
+
+Caused by:
+  the remote server responded with an error (status 429 Too Many Requests): You have published too many new crates in a short period of time. Please try again after Sat, 16 May 2026 12:24:33 GMT and see https://crates.io/docs/rate-limits for more details.
+sleeping 597s 2026-05-16T12:16:35Z
+attempt 2026-05-16T12:26:32Z
+    Updating crates.io index
+   Packaging modelio-rs v0.1.0 (/Users/perjohansson/dev/modelio-rs)
+    Updating crates.io index
+    Packaged 24 files, 94.7KiB (20.6KiB compressed)
+   Verifying modelio-rs v0.1.0 (/Users/perjohansson/dev/modelio-rs)
+   Compiling modelio-rs v0.1.0 (/Users/perjohansson/dev/modelio-rs/target/package/modelio-rs-0.1.0)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.21s
+   Uploading modelio-rs v0.1.0 (/Users/perjohansson/dev/modelio-rs)
+error: failed to publish modelio-rs v0.1.0 to registry at https://crates.io
+
+Caused by:
+  the remote server responded with an error (status 429 Too Many Requests): You have published too many new crates in a short period of time. Please try again after Sat, 16 May 2026 12:34:33 GMT and see https://crates.io/docs/rate-limits for more details.
+sleeping 597s 2026-05-16T12:26:35Z
+initial-sleep 1200s 2026-05-16T12:44:32Z
+attempt 2026-05-16T13:04:32Z
+    Updating crates.io index
+   Packaging modelio-rs v0.1.0 (/Users/perjohansson/dev/modelio-rs)
+    Updating crates.io index
+    Packaged 24 files, 94.7KiB (20.6KiB compressed)
+   Verifying modelio-rs v0.1.0 (/Users/perjohansson/dev/modelio-rs)
+   Compiling modelio-rs v0.1.0 (/Users/perjohansson/dev/modelio-rs/target/package/modelio-rs-0.1.0)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.33s
+   Uploading modelio-rs v0.1.0 (/Users/perjohansson/dev/modelio-rs)
+error: failed to publish modelio-rs v0.1.0 to registry at https://crates.io
+
+Caused by:
+  the remote server responded with an error (status 429 Too Many Requests): You have published too many new crates in a short period of time. Please try again after Sat, 16 May 2026 13:14:33 GMT and see https://crates.io/docs/rate-limits for more details.
+sleeping 1200s 2026-05-16T13:04:36Z

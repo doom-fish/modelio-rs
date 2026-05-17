@@ -1,16 +1,52 @@
 use std::path::Path;
 use std::ptr;
 
+use crate::asset_resolver::AssetResolver;
 use crate::error::Result;
 use crate::ffi;
 use crate::handle::ObjectHandle;
+use crate::protocols::Named;
 use crate::texture::Texture;
-use crate::types::{MaterialFace, MaterialInfo, MaterialPropertyInfo, MaterialSemantic};
+use crate::transform::Transform;
+use crate::types::{
+    MaterialFace, MaterialInfo, MaterialMipMapFilterMode, MaterialPropertyInfo, MaterialSemantic,
+    MaterialTextureFilterMode, MaterialTextureWrapMode, TextureFilterInfo, TextureSamplerInfo,
+};
 use crate::util::{c_string, parse_json, path_to_c_string, required_handle, take_string};
+
+fn array_objects<T, F>(
+    array_ptr: *mut core::ffi::c_void,
+    context: &'static str,
+    mut map: F,
+) -> Result<Vec<T>>
+where
+    F: FnMut(ObjectHandle) -> T,
+{
+    let array = required_handle(array_ptr, context)?;
+    let count = unsafe { ffi::mdl_array_count(array.as_ptr()) as usize };
+    let mut values = Vec::with_capacity(count);
+    for index in 0..count {
+        let ptr = unsafe { ffi::mdl_array_object_at(array.as_ptr(), index as u64) };
+        if let Some(handle) = unsafe { ObjectHandle::from_retained_ptr(ptr) } {
+            values.push(map(handle));
+        }
+    }
+    Ok(values)
+}
 
 #[derive(Debug, Clone)]
 pub struct Material {
     handle: ObjectHandle,
+}
+
+impl Named for Material {
+    fn name(&self) -> Option<String> {
+        self.name()
+    }
+
+    fn set_name(&self, name: &str) -> Result<()> {
+        self.set_name(name)
+    }
 }
 
 impl Material {
@@ -58,6 +94,12 @@ impl Material {
         take_string(unsafe { ffi::mdl_material_name_string(self.handle.as_ptr()) })
     }
 
+    pub fn set_name(&self, name: &str) -> Result<()> {
+        let name = c_string(name)?;
+        unsafe { ffi::mdl_material_set_name(self.handle.as_ptr(), name.as_ptr()) };
+        Ok(())
+    }
+
     #[must_use]
     pub fn material_face(&self) -> Option<MaterialFace> {
         MaterialFace::from_raw(unsafe { ffi::mdl_material_material_face(self.handle.as_ptr()) })
@@ -69,6 +111,12 @@ impl Material {
 
     pub fn remove_all_properties(&self) {
         unsafe { ffi::mdl_material_remove_all_properties(self.handle.as_ptr()) };
+    }
+
+    pub fn load_textures_using_resolver(&self, resolver: &AssetResolver) {
+        unsafe {
+            ffi::mdl_material_load_textures_using_resolver(self.handle.as_ptr(), resolver.as_ptr());
+        };
     }
 
     #[must_use]
@@ -104,9 +152,53 @@ pub struct MaterialProperty {
     handle: ObjectHandle,
 }
 
+impl Named for MaterialProperty {
+    fn name(&self) -> Option<String> {
+        self.name()
+    }
+
+    fn set_name(&self, name: &str) -> Result<()> {
+        self.set_name(name)
+    }
+}
+
 impl MaterialProperty {
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
+        self.handle.as_ptr()
+    }
+
+    pub fn new(name: &str, semantic: MaterialSemantic) -> Result<Self> {
+        let name = c_string(name)?;
+        let mut out_property = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_material_property_new(
+                name.as_ptr(),
+                semantic as u32,
+                &mut out_property,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_property,
+            "MDLMaterialProperty",
+        )?))
+    }
+
+    #[must_use]
+    pub fn name(&self) -> Option<String> {
+        take_string(unsafe { ffi::mdl_named_name_string(self.handle.as_ptr()) })
+    }
+
+    pub fn set_name(&self, name: &str) -> Result<()> {
+        let name = c_string(name)?;
+        unsafe { ffi::mdl_named_set_name(self.handle.as_ptr(), name.as_ptr()) };
+        Ok(())
     }
 
     pub fn info(&self) -> Result<MaterialPropertyInfo> {
@@ -120,6 +212,21 @@ impl MaterialProperty {
     pub fn texture(&self) -> Option<Texture> {
         let ptr = unsafe { ffi::mdl_material_property_texture(self.handle.as_ptr()) };
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Texture::from_handle)
+    }
+
+    #[must_use]
+    pub fn texture_sampler(&self) -> Option<TextureSampler> {
+        let ptr = unsafe { ffi::mdl_material_property_texture_sampler(self.handle.as_ptr()) };
+        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(TextureSampler::from_handle)
+    }
+
+    pub fn set_texture_sampler(&self, sampler: Option<&TextureSampler>) {
+        unsafe {
+            ffi::mdl_material_property_set_texture_sampler(
+                self.handle.as_ptr(),
+                sampler.map_or(ptr::null_mut(), TextureSampler::as_ptr),
+            );
+        };
     }
 
     pub fn set_float(&self, value: f32) {
@@ -195,5 +302,371 @@ impl MaterialProperty {
 
     pub fn set_luminance(&self, value: f32) {
         unsafe { ffi::mdl_material_property_set_luminance(self.handle.as_ptr(), value) };
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct TextureFilter {
+    handle: ObjectHandle,
+}
+
+impl TextureFilter {
+    pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
+        Self { handle }
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
+        self.handle.as_ptr()
+    }
+
+    pub fn new() -> Result<Self> {
+        let mut out_filter = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe { ffi::mdl_texture_filter_new(&mut out_filter, &mut out_error) };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_filter,
+            "MDLTextureFilter",
+        )?))
+    }
+
+    pub fn info(&self) -> Result<TextureFilterInfo> {
+        parse_json(
+            unsafe { ffi::mdl_texture_filter_info_json(self.handle.as_ptr()) },
+            "MDLTextureFilter",
+        )
+    }
+
+    pub fn set_s_wrap_mode(&self, value: MaterialTextureWrapMode) {
+        unsafe { ffi::mdl_texture_filter_set_s_wrap_mode(self.handle.as_ptr(), value.as_raw()) };
+    }
+
+    pub fn set_t_wrap_mode(&self, value: MaterialTextureWrapMode) {
+        unsafe { ffi::mdl_texture_filter_set_t_wrap_mode(self.handle.as_ptr(), value.as_raw()) };
+    }
+
+    pub fn set_r_wrap_mode(&self, value: MaterialTextureWrapMode) {
+        unsafe { ffi::mdl_texture_filter_set_r_wrap_mode(self.handle.as_ptr(), value.as_raw()) };
+    }
+
+    pub fn set_min_filter(&self, value: MaterialTextureFilterMode) {
+        unsafe { ffi::mdl_texture_filter_set_min_filter(self.handle.as_ptr(), value.as_raw()) };
+    }
+
+    pub fn set_mag_filter(&self, value: MaterialTextureFilterMode) {
+        unsafe { ffi::mdl_texture_filter_set_mag_filter(self.handle.as_ptr(), value.as_raw()) };
+    }
+
+    pub fn set_mip_filter(&self, value: MaterialMipMapFilterMode) {
+        unsafe { ffi::mdl_texture_filter_set_mip_filter(self.handle.as_ptr(), value.as_raw()) };
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct TextureSampler {
+    handle: ObjectHandle,
+}
+
+impl TextureSampler {
+    pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
+        Self { handle }
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
+        self.handle.as_ptr()
+    }
+
+    pub fn new() -> Result<Self> {
+        let mut out_sampler = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe { ffi::mdl_texture_sampler_new(&mut out_sampler, &mut out_error) };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_sampler,
+            "MDLTextureSampler",
+        )?))
+    }
+
+    pub fn info(&self) -> Result<TextureSamplerInfo> {
+        parse_json(
+            unsafe { ffi::mdl_texture_sampler_info_json(self.handle.as_ptr()) },
+            "MDLTextureSampler",
+        )
+    }
+
+    #[must_use]
+    pub fn texture(&self) -> Option<Texture> {
+        let ptr = unsafe { ffi::mdl_texture_sampler_texture(self.handle.as_ptr()) };
+        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Texture::from_handle)
+    }
+
+    pub fn set_texture(&self, texture: Option<&Texture>) {
+        unsafe {
+            ffi::mdl_texture_sampler_set_texture(
+                self.handle.as_ptr(),
+                texture.map_or(ptr::null_mut(), Texture::as_ptr),
+            );
+        };
+    }
+
+    #[must_use]
+    pub fn hardware_filter(&self) -> Option<TextureFilter> {
+        let ptr = unsafe { ffi::mdl_texture_sampler_hardware_filter(self.handle.as_ptr()) };
+        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(TextureFilter::from_handle)
+    }
+
+    pub fn set_hardware_filter(&self, filter: Option<&TextureFilter>) {
+        unsafe {
+            ffi::mdl_texture_sampler_set_hardware_filter(
+                self.handle.as_ptr(),
+                filter.map_or(ptr::null_mut(), TextureFilter::as_ptr),
+            );
+        };
+    }
+
+    #[must_use]
+    pub fn transform(&self) -> Option<Transform> {
+        let ptr = unsafe { ffi::mdl_texture_sampler_transform(self.handle.as_ptr()) };
+        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Transform::from_handle)
+    }
+
+    pub fn set_transform(&self, transform: Option<&Transform>) {
+        unsafe {
+            ffi::mdl_texture_sampler_set_transform(
+                self.handle.as_ptr(),
+                transform.map_or(ptr::null_mut(), Transform::as_ptr),
+            );
+        };
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct MaterialPropertyConnection {
+    handle: ObjectHandle,
+}
+
+impl Named for MaterialPropertyConnection {
+    fn name(&self) -> Option<String> {
+        self.name()
+    }
+
+    fn set_name(&self, name: &str) -> Result<()> {
+        self.set_name(name)
+    }
+}
+
+impl MaterialPropertyConnection {
+    pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
+        Self { handle }
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
+        self.handle.as_ptr()
+    }
+
+    pub fn new(output: &MaterialProperty, input: &MaterialProperty) -> Result<Self> {
+        let mut out_connection = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_material_property_connection_new(
+                output.as_ptr(),
+                input.as_ptr(),
+                &mut out_connection,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_connection,
+            "MDLMaterialPropertyConnection",
+        )?))
+    }
+
+    #[must_use]
+    pub fn name(&self) -> Option<String> {
+        take_string(unsafe { ffi::mdl_named_name_string(self.handle.as_ptr()) })
+    }
+
+    pub fn set_name(&self, name: &str) -> Result<()> {
+        let name = c_string(name)?;
+        unsafe { ffi::mdl_named_set_name(self.handle.as_ptr(), name.as_ptr()) };
+        Ok(())
+    }
+
+    #[must_use]
+    pub fn output(&self) -> Option<MaterialProperty> {
+        let ptr = unsafe { ffi::mdl_material_property_connection_output(self.handle.as_ptr()) };
+        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(MaterialProperty::from_handle)
+    }
+
+    #[must_use]
+    pub fn input(&self) -> Option<MaterialProperty> {
+        let ptr = unsafe { ffi::mdl_material_property_connection_input(self.handle.as_ptr()) };
+        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(MaterialProperty::from_handle)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct MaterialPropertyNode {
+    handle: ObjectHandle,
+}
+
+impl Named for MaterialPropertyNode {
+    fn name(&self) -> Option<String> {
+        self.name()
+    }
+
+    fn set_name(&self, name: &str) -> Result<()> {
+        self.set_name(name)
+    }
+}
+
+impl MaterialPropertyNode {
+    pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
+        Self { handle }
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
+        self.handle.as_ptr()
+    }
+
+    pub fn new(inputs: &[&MaterialProperty], outputs: &[&MaterialProperty]) -> Result<Self> {
+        let input_ptrs = inputs
+            .iter()
+            .map(|property| property.as_ptr())
+            .collect::<Vec<_>>();
+        let output_ptrs = outputs
+            .iter()
+            .map(|property| property.as_ptr())
+            .collect::<Vec<_>>();
+        let mut out_node = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_material_property_node_new(
+                input_ptrs.as_ptr(),
+                input_ptrs.len() as u64,
+                output_ptrs.as_ptr(),
+                output_ptrs.len() as u64,
+                &mut out_node,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_node,
+            "MDLMaterialPropertyNode",
+        )?))
+    }
+
+    #[must_use]
+    pub fn name(&self) -> Option<String> {
+        take_string(unsafe { ffi::mdl_named_name_string(self.handle.as_ptr()) })
+    }
+
+    pub fn set_name(&self, name: &str) -> Result<()> {
+        let name = c_string(name)?;
+        unsafe { ffi::mdl_named_set_name(self.handle.as_ptr(), name.as_ptr()) };
+        Ok(())
+    }
+
+    pub fn inputs(&self) -> Result<Vec<MaterialProperty>> {
+        array_objects(
+            unsafe { ffi::mdl_material_property_node_inputs(self.handle.as_ptr()) },
+            "MDLMaterialPropertyNode inputs",
+            MaterialProperty::from_handle,
+        )
+    }
+
+    pub fn outputs(&self) -> Result<Vec<MaterialProperty>> {
+        array_objects(
+            unsafe { ffi::mdl_material_property_node_outputs(self.handle.as_ptr()) },
+            "MDLMaterialPropertyNode outputs",
+            MaterialProperty::from_handle,
+        )
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct MaterialPropertyGraph {
+    handle: ObjectHandle,
+}
+
+impl Named for MaterialPropertyGraph {
+    fn name(&self) -> Option<String> {
+        self.name()
+    }
+
+    fn set_name(&self, name: &str) -> Result<()> {
+        self.set_name(name)
+    }
+}
+
+impl MaterialPropertyGraph {
+    pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
+        Self { handle }
+    }
+
+    pub fn new(
+        nodes: &[&MaterialPropertyNode],
+        connections: &[&MaterialPropertyConnection],
+    ) -> Result<Self> {
+        let node_ptrs = nodes.iter().map(|node| node.as_ptr()).collect::<Vec<_>>();
+        let connection_ptrs = connections
+            .iter()
+            .map(|connection| connection.as_ptr())
+            .collect::<Vec<_>>();
+        let mut out_graph = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_material_property_graph_new(
+                node_ptrs.as_ptr(),
+                node_ptrs.len() as u64,
+                connection_ptrs.as_ptr(),
+                connection_ptrs.len() as u64,
+                &mut out_graph,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_graph,
+            "MDLMaterialPropertyGraph",
+        )?))
+    }
+
+    #[must_use]
+    pub fn name(&self) -> Option<String> {
+        take_string(unsafe { ffi::mdl_named_name_string(self.handle.as_ptr()) })
+    }
+
+    pub fn set_name(&self, name: &str) -> Result<()> {
+        let name = c_string(name)?;
+        unsafe { ffi::mdl_named_set_name(self.handle.as_ptr(), name.as_ptr()) };
+        Ok(())
+    }
+
+    pub fn evaluate(&self) {
+        unsafe { ffi::mdl_material_property_graph_evaluate(self.handle.as_ptr()) };
+    }
+
+    pub fn nodes(&self) -> Result<Vec<MaterialPropertyNode>> {
+        array_objects(
+            unsafe { ffi::mdl_material_property_graph_nodes(self.handle.as_ptr()) },
+            "MDLMaterialPropertyGraph nodes",
+            MaterialPropertyNode::from_handle,
+        )
+    }
+
+    pub fn connections(&self) -> Result<Vec<MaterialPropertyConnection>> {
+        array_objects(
+            unsafe { ffi::mdl_material_property_graph_connections(self.handle.as_ptr()) },
+            "MDLMaterialPropertyGraph connections",
+            MaterialPropertyConnection::from_handle,
+        )
+    }
+
+    #[must_use]
+    pub fn as_node(&self) -> MaterialPropertyNode {
+        MaterialPropertyNode::from_handle(self.handle.clone())
     }
 }

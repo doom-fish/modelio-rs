@@ -9,7 +9,10 @@ fn transform_and_transform_stack_round_trip() {
     transform.set_rotation_for_time([0.0, 0.25, 0.0], 1.0);
     transform.set_translation_for_time([4.0, 5.0, 6.0], 1.0);
 
-    assert!(transform.translation().iter().all(|value| value.is_finite()));
+    assert!(transform
+        .translation()
+        .iter()
+        .all(|value| value.is_finite()));
     assert!(transform
         .scale()
         .iter()
@@ -33,12 +36,16 @@ fn transform_and_transform_stack_round_trip() {
         .translation()
         .iter()
         .all(|value| value.is_finite()));
-    assert!(TransformComponent::global_transform_with_object(&object, 1.0)
-        .iter()
-        .all(|value| value.is_finite()));
+    assert!(
+        TransformComponent::global_transform_with_object(&object, 1.0)
+            .iter()
+            .all(|value| value.is_finite())
+    );
 
     let stack = TransformStack::new().expect("stack");
-    let translate_op = stack.add_translate_op("translate", false).expect("translate op");
+    let translate_op = stack
+        .add_translate_op("translate", false)
+        .expect("translate op");
     translate_op
         .animated_value()
         .expect("translate animated value")
@@ -80,12 +87,12 @@ fn transform_and_transform_stack_round_trip() {
     matrix
         .animated_value()
         .expect("matrix animated value")
-        .set_float4x4([
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0,
-        ], 0.0);
+        .set_float4x4(
+            [
+                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+            ],
+            0.0,
+        );
 
     let orient = stack.add_orient_op("orient", false).expect("orient op");
     orient
@@ -98,7 +105,10 @@ fn transform_and_transform_stack_round_trip() {
     assert_eq!(ops.len(), 8);
     assert_eq!(ops[0].name().as_deref(), Some("translate"));
     assert!(ops[4].is_inverse());
-    assert!(stack.float4x4_at_time(0.0).iter().all(|value| value.is_finite()));
+    assert!(stack
+        .float4x4_at_time(0.0)
+        .iter()
+        .all(|value| value.is_finite()));
 
     let animated_value = stack
         .animated_value_named("translate")

@@ -161,7 +161,10 @@ impl Texture {
             )
         };
         crate::util::status_result(status, out_error)?;
-        Ok(Self::from_handle(required_handle(out_texture, "MDLNoiseTexture")?))
+        Ok(Self::from_handle(required_handle(
+            out_texture,
+            "MDLNoiseTexture",
+        )?))
     }
 
     pub fn new_scalar_noise(
@@ -189,7 +192,10 @@ impl Texture {
             )
         };
         crate::util::status_result(status, out_error)?;
-        Ok(Self::from_handle(required_handle(out_texture, "MDLNoiseTexture")?))
+        Ok(Self::from_handle(required_handle(
+            out_texture,
+            "MDLNoiseTexture",
+        )?))
     }
 
     pub fn new_cellular_noise(
@@ -213,7 +219,10 @@ impl Texture {
             )
         };
         crate::util::status_result(status, out_error)?;
-        Ok(Self::from_handle(required_handle(out_texture, "MDLNoiseTexture")?))
+        Ok(Self::from_handle(required_handle(
+            out_texture,
+            "MDLNoiseTexture",
+        )?))
     }
 
     pub fn new_normal_map(
@@ -269,7 +278,10 @@ impl Texture {
             )
         };
         crate::util::status_result(status, out_error)?;
-        Ok(Self::from_handle(required_handle(out_texture, "MDLSkyCubeTexture")?))
+        Ok(Self::from_handle(required_handle(
+            out_texture,
+            "MDLSkyCubeTexture",
+        )?))
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -302,7 +314,10 @@ impl Texture {
             )
         };
         crate::util::status_result(status, out_error)?;
-        Ok(Self::from_handle(required_handle(out_texture, "MDLSkyCubeTexture")?))
+        Ok(Self::from_handle(required_handle(
+            out_texture,
+            "MDLSkyCubeTexture",
+        )?))
     }
 
     pub fn update_sky_cube(&self) {

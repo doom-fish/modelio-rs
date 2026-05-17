@@ -6,6 +6,7 @@ use crate::error::Result;
 use crate::ffi;
 use crate::handle::ObjectHandle;
 use crate::object::Object;
+use crate::protocols::{Component, JointAnimation};
 use crate::skeleton::Skeleton;
 use crate::types::{AnimationBindComponentInfo, PackedJointAnimationInfo};
 use crate::util::{c_string, parse_json, required_handle};
@@ -23,6 +24,8 @@ fn c_string_vec(values: &[&str]) -> Result<(Vec<CString>, Vec<*const i8>)> {
 pub struct PackedJointAnimation {
     handle: ObjectHandle,
 }
+
+impl JointAnimation for PackedJointAnimation {}
 
 impl PackedJointAnimation {
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
@@ -91,6 +94,8 @@ impl PackedJointAnimation {
 pub struct AnimationBindComponent {
     handle: ObjectHandle,
 }
+
+impl Component for AnimationBindComponent {}
 
 impl AnimationBindComponent {
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {

@@ -239,6 +239,77 @@ impl MaterialFace {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
+pub enum MaterialTextureWrapMode {
+    Clamp = 0,
+    Repeat = 1,
+    Mirror = 2,
+}
+
+impl MaterialTextureWrapMode {
+    #[must_use]
+    pub const fn as_raw(self) -> u32 {
+        self as u32
+    }
+
+    #[must_use]
+    pub const fn from_raw(raw: u32) -> Option<Self> {
+        match raw {
+            0 => Some(Self::Clamp),
+            1 => Some(Self::Repeat),
+            2 => Some(Self::Mirror),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)]
+pub enum MaterialTextureFilterMode {
+    Nearest = 0,
+    Linear = 1,
+}
+
+impl MaterialTextureFilterMode {
+    #[must_use]
+    pub const fn as_raw(self) -> u32 {
+        self as u32
+    }
+
+    #[must_use]
+    pub const fn from_raw(raw: u32) -> Option<Self> {
+        match raw {
+            0 => Some(Self::Nearest),
+            1 => Some(Self::Linear),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)]
+pub enum MaterialMipMapFilterMode {
+    Nearest = 0,
+    Linear = 1,
+}
+
+impl MaterialMipMapFilterMode {
+    #[must_use]
+    pub const fn as_raw(self) -> u32 {
+        self as u32
+    }
+
+    #[must_use]
+    pub const fn from_raw(raw: u32) -> Option<Self> {
+        match raw {
+            0 => Some(Self::Nearest),
+            1 => Some(Self::Linear),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)]
 pub enum LightType {
     Unknown = 0,
     Ambient = 1,
@@ -526,6 +597,55 @@ impl MaterialInfo {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+pub struct TextureFilterInfo {
+    pub s_wrap_mode: u32,
+    pub t_wrap_mode: u32,
+    pub r_wrap_mode: u32,
+    pub min_filter: u32,
+    pub mag_filter: u32,
+    pub mip_filter: u32,
+}
+
+impl TextureFilterInfo {
+    #[must_use]
+    pub fn s_wrap_mode_enum(&self) -> Option<MaterialTextureWrapMode> {
+        MaterialTextureWrapMode::from_raw(self.s_wrap_mode)
+    }
+
+    #[must_use]
+    pub fn t_wrap_mode_enum(&self) -> Option<MaterialTextureWrapMode> {
+        MaterialTextureWrapMode::from_raw(self.t_wrap_mode)
+    }
+
+    #[must_use]
+    pub fn r_wrap_mode_enum(&self) -> Option<MaterialTextureWrapMode> {
+        MaterialTextureWrapMode::from_raw(self.r_wrap_mode)
+    }
+
+    #[must_use]
+    pub fn min_filter_enum(&self) -> Option<MaterialTextureFilterMode> {
+        MaterialTextureFilterMode::from_raw(self.min_filter)
+    }
+
+    #[must_use]
+    pub fn mag_filter_enum(&self) -> Option<MaterialTextureFilterMode> {
+        MaterialTextureFilterMode::from_raw(self.mag_filter)
+    }
+
+    #[must_use]
+    pub fn mip_filter_enum(&self) -> Option<MaterialMipMapFilterMode> {
+        MaterialMipMapFilterMode::from_raw(self.mip_filter)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct TextureSamplerInfo {
+    pub has_texture: bool,
+    pub has_hardware_filter: bool,
+    pub has_transform: bool,
+}
+
+#[derive(Debug, Clone, Deserialize)]
 pub struct AssetInfo {
     pub count: usize,
     pub frame_interval: f64,
@@ -589,6 +709,50 @@ impl PhysicallyPlausibleLightInfo {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+pub struct AreaLightInfo {
+    pub light_type: u32,
+    pub color_space: String,
+    pub color: Option<[f32; 4]>,
+    pub lumens: f32,
+    pub inner_cone_angle: f32,
+    pub outer_cone_angle: f32,
+    pub attenuation_start_distance: f32,
+    pub attenuation_end_distance: f32,
+    pub area_radius: f32,
+    pub super_elliptic_power: [f32; 2],
+    pub aspect: f32,
+}
+
+impl AreaLightInfo {
+    #[must_use]
+    pub fn light_type_enum(&self) -> Option<LightType> {
+        LightType::from_raw(self.light_type)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct PhotometricLightInfo {
+    pub light_type: u32,
+    pub color_space: String,
+    pub color: Option<[f32; 4]>,
+    pub lumens: f32,
+    pub inner_cone_angle: f32,
+    pub outer_cone_angle: f32,
+    pub attenuation_start_distance: f32,
+    pub attenuation_end_distance: f32,
+    pub spherical_harmonics_level: usize,
+    pub spherical_harmonics_coefficients_length: usize,
+    pub has_light_cube_map: bool,
+}
+
+impl PhotometricLightInfo {
+    #[must_use]
+    pub fn light_type_enum(&self) -> Option<LightType> {
+        LightType::from_raw(self.light_type)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
 pub struct CameraInfo {
     pub projection: u32,
     pub projection_matrix: [f32; 16],
@@ -620,6 +784,18 @@ impl CameraInfo {
     pub fn projection_enum(&self) -> Option<CameraProjection> {
         CameraProjection::from_raw(self.projection)
     }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct StereoscopicCameraInfo {
+    pub inter_pupillary_distance: f32,
+    pub left_vergence: f32,
+    pub right_vergence: f32,
+    pub overlap: f32,
+    pub left_view_matrix: [f32; 16],
+    pub right_view_matrix: [f32; 16],
+    pub left_projection_matrix: [f32; 16],
+    pub right_projection_matrix: [f32; 16],
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -686,6 +862,19 @@ pub struct SkeletonInfo {
     pub joint_count: usize,
     pub joint_bind_transform_count: usize,
     pub joint_rest_transform_count: usize,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct Matrix4x4ArrayInfo {
+    pub element_count: usize,
+    pub precision: u32,
+}
+
+impl Matrix4x4ArrayInfo {
+    #[must_use]
+    pub fn precision_enum(&self) -> Option<DataPrecision> {
+        DataPrecision::from_raw(self.precision)
+    }
 }
 
 #[derive(Debug, Clone, Deserialize)]

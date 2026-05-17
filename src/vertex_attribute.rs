@@ -82,6 +82,39 @@ impl VertexAttribute {
 }
 
 #[derive(Debug, Clone)]
+pub struct VertexBufferLayout {
+    handle: ObjectHandle,
+}
+
+impl VertexBufferLayout {
+    pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
+        Self { handle }
+    }
+
+    pub fn new(stride: usize) -> Result<Self> {
+        let mut out_layout = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_vertex_buffer_layout_new(stride as u64, &mut out_layout, &mut out_error)
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_layout,
+            "MDLVertexBufferLayout",
+        )?))
+    }
+
+    #[must_use]
+    pub fn stride(&self) -> usize {
+        unsafe { ffi::mdl_vertex_buffer_layout_stride(self.handle.as_ptr()) as usize }
+    }
+
+    pub fn set_stride(&self, stride: usize) {
+        unsafe { ffi::mdl_vertex_buffer_layout_set_stride(self.handle.as_ptr(), stride as u64) };
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct VertexDescriptor {
     handle: ObjectHandle,
 }
@@ -139,6 +172,25 @@ impl VertexDescriptor {
     pub fn attributes(&self) -> Vec<VertexAttribute> {
         (0..self.attribute_count())
             .filter_map(|index| self.attribute_at(index))
+            .collect()
+    }
+
+    #[must_use]
+    pub fn layout_count(&self) -> usize {
+        unsafe { ffi::mdl_vertex_descriptor_layout_count(self.handle.as_ptr()) as usize }
+    }
+
+    #[must_use]
+    pub fn layout_at(&self, index: usize) -> Option<VertexBufferLayout> {
+        let ptr =
+            unsafe { ffi::mdl_vertex_descriptor_layout_at(self.handle.as_ptr(), index as u64) };
+        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(VertexBufferLayout::from_handle)
+    }
+
+    #[must_use]
+    pub fn layouts(&self) -> Vec<VertexBufferLayout> {
+        (0..self.layout_count())
+            .filter_map(|index| self.layout_at(index))
             .collect()
     }
 

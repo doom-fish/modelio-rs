@@ -7,6 +7,7 @@ use crate::handle::ObjectHandle;
 use crate::light::Light;
 use crate::mesh::Mesh;
 use crate::physically_plausible_light::PhysicallyPlausibleLight;
+use crate::protocols::{Component, Named, ObjectContainerComponent};
 use crate::skeleton::Skeleton;
 use crate::types::{BoundingBox, ObjectInfo, ObjectKind};
 use crate::util::{c_string, parse_json, required_handle, take_string};
@@ -16,6 +17,16 @@ use crate::PackedJointAnimation;
 #[derive(Debug, Clone)]
 pub struct Object {
     handle: ObjectHandle,
+}
+
+impl Named for Object {
+    fn name(&self) -> Option<String> {
+        self.name()
+    }
+
+    fn set_name(&self, name: &str) -> Result<()> {
+        self.set_name(name)
+    }
 }
 
 impl Object {
@@ -75,6 +86,21 @@ impl Object {
 
     pub fn add_child(&self, child: &Self) {
         unsafe { ffi::mdl_object_add_child(self.handle.as_ptr(), child.handle.as_ptr()) };
+    }
+
+    #[must_use]
+    pub fn children_container(&self) -> Option<ObjectContainer> {
+        let ptr = unsafe { ffi::mdl_object_children_container(self.handle.as_ptr()) };
+        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(ObjectContainer::from_handle)
+    }
+
+    pub fn set_children_container(&self, container: Option<&ObjectContainer>) {
+        unsafe {
+            ffi::mdl_object_set_children_container(
+                self.handle.as_ptr(),
+                container.map_or(ptr::null_mut(), ObjectContainer::as_ptr),
+            );
+        };
     }
 
     #[must_use]
@@ -160,5 +186,78 @@ impl Object {
     pub fn as_packed_joint_animation(&self) -> Option<PackedJointAnimation> {
         (self.kind() == ObjectKind::PackedJointAnimation)
             .then(|| PackedJointAnimation::from_handle(self.handle.clone()))
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ObjectContainer {
+    handle: ObjectHandle,
+}
+
+impl Component for ObjectContainer {}
+
+impl ObjectContainerComponent for ObjectContainer {
+    fn count(&self) -> usize {
+        self.count()
+    }
+
+    fn object_at(&self, index: usize) -> Option<Object> {
+        self.object_at(index)
+    }
+
+    fn add_object(&self, object: &Object) {
+        self.add_object(object);
+    }
+
+    fn remove_object(&self, object: &Object) {
+        self.remove_object(object);
+    }
+}
+
+impl ObjectContainer {
+    pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
+        Self { handle }
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
+        self.handle.as_ptr()
+    }
+
+    pub fn new() -> Result<Self> {
+        let mut out_container = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe { ffi::mdl_object_container_new(&mut out_container, &mut out_error) };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_container,
+            "MDLObjectContainer",
+        )?))
+    }
+
+    #[must_use]
+    pub fn count(&self) -> usize {
+        unsafe { ffi::mdl_object_container_count(self.handle.as_ptr()) as usize }
+    }
+
+    #[must_use]
+    pub fn object_at(&self, index: usize) -> Option<Object> {
+        let ptr =
+            unsafe { ffi::mdl_object_container_object_at(self.handle.as_ptr(), index as u64) };
+        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Object::from_handle)
+    }
+
+    #[must_use]
+    pub fn objects(&self) -> Vec<Object> {
+        (0..self.count())
+            .filter_map(|index| self.object_at(index))
+            .collect()
+    }
+
+    pub fn add_object(&self, object: &Object) {
+        unsafe { ffi::mdl_object_container_add_object(self.handle.as_ptr(), object.as_ptr()) };
+    }
+
+    pub fn remove_object(&self, object: &Object) {
+        unsafe { ffi::mdl_object_container_remove_object(self.handle.as_ptr(), object.as_ptr()) };
     }
 }

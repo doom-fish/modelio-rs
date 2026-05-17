@@ -1,9 +1,11 @@
 use std::ptr;
 
+use crate::asset::Asset;
 use crate::error::Result;
 use crate::ffi;
 use crate::handle::ObjectHandle;
 use crate::mesh::Mesh;
+use crate::mesh_buffer::MeshBufferAllocator;
 use crate::object::Object;
 use crate::types::{BoundingBox, VoxelArrayInfo, VoxelIndexExtent};
 use crate::util::{parse_json, required_handle};
@@ -51,6 +53,25 @@ impl VoxelArray {
         )?))
     }
 
+    pub fn from_asset(asset: &Asset, divisions: i32, patch_radius: f32) -> Result<Self> {
+        let mut out_voxel_array = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        let status = unsafe {
+            ffi::mdl_voxel_array_new_with_asset(
+                asset.as_ptr(),
+                divisions,
+                patch_radius,
+                &mut out_voxel_array,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_voxel_array,
+            "MDLVoxelArray",
+        )?))
+    }
+
     pub fn info(&self) -> Result<VoxelArrayInfo> {
         parse_json(
             unsafe { ffi::mdl_voxel_array_info_json(self.handle.as_ptr()) },
@@ -71,6 +92,17 @@ impl VoxelArray {
                 index[1],
                 index[2],
                 index[3],
+            );
+        };
+    }
+
+    pub fn set_voxels_for_mesh(&self, mesh: &Mesh, divisions: i32, patch_radius: f32) {
+        unsafe {
+            ffi::mdl_voxel_array_set_voxels_for_mesh(
+                self.handle.as_ptr(),
+                mesh.as_ptr(),
+                divisions,
+                patch_radius,
             );
         };
     }
@@ -235,13 +267,36 @@ impl VoxelArray {
 
     #[must_use]
     pub fn coarse_mesh(&self) -> Option<Mesh> {
-        let ptr = unsafe { ffi::mdl_voxel_array_coarse_mesh(self.handle.as_ptr()) };
+        self.coarse_mesh_with_allocator(None)
+    }
+
+    #[must_use]
+    pub fn coarse_mesh_with_allocator(
+        &self,
+        allocator: Option<&MeshBufferAllocator>,
+    ) -> Option<Mesh> {
+        let ptr = unsafe {
+            ffi::mdl_voxel_array_coarse_mesh_with_allocator(
+                self.handle.as_ptr(),
+                allocator.map_or(ptr::null_mut(), MeshBufferAllocator::as_ptr),
+            )
+        };
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Mesh::from_handle)
     }
 
     #[must_use]
     pub fn mesh(&self) -> Option<Mesh> {
-        let ptr = unsafe { ffi::mdl_voxel_array_mesh(self.handle.as_ptr()) };
+        self.mesh_with_allocator(None)
+    }
+
+    #[must_use]
+    pub fn mesh_with_allocator(&self, allocator: Option<&MeshBufferAllocator>) -> Option<Mesh> {
+        let ptr = unsafe {
+            ffi::mdl_voxel_array_mesh_with_allocator(
+                self.handle.as_ptr(),
+                allocator.map_or(ptr::null_mut(), MeshBufferAllocator::as_ptr),
+            )
+        };
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Mesh::from_handle)
     }
 

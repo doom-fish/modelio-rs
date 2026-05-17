@@ -18,7 +18,10 @@ fn main() -> modelio::Result<()> {
         .expect("rotate animated value")
         .set_float3([0.0, 0.5, 0.0], 0.0);
 
-    println!("object global matrix={:?}", TransformComponent::global_transform_with_object(&object, 0.0));
+    println!(
+        "object global matrix={:?}",
+        TransformComponent::global_transform_with_object(&object, 0.0)
+    );
     println!("stack op count={}", stack.count());
     println!("stack matrix={:?}", stack.float4x4_at_time(0.0));
     Ok(())

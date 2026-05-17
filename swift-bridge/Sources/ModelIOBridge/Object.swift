@@ -133,6 +133,22 @@ public func mdl_object_add_child(_ handle: UnsafeMutableRawPointer?, _ childHand
     object.addChild(child)
 }
 
+@_cdecl("mdl_object_children_container")
+public func mdl_object_children_container(_ handle: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
+    guard let object = mdl_borrow_object(handle) as? MDLObject,
+          let container = object.children as? MDLObjectContainer
+    else {
+        return nil
+    }
+    return mdl_retain(container)
+}
+
+@_cdecl("mdl_object_set_children_container")
+public func mdl_object_set_children_container(_ handle: UnsafeMutableRawPointer?, _ containerHandle: UnsafeMutableRawPointer?) {
+    guard let object = mdl_borrow_object(handle) as? MDLObject else { return }
+    object.children = (mdl_borrow_object(containerHandle) as? MDLObjectContainer) ?? MDLObjectContainer()
+}
+
 @_cdecl("mdl_object_child_count")
 public func mdl_object_child_count(_ handle: UnsafeMutableRawPointer?) -> UInt64 {
     guard let object = mdl_borrow_object(handle) as? MDLObject else { return 0 }
@@ -198,4 +214,53 @@ public func mdl_object_bounding_box_at_time(
     outMaxX?.pointee = boundingBox.maxBounds.x
     outMaxY?.pointee = boundingBox.maxBounds.y
     outMaxZ?.pointee = boundingBox.maxBounds.z
+}
+
+@_cdecl("mdl_object_container_new")
+public func mdl_object_container_new(
+    _ outContainer: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outContainer else {
+            throw ModelIOBridgeError.invalidArgument("missing output object container pointer")
+        }
+        outContainer.pointee = mdl_retain(MDLObjectContainer())
+    }
+}
+
+@_cdecl("mdl_object_container_count")
+public func mdl_object_container_count(_ handle: UnsafeMutableRawPointer?) -> UInt64 {
+    guard let container = mdl_borrow_object(handle) as? MDLObjectContainer else { return 0 }
+    return UInt64(container.count)
+}
+
+@_cdecl("mdl_object_container_object_at")
+public func mdl_object_container_object_at(_ handle: UnsafeMutableRawPointer?, _ index: UInt64) -> UnsafeMutableRawPointer? {
+    guard let container = mdl_borrow_object(handle) as? MDLObjectContainer,
+          index < UInt64(container.count)
+    else {
+        return nil
+    }
+    return mdl_retain(container.objects[Int(index)])
+}
+
+@_cdecl("mdl_object_container_add_object")
+public func mdl_object_container_add_object(_ handle: UnsafeMutableRawPointer?, _ objectHandle: UnsafeMutableRawPointer?) {
+    guard let container = mdl_borrow_object(handle) as? MDLObjectContainer,
+          let object = mdl_borrow_object(objectHandle) as? MDLObject
+    else {
+        return
+    }
+    container.add(object)
+}
+
+@_cdecl("mdl_object_container_remove_object")
+public func mdl_object_container_remove_object(_ handle: UnsafeMutableRawPointer?, _ objectHandle: UnsafeMutableRawPointer?) {
+    guard let container = mdl_borrow_object(handle) as? MDLObjectContainer,
+          let object = mdl_borrow_object(objectHandle) as? MDLObject
+    else {
+        return
+    }
+    container.remove(object)
 }
