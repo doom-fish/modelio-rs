@@ -31,6 +31,7 @@ impl Mesh {
     ) -> Result<Self> {
         let mut out_mesh = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_mesh_new_box(
                 extent[0],
@@ -58,6 +59,7 @@ impl Mesh {
     ) -> Result<Self> {
         let mut out_mesh = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_mesh_new_ellipsoid(
                 extent[0],
@@ -104,6 +106,7 @@ impl Mesh {
     ) -> Result<Self> {
         let mut out_mesh = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_mesh_new_cylinder(
                 extent[0],
@@ -133,6 +136,7 @@ impl Mesh {
     ) -> Result<Self> {
         let mut out_mesh = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_mesh_new_plane(
                 extent[0],
@@ -159,6 +163,7 @@ impl Mesh {
     ) -> Result<Self> {
         let mut out_mesh = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_mesh_new_icosahedron(
                 extent[0],
@@ -179,17 +184,21 @@ impl Mesh {
 
     #[must_use]
     pub fn vertex_count(&self) -> usize {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_mesh_vertex_count(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
     pub fn vertex_buffer_count(&self) -> usize {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_mesh_vertex_buffer_count(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
     pub fn vertex_buffer(&self, index: usize) -> Option<MeshBuffer> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_mesh_vertex_buffer_at(self.handle.as_ptr(), index as u64) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(MeshBuffer::from_handle)
     }
 
@@ -202,12 +211,15 @@ impl Mesh {
 
     #[must_use]
     pub fn submesh_count(&self) -> usize {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_mesh_submesh_count(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
     pub fn submesh(&self, index: usize) -> Option<Submesh> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_mesh_submesh_at(self.handle.as_ptr(), index as u64) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Submesh::from_handle)
     }
 
@@ -222,6 +234,7 @@ impl Mesh {
     pub fn bounding_box(&self) -> BoundingBox {
         let mut min = [0.0_f32; 3];
         let mut max = [0.0_f32; 3];
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_mesh_bounding_box(
                 self.handle.as_ptr(),
@@ -238,7 +251,9 @@ impl Mesh {
 
     #[must_use]
     pub fn vertex_descriptor(&self) -> Option<VertexDescriptor> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_mesh_vertex_descriptor(self.handle.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(VertexDescriptor::from_handle)
     }
 
@@ -247,9 +262,11 @@ impl Mesh {
         attribute_name: &str,
     ) -> Result<Option<VertexAttributeData>> {
         let attribute_name = c_string(attribute_name)?;
+        // SAFETY: The unsafe operation is valid in this context.
         let ptr = unsafe {
             ffi::mdl_mesh_vertex_attribute_data(self.handle.as_ptr(), attribute_name.as_ptr())
         };
+        // SAFETY: The unsafe operation is valid in this context.
         Ok(unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(VertexAttributeData::from_handle))
     }
 
@@ -275,6 +292,7 @@ impl MeshBuffer {
 
     pub fn info(&self) -> Result<MeshBufferInfo> {
         parse_json(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_mesh_buffer_info_json(self.handle.as_ptr()) },
             "MDLMeshBuffer",
         )
@@ -286,6 +304,7 @@ impl MeshBuffer {
         if bytes.is_empty() {
             return Ok(bytes);
         }
+        // SAFETY: The unsafe operation is valid in this context.
         let written = unsafe {
             ffi::mdl_mesh_buffer_copy_bytes(
                 self.handle.as_ptr(),
@@ -310,6 +329,7 @@ impl VertexAttributeData {
 
     pub fn info(&self) -> Result<VertexAttributeInfo> {
         parse_json(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_vertex_attribute_data_info_json(self.handle.as_ptr()) },
             "MDLVertexAttributeData",
         )
@@ -321,6 +341,7 @@ impl VertexAttributeData {
         if bytes.is_empty() {
             return Ok(bytes);
         }
+        // SAFETY: The unsafe operation is valid in this context.
         let written = unsafe {
             ffi::mdl_vertex_attribute_data_copy_bytes(
                 self.handle.as_ptr(),

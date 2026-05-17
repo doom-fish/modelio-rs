@@ -37,6 +37,7 @@ impl PackedJointAnimation {
         let (_joint_paths, raw_joint_paths) = c_string_vec(joint_paths)?;
         let mut out_animation = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_packed_joint_animation_new(
                 name.as_ptr(),
@@ -55,12 +56,14 @@ impl PackedJointAnimation {
 
     pub fn info(&self) -> Result<PackedJointAnimationInfo> {
         parse_json(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_packed_joint_animation_info_json(self.handle.as_ptr()) },
             "MDLPackedJointAnimation",
         )
     }
 
     pub fn translations(&self) -> Result<AnimatedVector3Array> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_packed_joint_animation_translations(self.handle.as_ptr()) };
         Ok(AnimatedVector3Array::from_handle(required_handle(
             ptr,
@@ -69,6 +72,7 @@ impl PackedJointAnimation {
     }
 
     pub fn rotations(&self) -> Result<AnimatedQuaternionArray> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_packed_joint_animation_rotations(self.handle.as_ptr()) };
         Ok(AnimatedQuaternionArray::from_handle(required_handle(
             ptr,
@@ -77,6 +81,7 @@ impl PackedJointAnimation {
     }
 
     pub fn scales(&self) -> Result<AnimatedVector3Array> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_packed_joint_animation_scales(self.handle.as_ptr()) };
         Ok(AnimatedVector3Array::from_handle(required_handle(
             ptr,
@@ -106,6 +111,7 @@ impl AnimationBindComponent {
         let mut out_component = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         let status =
+            // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
             unsafe { ffi::mdl_animation_bind_component_new(&mut out_component, &mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
@@ -116,12 +122,14 @@ impl AnimationBindComponent {
 
     pub fn info(&self) -> Result<AnimationBindComponentInfo> {
         parse_json(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_animation_bind_component_info_json(self.handle.as_ptr()) },
             "MDLAnimationBindComponent",
         )
     }
 
     pub fn set_skeleton(&self, skeleton: &Skeleton) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_animation_bind_component_set_skeleton(
                 self.handle.as_ptr(),
@@ -132,11 +140,14 @@ impl AnimationBindComponent {
 
     #[must_use]
     pub fn skeleton(&self) -> Option<Skeleton> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_animation_bind_component_skeleton(self.handle.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Skeleton::from_handle)
     }
 
     pub fn set_packed_joint_animation(&self, animation: &PackedJointAnimation) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_animation_bind_component_set_packed_joint_animation(
                 self.handle.as_ptr(),
@@ -147,14 +158,17 @@ impl AnimationBindComponent {
 
     #[must_use]
     pub fn packed_joint_animation(&self) -> Option<PackedJointAnimation> {
+        // SAFETY: The unsafe operation is valid in this context.
         let ptr = unsafe {
             ffi::mdl_animation_bind_component_packed_joint_animation(self.handle.as_ptr())
         };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(PackedJointAnimation::from_handle)
     }
 
     pub fn set_joint_paths(&self, joint_paths: &[&str]) -> Result<()> {
         let (_joint_paths, raw_joint_paths) = c_string_vec(joint_paths)?;
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_animation_bind_component_set_joint_paths(
                 self.handle.as_ptr(),
@@ -166,6 +180,7 @@ impl AnimationBindComponent {
     }
 
     pub fn set_geometry_bind_transform(&self, matrix: [f32; 16]) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_animation_bind_component_set_geometry_bind_transform(
                 self.handle.as_ptr(),

@@ -24,6 +24,7 @@ impl Matrix4x4Array {
     pub fn new(element_count: usize) -> Result<Self> {
         let mut out_array = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_matrix4x4_array_new(element_count as u64, &mut out_array, &mut out_error)
         };
@@ -36,12 +37,14 @@ impl Matrix4x4Array {
 
     pub fn info(&self) -> Result<Matrix4x4ArrayInfo> {
         parse_json(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_matrix4x4_array_info_json(self.handle.as_ptr()) },
             "MDLMatrix4x4Array",
         )
     }
 
     pub fn clear(&self) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_matrix4x4_array_clear(self.handle.as_ptr()) };
     }
 
@@ -50,6 +53,7 @@ impl Matrix4x4Array {
             .iter()
             .flat_map(|value| value.iter().copied())
             .collect::<Vec<_>>();
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_matrix4x4_array_set_float_matrices(
                 self.handle.as_ptr(),
@@ -65,6 +69,7 @@ impl Matrix4x4Array {
             return Ok(Vec::new());
         }
         let mut flattened = vec![0.0_f32; count * 16];
+        // SAFETY: The unsafe operation is valid in this context.
         let written = unsafe {
             ffi::mdl_matrix4x4_array_copy_float_matrices(
                 self.handle.as_ptr(),

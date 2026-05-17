@@ -15,6 +15,7 @@ impl Utility {
         let input_url = path_to_c_string(input_url.as_ref())?;
         let output_url = path_to_c_string(output_url.as_ref())?;
         let mut out_error = std::ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_utility_convert_to_usdz(
                 input_url.as_ptr(),

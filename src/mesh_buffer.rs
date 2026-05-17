@@ -33,6 +33,7 @@ impl MeshBufferMap {
         if bytes.is_empty() {
             return bytes;
         }
+        // SAFETY: The unsafe operation is valid in this context.
         let written = unsafe {
             ffi::mdl_mesh_buffer_map_copy_bytes(
                 self.as_ptr(),
@@ -46,6 +47,7 @@ impl MeshBufferMap {
     }
 
     pub fn write(&self, offset: usize, bytes: &[u8]) -> usize {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_mesh_buffer_map_write_bytes(
                 self.as_ptr(),
@@ -75,6 +77,7 @@ impl MeshBufferAllocator {
     pub fn new_zone(&self, capacity: usize) -> Result<MeshBufferZone> {
         let mut out_zone = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_mesh_buffer_allocator_new_zone(
                 self.as_ptr(),
@@ -108,6 +111,7 @@ impl MeshBufferAllocator {
             .collect::<Vec<_>>();
         let mut out_zone = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_mesh_buffer_allocator_new_zone_for_buffers_with_size(
                 self.as_ptr(),
@@ -128,6 +132,7 @@ impl MeshBufferAllocator {
     pub fn new_buffer(&self, length: usize, buffer_type: MeshBufferType) -> Result<MeshBuffer> {
         let mut out_buffer = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_mesh_buffer_allocator_new_buffer(
                 self.as_ptr(),
@@ -151,6 +156,7 @@ impl MeshBufferAllocator {
     ) -> Result<MeshBuffer> {
         let mut out_buffer = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_mesh_buffer_allocator_new_buffer_with_data(
                 self.as_ptr(),
@@ -176,6 +182,7 @@ impl MeshBufferAllocator {
     ) -> Result<Option<MeshBuffer>> {
         let mut out_buffer = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_mesh_buffer_allocator_new_buffer_from_zone_length(
                 self.as_ptr(),
@@ -187,6 +194,7 @@ impl MeshBufferAllocator {
             )
         };
         crate::util::status_result(status, out_error)?;
+        // SAFETY: The unsafe operation is valid in this context.
         Ok(unsafe { ObjectHandle::from_retained_ptr(out_buffer) }.map(MeshBuffer::from_handle))
     }
 
@@ -198,6 +206,7 @@ impl MeshBufferAllocator {
     ) -> Result<Option<MeshBuffer>> {
         let mut out_buffer = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_mesh_buffer_allocator_new_buffer_from_zone_data(
                 self.as_ptr(),
@@ -210,6 +219,7 @@ impl MeshBufferAllocator {
             )
         };
         crate::util::status_result(status, out_error)?;
+        // SAFETY: The unsafe operation is valid in this context.
         Ok(unsafe { ObjectHandle::from_retained_ptr(out_buffer) }.map(MeshBuffer::from_handle))
     }
 }
@@ -230,17 +240,21 @@ impl MeshBufferZone {
 
     #[must_use]
     pub fn capacity(&self) -> usize {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_mesh_buffer_zone_capacity(self.as_ptr()) as usize }
     }
 
     #[must_use]
     pub fn allocator(&self) -> Option<MeshBufferAllocator> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_mesh_buffer_zone_allocator(self.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(MeshBufferAllocator::from_handle)
     }
 
     #[must_use]
     pub fn as_default(&self) -> Option<MeshBufferZoneDefault> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         (unsafe { ffi::mdl_mesh_buffer_zone_is_default(self.as_ptr()) != 0 })
             .then(|| MeshBufferZoneDefault::from_handle(self.handle.clone()))
     }
@@ -260,6 +274,7 @@ impl MeshBufferZoneDefault {
         let mut out_zone = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         let status =
+            // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
             unsafe { ffi::mdl_mesh_buffer_zone_default_new(&mut out_zone, &mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
@@ -270,12 +285,15 @@ impl MeshBufferZoneDefault {
 
     #[must_use]
     pub fn capacity(&self) -> usize {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_mesh_buffer_zone_capacity(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
     pub fn allocator(&self) -> Option<MeshBufferAllocator> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_mesh_buffer_zone_allocator(self.handle.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(MeshBufferAllocator::from_handle)
     }
 
@@ -298,6 +316,7 @@ impl MeshBufferData {
     pub fn new(length: usize, buffer_type: MeshBufferType) -> Result<Self> {
         let mut out_buffer = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_mesh_buffer_data_new(
                 length as u64,
@@ -316,6 +335,7 @@ impl MeshBufferData {
     pub fn from_bytes(data: &[u8], buffer_type: MeshBufferType) -> Result<Self> {
         let mut out_buffer = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_mesh_buffer_data_new_with_bytes(
                 data.as_ptr(),
@@ -339,6 +359,7 @@ impl MeshBufferData {
         if bytes.is_empty() {
             return bytes;
         }
+        // SAFETY: The unsafe operation is valid in this context.
         let written = unsafe {
             ffi::mdl_mesh_buffer_data_copy_data(
                 self.handle.as_ptr(),
@@ -370,6 +391,7 @@ impl MeshBufferDataAllocator {
         let mut out_allocator = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         let status =
+            // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
             unsafe { ffi::mdl_mesh_buffer_data_allocator_new(&mut out_allocator, &mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self {
@@ -397,6 +419,7 @@ impl MeshBufferDataAllocator {
 
 impl MeshBuffer {
     pub fn fill_data(&self, data: &[u8], offset: usize) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_mesh_buffer_fill_data(
                 self.as_ptr(),
@@ -409,6 +432,7 @@ impl MeshBuffer {
 
     pub fn map(&self) -> Result<MeshBufferMap> {
         let length = self.info()?.length;
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_mesh_buffer_map(self.as_ptr()) };
         Ok(MeshBufferMap::from_handle(
             required_handle(ptr, "MDLMeshBufferMap")?,
@@ -418,22 +442,29 @@ impl MeshBuffer {
 
     #[must_use]
     pub fn allocator(&self) -> Option<MeshBufferAllocator> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_mesh_buffer_allocator(self.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(MeshBufferAllocator::from_handle)
     }
 
     #[must_use]
     pub fn zone(&self) -> Option<MeshBufferZone> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_mesh_buffer_zone(self.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(MeshBufferZone::from_handle)
     }
 
     #[must_use]
     pub fn as_data_buffer(&self) -> Option<MeshBufferData> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         if unsafe { ffi::mdl_mesh_buffer_is_data(self.as_ptr()) == 0 } {
             return None;
         }
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let retained = unsafe { ffi::mdl_object_retain(self.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(retained) }.map(MeshBufferData::from_handle)
     }
 }

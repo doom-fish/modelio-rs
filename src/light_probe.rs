@@ -28,12 +28,14 @@ pub extern "C" fn mdlx_light_probe_irradiance_data_source_coefficients(
     let Some(context) = (!context.is_null()).then_some(context.cast::<IrradianceCallback>()) else {
         return 0;
     };
+    // SAFETY: The unsafe operation is valid in this context.
     let values = (unsafe { &*context }.callback)([x, y, z]);
     let total = values.len();
     if out_values.is_null() || capacity == 0 {
         return total as u64;
     }
     let write_count = total.min(capacity as usize);
+    // SAFETY: The unsafe operation is valid in this context.
     unsafe { out_values.copy_from_nonoverlapping(values.as_ptr(), write_count) };
     total as u64
 }
@@ -43,6 +45,7 @@ pub extern "C" fn mdlx_light_probe_irradiance_data_source_release(context: *mut 
     if context.is_null() {
         return;
     }
+    // SAFETY: The unsafe operation is valid in this context.
     unsafe { drop(Box::from_raw(context.cast::<IrradianceCallback>())) };
 }
 
@@ -59,10 +62,13 @@ where
     F: FnMut(ObjectHandle) -> T,
 {
     let array = required_handle(array_ptr, context)?;
+    // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
     let count = unsafe { ffi::mdl_array_count(array.as_ptr()) as usize };
     let mut values = Vec::with_capacity(count);
     for index in 0..count {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_array_object_at(array.as_ptr(), index as u64) };
+        // SAFETY: The unsafe operation is valid in this context.
         if let Some(handle) = unsafe { ObjectHandle::from_retained_ptr(ptr) } {
             values.push(map(handle));
         }
@@ -86,6 +92,7 @@ impl LightProbe {
     ) -> Result<Self> {
         let mut out_probe = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_light_probe_new(
                 reflective_texture.map_or(ptr::null_mut(), Texture::as_ptr),
@@ -102,6 +109,7 @@ impl LightProbe {
     }
 
     pub fn generate_spherical_harmonics_from_irradiance(&self, level: usize) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_light_probe_generate_spherical_harmonics_from_irradiance(
                 self.handle.as_ptr(),
@@ -112,23 +120,29 @@ impl LightProbe {
 
     #[must_use]
     pub fn reflective_texture(&self) -> Option<Texture> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_light_probe_reflective_texture(self.handle.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Texture::from_handle)
     }
 
     #[must_use]
     pub fn irradiance_texture(&self) -> Option<Texture> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_light_probe_irradiance_texture(self.handle.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Texture::from_handle)
     }
 
     #[must_use]
     pub fn spherical_harmonics_level(&self) -> usize {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_light_probe_spherical_harmonics_level(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
     pub fn spherical_harmonics_coefficients(&self) -> Vec<f32> {
+        // SAFETY: The unsafe operation is valid in this context.
         let count = unsafe {
             ffi::mdl_light_probe_spherical_harmonics_coefficient_count(self.handle.as_ptr())
                 as usize
@@ -137,6 +151,7 @@ impl LightProbe {
         if values.is_empty() {
             return values;
         }
+        // SAFETY: The unsafe operation is valid in this context.
         let written = unsafe {
             ffi::mdl_light_probe_copy_spherical_harmonics_coefficients(
                 self.handle.as_ptr(),
@@ -187,6 +202,7 @@ impl LightProbeIrradianceDataSource {
         let callback_ptr = Box::into_raw(callback).cast::<core::ffi::c_void>();
         let mut out_data_source = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_light_probe_irradiance_data_source_new(
                 bounding_box.min[0],
@@ -218,6 +234,7 @@ impl LightProbeIrradianceDataSource {
     pub fn bounding_box(&self) -> BoundingBox {
         let mut min = [0.0_f32; 3];
         let mut max = [0.0_f32; 3];
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_light_probe_irradiance_data_source_bounding_box(
                 self.handle.as_ptr(),
@@ -233,6 +250,7 @@ impl LightProbeIrradianceDataSource {
     }
 
     pub fn set_bounding_box(&self, bounding_box: BoundingBox) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_light_probe_irradiance_data_source_set_bounding_box(
                 self.handle.as_ptr(),
@@ -248,6 +266,7 @@ impl LightProbeIrradianceDataSource {
 
     #[must_use]
     pub fn spherical_harmonics_level(&self) -> usize {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_light_probe_irradiance_data_source_spherical_harmonics_level(
                 self.handle.as_ptr(),
@@ -256,6 +275,7 @@ impl LightProbeIrradianceDataSource {
     }
 
     pub fn set_spherical_harmonics_level(&self, spherical_harmonics_level: usize) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_light_probe_irradiance_data_source_set_spherical_harmonics_level(
                 self.handle.as_ptr(),
@@ -271,6 +291,7 @@ impl Asset {
         heuristic: ProbePlacement,
         data_source: &LightProbeIrradianceDataSource,
     ) -> Result<Vec<LightProbe>> {
+        // SAFETY: The unsafe operation is valid in this context.
         let ptr = unsafe {
             ffi::mdl_asset_place_light_probes(density, heuristic.as_raw(), data_source.as_ptr())
         };

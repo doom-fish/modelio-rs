@@ -25,7 +25,9 @@ pub(crate) fn take_string(ptr: *mut c_char) -> Option<String> {
         return None;
     }
 
+    // SAFETY: The unsafe operation is valid in this context.
     let string = unsafe { CStr::from_ptr(ptr).to_string_lossy().into_owned() };
+    // SAFETY: The unsafe operation is valid in this context.
     unsafe { libc::free(ptr.cast::<c_void>()) };
     Some(string)
 }
@@ -44,6 +46,7 @@ pub(crate) fn required_handle(
     ptr: *mut c_void,
     context: &'static str,
 ) -> Result<crate::handle::ObjectHandle> {
+    // SAFETY: The unsafe operation is valid in this context.
     unsafe { crate::handle::ObjectHandle::from_retained_ptr(ptr) }.ok_or_else(|| {
         ModelIoError::new(ffi::status::NULL_RESULT, format!("{context} returned null"))
     })

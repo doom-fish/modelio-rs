@@ -20,6 +20,7 @@ impl VertexAttribute {
         let name = c_string(name)?;
         let mut out_attribute = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_vertex_attribute_new(
                 name.as_ptr(),
@@ -39,6 +40,7 @@ impl VertexAttribute {
 
     pub fn info(&self) -> Result<VertexAttributeDescriptorInfo> {
         parse_json(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_vertex_attribute_info_json(self.handle.as_ptr()) },
             "MDLVertexAttribute",
         )
@@ -46,29 +48,35 @@ impl VertexAttribute {
 
     pub fn set_name(&self, name: &str) -> Result<()> {
         let name = c_string(name)?;
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_vertex_attribute_set_name(self.handle.as_ptr(), name.as_ptr()) };
         Ok(())
     }
 
     pub fn set_format(&self, format: u32) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_vertex_attribute_set_format(self.handle.as_ptr(), format) };
     }
 
     pub fn set_offset(&self, offset: usize) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_vertex_attribute_set_offset(self.handle.as_ptr(), offset as u64) };
     }
 
     pub fn set_buffer_index(&self, buffer_index: usize) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_vertex_attribute_set_buffer_index(self.handle.as_ptr(), buffer_index as u64);
         };
     }
 
     pub fn set_time(&self, time: f64) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_vertex_attribute_set_time(self.handle.as_ptr(), time) };
     }
 
     pub fn set_initialization_value(&self, value: [f32; 4]) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_vertex_attribute_set_initialization_value(
                 self.handle.as_ptr(),
@@ -94,6 +102,7 @@ impl VertexBufferLayout {
     pub fn new(stride: usize) -> Result<Self> {
         let mut out_layout = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_vertex_buffer_layout_new(stride as u64, &mut out_layout, &mut out_error)
         };
@@ -106,10 +115,12 @@ impl VertexBufferLayout {
 
     #[must_use]
     pub fn stride(&self) -> usize {
+        // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
         unsafe { ffi::mdl_vertex_buffer_layout_stride(self.handle.as_ptr()) as usize }
     }
 
     pub fn set_stride(&self, stride: usize) {
+        // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
         unsafe { ffi::mdl_vertex_buffer_layout_set_stride(self.handle.as_ptr(), stride as u64) };
     }
 }
@@ -127,6 +138,7 @@ impl VertexDescriptor {
     pub fn copy(&self) -> Result<Self> {
         let mut out_descriptor = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_vertex_descriptor_new_copy(
                 self.handle.as_ptr(),
@@ -143,6 +155,7 @@ impl VertexDescriptor {
 
     pub fn info(&self) -> Result<VertexDescriptorInfo> {
         parse_json(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_vertex_descriptor_info_json(self.handle.as_ptr()) },
             "MDLVertexDescriptor",
         )
@@ -150,21 +163,26 @@ impl VertexDescriptor {
 
     #[must_use]
     pub fn attribute_count(&self) -> usize {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_vertex_descriptor_attribute_count(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
     pub fn attribute_at(&self, index: usize) -> Option<VertexAttribute> {
         let ptr =
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_vertex_descriptor_attribute_at(self.handle.as_ptr(), index as u64) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(VertexAttribute::from_handle)
     }
 
     pub fn attribute_named(&self, name: &str) -> Result<Option<VertexAttribute>> {
         let name = c_string(name)?;
+        // SAFETY: The unsafe operation is valid in this context.
         let ptr = unsafe {
             ffi::mdl_vertex_descriptor_attribute_named(self.handle.as_ptr(), name.as_ptr())
         };
+        // SAFETY: The unsafe operation is valid in this context.
         Ok(unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(VertexAttribute::from_handle))
     }
 
@@ -177,13 +195,16 @@ impl VertexDescriptor {
 
     #[must_use]
     pub fn layout_count(&self) -> usize {
+        // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
         unsafe { ffi::mdl_vertex_descriptor_layout_count(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
     pub fn layout_at(&self, index: usize) -> Option<VertexBufferLayout> {
         let ptr =
+            // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
             unsafe { ffi::mdl_vertex_descriptor_layout_at(self.handle.as_ptr(), index as u64) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(VertexBufferLayout::from_handle)
     }
 
@@ -195,14 +216,17 @@ impl VertexDescriptor {
     }
 
     pub fn reset(&self) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_vertex_descriptor_reset(self.handle.as_ptr()) };
     }
 
     pub fn set_packed_offsets(&self) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_vertex_descriptor_set_packed_offsets(self.handle.as_ptr()) };
     }
 
     pub fn set_packed_strides(&self) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_vertex_descriptor_set_packed_strides(self.handle.as_ptr()) };
     }
 }

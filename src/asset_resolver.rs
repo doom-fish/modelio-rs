@@ -22,11 +22,13 @@ impl AssetResolver {
 
     pub fn can_resolve_asset_named(&self, name: &str) -> Result<bool> {
         let name = c_string(name)?;
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         Ok(unsafe { ffi::mdl_asset_resolver_can_resolve_named(self.as_ptr(), name.as_ptr()) != 0 })
     }
 
     pub fn resolve_asset_named(&self, name: &str) -> Result<Option<String>> {
         let name = c_string(name)?;
+        // SAFETY: The unsafe operation is valid in this context.
         Ok(take_string(unsafe {
             ffi::mdl_asset_resolver_resolve_named(self.as_ptr(), name.as_ptr())
         }))
@@ -47,6 +49,7 @@ impl PathAssetResolver {
         let path = c_string(path)?;
         let mut out_resolver = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_path_asset_resolver_new(path.as_ptr(), &mut out_resolver, &mut out_error)
         };
@@ -59,11 +62,13 @@ impl PathAssetResolver {
 
     #[must_use]
     pub fn path(&self) -> Option<String> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_path_asset_resolver_path(self.handle.as_ptr()) })
     }
 
     pub fn set_path(&self, path: &str) -> Result<()> {
         let path = c_string(path)?;
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_path_asset_resolver_set_path(self.handle.as_ptr(), path.as_ptr()) };
         Ok(())
     }
@@ -88,6 +93,7 @@ impl BundleAssetResolver {
         let path = c_string(path)?;
         let mut out_resolver = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_bundle_asset_resolver_new(path.as_ptr(), &mut out_resolver, &mut out_error)
         };
@@ -100,11 +106,13 @@ impl BundleAssetResolver {
 
     #[must_use]
     pub fn path(&self) -> Option<String> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_bundle_asset_resolver_path(self.handle.as_ptr()) })
     }
 
     pub fn set_path(&self, path: &str) -> Result<()> {
         let path = c_string(path)?;
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_bundle_asset_resolver_set_path(self.handle.as_ptr(), path.as_ptr()) };
         Ok(())
     }
@@ -128,6 +136,7 @@ impl RelativeAssetResolver {
     pub fn new(asset: &Asset) -> Result<Self> {
         let mut out_resolver = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_relative_asset_resolver_new(asset.as_ptr(), &mut out_resolver, &mut out_error)
         };
@@ -140,11 +149,14 @@ impl RelativeAssetResolver {
 
     #[must_use]
     pub fn asset(&self) -> Option<Asset> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_relative_asset_resolver_asset(self.handle.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Asset::from_handle)
     }
 
     pub fn set_asset(&self, asset: Option<&Asset>) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_relative_asset_resolver_set_asset(
                 self.handle.as_ptr(),

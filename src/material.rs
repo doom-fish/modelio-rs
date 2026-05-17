@@ -23,10 +23,13 @@ where
     F: FnMut(ObjectHandle) -> T,
 {
     let array = required_handle(array_ptr, context)?;
+    // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
     let count = unsafe { ffi::mdl_array_count(array.as_ptr()) as usize };
     let mut values = Vec::with_capacity(count);
     for index in 0..count {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_array_object_at(array.as_ptr(), index as u64) };
+        // SAFETY: The unsafe operation is valid in this context.
         if let Some(handle) = unsafe { ObjectHandle::from_retained_ptr(ptr) } {
             values.push(map(handle));
         }
@@ -62,6 +65,7 @@ impl Material {
         let name = c_string(name)?;
         let mut out_material = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_material_new(
                 name.as_ptr(),
@@ -79,6 +83,7 @@ impl Material {
 
     pub fn info(&self) -> Result<MaterialInfo> {
         parse_json(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_material_info_json(self.handle.as_ptr()) },
             "MDLMaterial",
         )
@@ -86,34 +91,41 @@ impl Material {
 
     #[must_use]
     pub fn count(&self) -> usize {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_count(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
     pub fn name(&self) -> Option<String> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_material_name_string(self.handle.as_ptr()) })
     }
 
     pub fn set_name(&self, name: &str) -> Result<()> {
         let name = c_string(name)?;
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_set_name(self.handle.as_ptr(), name.as_ptr()) };
         Ok(())
     }
 
     #[must_use]
     pub fn material_face(&self) -> Option<MaterialFace> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         MaterialFace::from_raw(unsafe { ffi::mdl_material_material_face(self.handle.as_ptr()) })
     }
 
     pub fn set_material_face(&self, face: MaterialFace) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_set_material_face(self.handle.as_ptr(), face.as_raw()) };
     }
 
     pub fn remove_all_properties(&self) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_remove_all_properties(self.handle.as_ptr()) };
     }
 
     pub fn load_textures_using_resolver(&self, resolver: &AssetResolver) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_material_load_textures_using_resolver(self.handle.as_ptr(), resolver.as_ptr());
         };
@@ -121,21 +133,27 @@ impl Material {
 
     #[must_use]
     pub fn property(&self, index: usize) -> Option<MaterialProperty> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_material_property_at(self.handle.as_ptr(), index as u64) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(MaterialProperty::from_handle)
     }
 
     pub fn property_named(&self, name: &str) -> Result<Option<MaterialProperty>> {
         let name = c_string(name)?;
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_material_property_named(self.handle.as_ptr(), name.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         Ok(unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(MaterialProperty::from_handle))
     }
 
     #[must_use]
     pub fn property_with_semantic(&self, semantic: MaterialSemantic) -> Option<MaterialProperty> {
+        // SAFETY: The unsafe operation is valid in this context.
         let ptr = unsafe {
             ffi::mdl_material_property_with_semantic(self.handle.as_ptr(), semantic as u32)
         };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(MaterialProperty::from_handle)
     }
 
@@ -175,6 +193,7 @@ impl MaterialProperty {
         let name = c_string(name)?;
         let mut out_property = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_material_property_new(
                 name.as_ptr(),
@@ -192,17 +211,20 @@ impl MaterialProperty {
 
     #[must_use]
     pub fn name(&self) -> Option<String> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_named_name_string(self.handle.as_ptr()) })
     }
 
     pub fn set_name(&self, name: &str) -> Result<()> {
         let name = c_string(name)?;
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_named_set_name(self.handle.as_ptr(), name.as_ptr()) };
         Ok(())
     }
 
     pub fn info(&self) -> Result<MaterialPropertyInfo> {
         parse_json(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_material_property_info_json(self.handle.as_ptr()) },
             "MDLMaterialProperty",
         )
@@ -210,17 +232,22 @@ impl MaterialProperty {
 
     #[must_use]
     pub fn texture(&self) -> Option<Texture> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_material_property_texture(self.handle.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Texture::from_handle)
     }
 
     #[must_use]
     pub fn texture_sampler(&self) -> Option<TextureSampler> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_material_property_texture_sampler(self.handle.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(TextureSampler::from_handle)
     }
 
     pub fn set_texture_sampler(&self, sampler: Option<&TextureSampler>) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_material_property_set_texture_sampler(
                 self.handle.as_ptr(),
@@ -230,14 +257,17 @@ impl MaterialProperty {
     }
 
     pub fn set_float(&self, value: f32) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_property_set_float(self.handle.as_ptr(), value) };
     }
 
     pub fn set_float2(&self, value: [f32; 2]) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_property_set_float2(self.handle.as_ptr(), value[0], value[1]) };
     }
 
     pub fn set_float3(&self, value: [f32; 3]) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_material_property_set_float3(
                 self.handle.as_ptr(),
@@ -249,6 +279,7 @@ impl MaterialProperty {
     }
 
     pub fn set_float4(&self, value: [f32; 4]) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_material_property_set_float4(
                 self.handle.as_ptr(),
@@ -261,11 +292,13 @@ impl MaterialProperty {
     }
 
     pub fn set_matrix4x4(&self, value: [f32; 16]) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_property_set_matrix4x4(self.handle.as_ptr(), value.as_ptr()) };
     }
 
     pub fn set_string(&self, value: Option<&str>) -> Result<()> {
         let value = value.map(c_string).transpose()?;
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_material_property_set_string(
                 self.handle.as_ptr(),
@@ -279,6 +312,7 @@ impl MaterialProperty {
         let path = path
             .map(|path| path_to_c_string(path.as_ref()))
             .transpose()?;
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_material_property_set_url(
                 self.handle.as_ptr(),
@@ -289,6 +323,7 @@ impl MaterialProperty {
     }
 
     pub fn set_color(&self, color: [f32; 4]) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_material_property_set_color(
                 self.handle.as_ptr(),
@@ -301,6 +336,7 @@ impl MaterialProperty {
     }
 
     pub fn set_luminance(&self, value: f32) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_property_set_luminance(self.handle.as_ptr(), value) };
     }
 }
@@ -322,6 +358,7 @@ impl TextureFilter {
     pub fn new() -> Result<Self> {
         let mut out_filter = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
         let status = unsafe { ffi::mdl_texture_filter_new(&mut out_filter, &mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
@@ -332,32 +369,39 @@ impl TextureFilter {
 
     pub fn info(&self) -> Result<TextureFilterInfo> {
         parse_json(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_texture_filter_info_json(self.handle.as_ptr()) },
             "MDLTextureFilter",
         )
     }
 
     pub fn set_s_wrap_mode(&self, value: MaterialTextureWrapMode) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_texture_filter_set_s_wrap_mode(self.handle.as_ptr(), value.as_raw()) };
     }
 
     pub fn set_t_wrap_mode(&self, value: MaterialTextureWrapMode) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_texture_filter_set_t_wrap_mode(self.handle.as_ptr(), value.as_raw()) };
     }
 
     pub fn set_r_wrap_mode(&self, value: MaterialTextureWrapMode) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_texture_filter_set_r_wrap_mode(self.handle.as_ptr(), value.as_raw()) };
     }
 
     pub fn set_min_filter(&self, value: MaterialTextureFilterMode) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_texture_filter_set_min_filter(self.handle.as_ptr(), value.as_raw()) };
     }
 
     pub fn set_mag_filter(&self, value: MaterialTextureFilterMode) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_texture_filter_set_mag_filter(self.handle.as_ptr(), value.as_raw()) };
     }
 
     pub fn set_mip_filter(&self, value: MaterialMipMapFilterMode) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_texture_filter_set_mip_filter(self.handle.as_ptr(), value.as_raw()) };
     }
 }
@@ -379,6 +423,7 @@ impl TextureSampler {
     pub fn new() -> Result<Self> {
         let mut out_sampler = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
         let status = unsafe { ffi::mdl_texture_sampler_new(&mut out_sampler, &mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
@@ -389,6 +434,7 @@ impl TextureSampler {
 
     pub fn info(&self) -> Result<TextureSamplerInfo> {
         parse_json(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_texture_sampler_info_json(self.handle.as_ptr()) },
             "MDLTextureSampler",
         )
@@ -396,11 +442,14 @@ impl TextureSampler {
 
     #[must_use]
     pub fn texture(&self) -> Option<Texture> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_texture_sampler_texture(self.handle.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Texture::from_handle)
     }
 
     pub fn set_texture(&self, texture: Option<&Texture>) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_texture_sampler_set_texture(
                 self.handle.as_ptr(),
@@ -411,11 +460,14 @@ impl TextureSampler {
 
     #[must_use]
     pub fn hardware_filter(&self) -> Option<TextureFilter> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_texture_sampler_hardware_filter(self.handle.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(TextureFilter::from_handle)
     }
 
     pub fn set_hardware_filter(&self, filter: Option<&TextureFilter>) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_texture_sampler_set_hardware_filter(
                 self.handle.as_ptr(),
@@ -426,11 +478,14 @@ impl TextureSampler {
 
     #[must_use]
     pub fn transform(&self) -> Option<Transform> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_texture_sampler_transform(self.handle.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Transform::from_handle)
     }
 
     pub fn set_transform(&self, transform: Option<&Transform>) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_texture_sampler_set_transform(
                 self.handle.as_ptr(),
@@ -467,6 +522,7 @@ impl MaterialPropertyConnection {
     pub fn new(output: &MaterialProperty, input: &MaterialProperty) -> Result<Self> {
         let mut out_connection = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_material_property_connection_new(
                 output.as_ptr(),
@@ -484,24 +540,30 @@ impl MaterialPropertyConnection {
 
     #[must_use]
     pub fn name(&self) -> Option<String> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_named_name_string(self.handle.as_ptr()) })
     }
 
     pub fn set_name(&self, name: &str) -> Result<()> {
         let name = c_string(name)?;
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_named_set_name(self.handle.as_ptr(), name.as_ptr()) };
         Ok(())
     }
 
     #[must_use]
     pub fn output(&self) -> Option<MaterialProperty> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_material_property_connection_output(self.handle.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(MaterialProperty::from_handle)
     }
 
     #[must_use]
     pub fn input(&self) -> Option<MaterialProperty> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_material_property_connection_input(self.handle.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(MaterialProperty::from_handle)
     }
 }
@@ -541,6 +603,7 @@ impl MaterialPropertyNode {
             .collect::<Vec<_>>();
         let mut out_node = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_material_property_node_new(
                 input_ptrs.as_ptr(),
@@ -560,17 +623,20 @@ impl MaterialPropertyNode {
 
     #[must_use]
     pub fn name(&self) -> Option<String> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_named_name_string(self.handle.as_ptr()) })
     }
 
     pub fn set_name(&self, name: &str) -> Result<()> {
         let name = c_string(name)?;
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_named_set_name(self.handle.as_ptr(), name.as_ptr()) };
         Ok(())
     }
 
     pub fn inputs(&self) -> Result<Vec<MaterialProperty>> {
         array_objects(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_material_property_node_inputs(self.handle.as_ptr()) },
             "MDLMaterialPropertyNode inputs",
             MaterialProperty::from_handle,
@@ -579,6 +645,7 @@ impl MaterialPropertyNode {
 
     pub fn outputs(&self) -> Result<Vec<MaterialProperty>> {
         array_objects(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_material_property_node_outputs(self.handle.as_ptr()) },
             "MDLMaterialPropertyNode outputs",
             MaterialProperty::from_handle,
@@ -617,6 +684,7 @@ impl MaterialPropertyGraph {
             .collect::<Vec<_>>();
         let mut out_graph = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_material_property_graph_new(
                 node_ptrs.as_ptr(),
@@ -636,21 +704,25 @@ impl MaterialPropertyGraph {
 
     #[must_use]
     pub fn name(&self) -> Option<String> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_named_name_string(self.handle.as_ptr()) })
     }
 
     pub fn set_name(&self, name: &str) -> Result<()> {
         let name = c_string(name)?;
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_named_set_name(self.handle.as_ptr(), name.as_ptr()) };
         Ok(())
     }
 
     pub fn evaluate(&self) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_property_graph_evaluate(self.handle.as_ptr()) };
     }
 
     pub fn nodes(&self) -> Result<Vec<MaterialPropertyNode>> {
         array_objects(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_material_property_graph_nodes(self.handle.as_ptr()) },
             "MDLMaterialPropertyGraph nodes",
             MaterialPropertyNode::from_handle,
@@ -659,6 +731,7 @@ impl MaterialPropertyGraph {
 
     pub fn connections(&self) -> Result<Vec<MaterialPropertyConnection>> {
         array_objects(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_material_property_graph_connections(self.handle.as_ptr()) },
             "MDLMaterialPropertyGraph connections",
             MaterialPropertyConnection::from_handle,

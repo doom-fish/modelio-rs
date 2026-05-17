@@ -24,6 +24,7 @@ const VERTEX_ATTRIBUTE_TANGENT: u32 = 114;
 const VERTEX_ATTRIBUTE_TEXTURE_COORDINATE: u32 = 115;
 
 fn sdk_constant(code: u32) -> Option<String> {
+    // SAFETY: FFI call is safe with the provided arguments.
     take_string(unsafe { ffi::mdl_sdk_constant_string(code) })
 }
 

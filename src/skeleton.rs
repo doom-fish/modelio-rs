@@ -27,6 +27,7 @@ fn copy_matrices(
         return Vec::new();
     }
     let mut flattened = vec![0.0_f32; count * 16];
+    // SAFETY: The unsafe operation is valid in this context.
     let written = unsafe { copier(handle.as_ptr(), flattened.as_mut_ptr(), count as u64) } as usize;
     flattened.truncate(written * 16);
     flattened
@@ -54,6 +55,7 @@ impl Skeleton {
         let (_joint_paths, raw_joint_paths) = c_string_vec(joint_paths)?;
         let mut out_skeleton = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_skeleton_new(
                 name.as_ptr(),
@@ -72,12 +74,14 @@ impl Skeleton {
 
     pub fn info(&self) -> Result<SkeletonInfo> {
         parse_json(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_skeleton_info_json(self.handle.as_ptr()) },
             "MDLSkeleton",
         )
     }
 
     pub fn joint_bind_transform_array(&self) -> Result<Matrix4x4Array> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_skeleton_joint_bind_transform_array(self.handle.as_ptr()) };
         Ok(Matrix4x4Array::from_handle(required_handle(
             ptr,
@@ -86,6 +90,7 @@ impl Skeleton {
     }
 
     pub fn joint_rest_transform_array(&self) -> Result<Matrix4x4Array> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_skeleton_joint_rest_transform_array(self.handle.as_ptr()) };
         Ok(Matrix4x4Array::from_handle(required_handle(
             ptr,

@@ -31,6 +31,7 @@ impl VoxelArray {
             .collect::<Vec<_>>();
         let mut out_voxel_array = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_voxel_array_new_with_indices(
                 flattened.as_ptr(),
@@ -56,6 +57,7 @@ impl VoxelArray {
     pub fn from_asset(asset: &Asset, divisions: i32, patch_radius: f32) -> Result<Self> {
         let mut out_voxel_array = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_voxel_array_new_with_asset(
                 asset.as_ptr(),
@@ -74,6 +76,7 @@ impl VoxelArray {
 
     pub fn info(&self) -> Result<VoxelArrayInfo> {
         parse_json(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_voxel_array_info_json(self.handle.as_ptr()) },
             "MDLVoxelArray",
         )
@@ -81,10 +84,12 @@ impl VoxelArray {
 
     #[must_use]
     pub fn count(&self) -> usize {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_voxel_array_count(self.handle.as_ptr()) as usize }
     }
 
     pub fn set_voxel(&self, index: [i32; 4]) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_voxel_array_set_voxel(
                 self.handle.as_ptr(),
@@ -97,6 +102,7 @@ impl VoxelArray {
     }
 
     pub fn set_voxels_for_mesh(&self, mesh: &Mesh, divisions: i32, patch_radius: f32) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_voxel_array_set_voxels_for_mesh(
                 self.handle.as_ptr(),
@@ -117,6 +123,7 @@ impl VoxelArray {
         allow_any_z: bool,
         allow_any_shell: bool,
     ) -> bool {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_voxel_array_voxel_exists(
                 self.handle.as_ptr(),
@@ -139,6 +146,7 @@ impl VoxelArray {
             return Vec::new();
         }
         let mut flattened = vec![0_i32; count * 4];
+        // SAFETY: The unsafe operation is valid in this context.
         let written = unsafe {
             ffi::mdl_voxel_array_copy_indices(
                 self.handle.as_ptr(),
@@ -160,6 +168,7 @@ impl VoxelArray {
             return Vec::new();
         }
         let mut flattened = vec![0_i32; capacity * 4];
+        // SAFETY: The unsafe operation is valid in this context.
         let written = unsafe {
             ffi::mdl_voxel_array_copy_voxels_within_extent(
                 self.handle.as_ptr(),
@@ -183,20 +192,24 @@ impl VoxelArray {
     }
 
     pub fn union_with(&self, other: &Self) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_voxel_array_union(self.handle.as_ptr(), other.handle.as_ptr()) };
     }
 
     pub fn intersect_with(&self, other: &Self) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_voxel_array_intersect(self.handle.as_ptr(), other.handle.as_ptr()) };
     }
 
     pub fn difference_with(&self, other: &Self) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_voxel_array_difference(self.handle.as_ptr(), other.handle.as_ptr()) };
     }
 
     #[must_use]
     pub fn index_of_spatial_location(&self, location: [f32; 3]) -> [i32; 4] {
         let mut values = [0_i32; 4];
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_voxel_array_index_of_spatial_location(
                 self.handle.as_ptr(),
@@ -212,6 +225,7 @@ impl VoxelArray {
     #[must_use]
     pub fn spatial_location_of_index(&self, index: [i32; 4]) -> [f32; 3] {
         let mut values = [0.0_f32; 3];
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_voxel_array_spatial_location_of_index(
                 self.handle.as_ptr(),
@@ -231,6 +245,7 @@ impl VoxelArray {
     pub fn voxel_bounding_box_at_index(&self, index: [i32; 4]) -> BoundingBox {
         let mut min = [0.0_f32; 3];
         let mut max = [0.0_f32; 3];
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_voxel_array_voxel_bounding_box_at_index(
                 self.handle.as_ptr(),
@@ -250,16 +265,19 @@ impl VoxelArray {
     }
 
     pub fn convert_to_signed_shell_field(&self) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_voxel_array_convert_to_signed_shell_field(self.handle.as_ptr()) };
     }
 
     pub fn set_shell_field_interior_thickness(&self, value: f32) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_voxel_array_set_shell_field_interior_thickness(self.handle.as_ptr(), value);
         };
     }
 
     pub fn set_shell_field_exterior_thickness(&self, value: f32) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_voxel_array_set_shell_field_exterior_thickness(self.handle.as_ptr(), value);
         };
@@ -275,12 +293,14 @@ impl VoxelArray {
         &self,
         allocator: Option<&MeshBufferAllocator>,
     ) -> Option<Mesh> {
+        // SAFETY: The unsafe operation is valid in this context.
         let ptr = unsafe {
             ffi::mdl_voxel_array_coarse_mesh_with_allocator(
                 self.handle.as_ptr(),
                 allocator.map_or(ptr::null_mut(), MeshBufferAllocator::as_ptr),
             )
         };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Mesh::from_handle)
     }
 
@@ -291,12 +311,14 @@ impl VoxelArray {
 
     #[must_use]
     pub fn mesh_with_allocator(&self, allocator: Option<&MeshBufferAllocator>) -> Option<Mesh> {
+        // SAFETY: The unsafe operation is valid in this context.
         let ptr = unsafe {
             ffi::mdl_voxel_array_mesh_with_allocator(
                 self.handle.as_ptr(),
                 allocator.map_or(ptr::null_mut(), MeshBufferAllocator::as_ptr),
             )
         };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Mesh::from_handle)
     }
 

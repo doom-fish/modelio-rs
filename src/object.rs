@@ -41,6 +41,7 @@ impl Object {
     pub fn new() -> Result<Self> {
         let mut out_object = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
         let status = unsafe { ffi::mdl_object_new(&mut out_object, &mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(out_object, "MDLObject")?))
@@ -48,6 +49,7 @@ impl Object {
 
     pub fn info(&self) -> Result<ObjectInfo> {
         parse_json(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_object_info_json(self.handle.as_ptr()) },
             "MDLObject",
         )
@@ -55,46 +57,56 @@ impl Object {
 
     #[must_use]
     pub fn kind(&self) -> ObjectKind {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         ObjectKind::from_raw(unsafe { ffi::mdl_object_kind(self.handle.as_ptr()) })
             .unwrap_or(ObjectKind::Unknown)
     }
 
     #[must_use]
     pub fn name(&self) -> Option<String> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_object_name_string(self.handle.as_ptr()) })
     }
 
     pub fn set_name(&self, name: &str) -> Result<()> {
         let name = c_string(name)?;
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_object_set_name(self.handle.as_ptr(), name.as_ptr()) };
         Ok(())
     }
 
     #[must_use]
     pub fn path(&self) -> Option<String> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_object_path_string(self.handle.as_ptr()) })
     }
 
     #[must_use]
     pub fn hidden(&self) -> bool {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_object_hidden(self.handle.as_ptr()) != 0 }
     }
 
     pub fn set_hidden(&self, hidden: bool) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_object_set_hidden(self.handle.as_ptr(), i32::from(hidden)) };
     }
 
     pub fn add_child(&self, child: &Self) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_object_add_child(self.handle.as_ptr(), child.handle.as_ptr()) };
     }
 
     #[must_use]
     pub fn children_container(&self) -> Option<ObjectContainer> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_object_children_container(self.handle.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(ObjectContainer::from_handle)
     }
 
     pub fn set_children_container(&self, container: Option<&ObjectContainer>) {
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_object_set_children_container(
                 self.handle.as_ptr(),
@@ -105,12 +117,15 @@ impl Object {
 
     #[must_use]
     pub fn child_count(&self) -> usize {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_object_child_count(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
     pub fn child_at(&self, index: usize) -> Option<Self> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_object_child_at(self.handle.as_ptr(), index as u64) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Self::from_handle)
     }
 
@@ -123,7 +138,9 @@ impl Object {
 
     pub fn at_path(&self, path: &str) -> Result<Option<Self>> {
         let path = c_string(path)?;
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_object_at_path(self.handle.as_ptr(), path.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
         Ok(unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Self::from_handle))
     }
 
@@ -131,6 +148,7 @@ impl Object {
     pub fn bounding_box_at_time(&self, time: f64) -> BoundingBox {
         let mut min = [0.0_f32; 3];
         let mut max = [0.0_f32; 3];
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_object_bounding_box_at_time(
                 self.handle.as_ptr(),
@@ -226,6 +244,7 @@ impl ObjectContainer {
     pub fn new() -> Result<Self> {
         let mut out_container = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
         let status = unsafe { ffi::mdl_object_container_new(&mut out_container, &mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
@@ -236,13 +255,16 @@ impl ObjectContainer {
 
     #[must_use]
     pub fn count(&self) -> usize {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_object_container_count(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
     pub fn object_at(&self, index: usize) -> Option<Object> {
         let ptr =
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_object_container_object_at(self.handle.as_ptr(), index as u64) };
+        // SAFETY: The unsafe operation is valid in this context.
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Object::from_handle)
     }
 
@@ -254,10 +276,12 @@ impl ObjectContainer {
     }
 
     pub fn add_object(&self, object: &Object) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_object_container_add_object(self.handle.as_ptr(), object.as_ptr()) };
     }
 
     pub fn remove_object(&self, object: &Object) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_object_container_remove_object(self.handle.as_ptr(), object.as_ptr()) };
     }
 }

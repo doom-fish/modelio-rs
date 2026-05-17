@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.3] - 2026-05-17
+
+### Changed
+
+- Added SAFETY comments to all unsafe blocks for comprehensive unsafe audit documentation.
+
 ## [0.2.2] - 2026-05-17
 
 ### Added

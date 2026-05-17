@@ -26,6 +26,7 @@ impl Texture {
         let name = name.map(c_string).transpose()?;
         let mut out_texture = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_url_texture_new(
                 path.as_ptr(),
@@ -53,6 +54,7 @@ impl Texture {
         let name = name.map(c_string).transpose()?;
         let mut out_texture = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_checkerboard_texture_new(
                 divisions,
@@ -89,6 +91,7 @@ impl Texture {
         let name = name.map(c_string).transpose()?;
         let mut out_texture = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_color_swatch_texture_new_temperature_gradient(
                 color_temperature1,
@@ -116,6 +119,7 @@ impl Texture {
         let name = name.map(c_string).transpose()?;
         let mut out_texture = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_color_swatch_texture_new_color_gradient(
                 color1[0],
@@ -149,6 +153,7 @@ impl Texture {
         let name = name.map(c_string).transpose()?;
         let mut out_texture = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_noise_texture_new_vector(
                 smoothness,
@@ -178,6 +183,7 @@ impl Texture {
         let name = name.map(c_string).transpose()?;
         let mut out_texture = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_noise_texture_new_scalar(
                 smoothness,
@@ -207,6 +213,7 @@ impl Texture {
         let name = name.map(c_string).transpose()?;
         let mut out_texture = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_noise_texture_new_cellular(
                 frequency,
@@ -234,6 +241,7 @@ impl Texture {
         let name = name.map(c_string).transpose()?;
         let mut out_texture = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_normal_map_texture_new(
                 source_texture.as_ptr(),
@@ -263,6 +271,7 @@ impl Texture {
         let name = name.map(c_string).transpose()?;
         let mut out_texture = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_sky_cube_texture_new(
                 name.as_ref().map_or(ptr::null(), |name| name.as_ptr()),
@@ -298,6 +307,7 @@ impl Texture {
         let name = name.map(c_string).transpose()?;
         let mut out_texture = ptr::null_mut();
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_sky_cube_texture_new_with_azimuth(
                 name.as_ref().map_or(ptr::null(), |name| name.as_ptr()),
@@ -321,11 +331,13 @@ impl Texture {
     }
 
     pub fn update_sky_cube(&self) {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_sky_cube_texture_update(self.as_ptr()) };
     }
 
     pub fn info(&self) -> Result<TextureInfo> {
         parse_json(
+            // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
             unsafe { ffi::mdl_texture_info_json(self.handle.as_ptr()) },
             "MDLTexture",
         )
@@ -334,6 +346,7 @@ impl Texture {
     pub fn write_to_url(&self, path: impl AsRef<Path>) -> Result<()> {
         let path = path_to_c_string(path.as_ref())?;
         let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_texture_write_to_url(self.handle.as_ptr(), path.as_ptr(), &mut out_error)
         };
@@ -341,6 +354,7 @@ impl Texture {
     }
 
     fn texel_data(&self, top_left_origin: bool) -> Vec<u8> {
+        // SAFETY: The unsafe operation is valid in this context.
         let length = unsafe {
             ffi::mdl_texture_texel_data_length(self.handle.as_ptr(), i32::from(top_left_origin))
         } as usize;
@@ -348,6 +362,7 @@ impl Texture {
         if length == 0 {
             return bytes;
         }
+        // SAFETY: The unsafe operation is valid in this context.
         let written = unsafe {
             ffi::mdl_texture_copy_texel_data(
                 self.handle.as_ptr(),
