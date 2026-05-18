@@ -21,6 +21,7 @@ fn c_string_vec(values: &[&str]) -> Result<(Vec<CString>, Vec<*const i8>)> {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O packed joint animation counterpart.
 pub struct PackedJointAnimation {
     handle: ObjectHandle,
 }
@@ -28,10 +29,12 @@ pub struct PackedJointAnimation {
 impl JointAnimation for PackedJointAnimation {}
 
 impl PackedJointAnimation {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O packed joint animation counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O packed joint animation counterpart.
     pub fn new(name: &str, joint_paths: &[&str]) -> Result<Self> {
         let name = c_string(name)?;
         let (_joint_paths, raw_joint_paths) = c_string_vec(joint_paths)?;
@@ -54,6 +57,7 @@ impl PackedJointAnimation {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O packed joint animation counterpart.
     pub fn info(&self) -> Result<PackedJointAnimationInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -62,6 +66,7 @@ impl PackedJointAnimation {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O packed joint animation counterpart.
     pub fn translations(&self) -> Result<AnimatedVector3Array> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_packed_joint_animation_translations(self.handle.as_ptr()) };
@@ -71,6 +76,7 @@ impl PackedJointAnimation {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O packed joint animation counterpart.
     pub fn rotations(&self) -> Result<AnimatedQuaternionArray> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_packed_joint_animation_rotations(self.handle.as_ptr()) };
@@ -80,6 +86,7 @@ impl PackedJointAnimation {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O packed joint animation counterpart.
     pub fn scales(&self) -> Result<AnimatedVector3Array> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_packed_joint_animation_scales(self.handle.as_ptr()) };
@@ -90,12 +97,14 @@ impl PackedJointAnimation {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O packed joint animation counterpart.
     pub fn as_object(&self) -> Object {
         Object::from_handle(self.handle.clone())
     }
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O animation bind component counterpart.
 pub struct AnimationBindComponent {
     handle: ObjectHandle,
 }
@@ -103,10 +112,12 @@ pub struct AnimationBindComponent {
 impl Component for AnimationBindComponent {}
 
 impl AnimationBindComponent {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O animation bind component counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O animation bind component counterpart.
     pub fn new() -> Result<Self> {
         let mut out_component = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -120,6 +131,7 @@ impl AnimationBindComponent {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animation bind component counterpart.
     pub fn info(&self) -> Result<AnimationBindComponentInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -128,6 +140,7 @@ impl AnimationBindComponent {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animation bind component counterpart.
     pub fn set_skeleton(&self, skeleton: &Skeleton) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -139,6 +152,7 @@ impl AnimationBindComponent {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animation bind component counterpart.
     pub fn skeleton(&self) -> Option<Skeleton> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_animation_bind_component_skeleton(self.handle.as_ptr()) };
@@ -146,6 +160,7 @@ impl AnimationBindComponent {
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Skeleton::from_handle)
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animation bind component counterpart.
     pub fn set_packed_joint_animation(&self, animation: &PackedJointAnimation) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -157,6 +172,7 @@ impl AnimationBindComponent {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animation bind component counterpart.
     pub fn packed_joint_animation(&self) -> Option<PackedJointAnimation> {
         // SAFETY: The unsafe operation is valid in this context.
         let ptr = unsafe {
@@ -166,6 +182,7 @@ impl AnimationBindComponent {
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(PackedJointAnimation::from_handle)
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animation bind component counterpart.
     pub fn set_joint_paths(&self, joint_paths: &[&str]) -> Result<()> {
         let (_joint_paths, raw_joint_paths) = c_string_vec(joint_paths)?;
         // SAFETY: The unsafe operation is valid in this context.
@@ -179,6 +196,7 @@ impl AnimationBindComponent {
         Ok(())
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animation bind component counterpart.
     pub fn set_geometry_bind_transform(&self, matrix: [f32; 16]) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {

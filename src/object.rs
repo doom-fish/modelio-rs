@@ -15,6 +15,7 @@ use crate::voxel_array::VoxelArray;
 use crate::PackedJointAnimation;
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O object counterpart.
 pub struct Object {
     handle: ObjectHandle,
 }
@@ -30,14 +31,17 @@ impl Named for Object {
 }
 
 impl Object {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O object counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O object counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O object counterpart.
     pub fn new() -> Result<Self> {
         let mut out_object = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -47,6 +51,7 @@ impl Object {
         Ok(Self::from_handle(required_handle(out_object, "MDLObject")?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn info(&self) -> Result<ObjectInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -56,6 +61,7 @@ impl Object {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn kind(&self) -> ObjectKind {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         ObjectKind::from_raw(unsafe { ffi::mdl_object_kind(self.handle.as_ptr()) })
@@ -63,11 +69,13 @@ impl Object {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn name(&self) -> Option<String> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_object_name_string(self.handle.as_ptr()) })
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn set_name(&self, name: &str) -> Result<()> {
         let name = c_string(name)?;
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -76,28 +84,33 @@ impl Object {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn path(&self) -> Option<String> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_object_path_string(self.handle.as_ptr()) })
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn hidden(&self) -> bool {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_object_hidden(self.handle.as_ptr()) != 0 }
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn set_hidden(&self, hidden: bool) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_object_set_hidden(self.handle.as_ptr(), i32::from(hidden)) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn add_child(&self, child: &Self) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_object_add_child(self.handle.as_ptr(), child.handle.as_ptr()) };
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn children_container(&self) -> Option<ObjectContainer> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_object_children_container(self.handle.as_ptr()) };
@@ -105,6 +118,7 @@ impl Object {
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(ObjectContainer::from_handle)
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn set_children_container(&self, container: Option<&ObjectContainer>) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -116,12 +130,14 @@ impl Object {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn child_count(&self) -> usize {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_object_child_count(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn child_at(&self, index: usize) -> Option<Self> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_object_child_at(self.handle.as_ptr(), index as u64) };
@@ -130,12 +146,14 @@ impl Object {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn children(&self) -> Vec<Self> {
         (0..self.child_count())
             .filter_map(|index| self.child_at(index))
             .collect()
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn at_path(&self, path: &str) -> Result<Option<Self>> {
         let path = c_string(path)?;
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -145,6 +163,7 @@ impl Object {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn bounding_box_at_time(&self, time: f64) -> BoundingBox {
         let mut min = [0.0_f32; 3];
         let mut max = [0.0_f32; 3];
@@ -165,11 +184,13 @@ impl Object {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn as_mesh(&self) -> Option<Mesh> {
         (self.kind() == ObjectKind::Mesh).then(|| Mesh::from_handle(self.handle.clone()))
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn as_light(&self) -> Option<Light> {
         matches!(
             self.kind(),
@@ -179,28 +200,33 @@ impl Object {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn as_physically_plausible_light(&self) -> Option<PhysicallyPlausibleLight> {
         (self.kind() == ObjectKind::PhysicallyPlausibleLight)
             .then(|| PhysicallyPlausibleLight::from_handle(self.handle.clone()))
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn as_camera(&self) -> Option<Camera> {
         (self.kind() == ObjectKind::Camera).then(|| Camera::from_handle(self.handle.clone()))
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn as_voxel_array(&self) -> Option<VoxelArray> {
         (self.kind() == ObjectKind::VoxelArray)
             .then(|| VoxelArray::from_handle(self.handle.clone()))
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn as_skeleton(&self) -> Option<Skeleton> {
         (self.kind() == ObjectKind::Skeleton).then(|| Skeleton::from_handle(self.handle.clone()))
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn as_packed_joint_animation(&self) -> Option<PackedJointAnimation> {
         (self.kind() == ObjectKind::PackedJointAnimation)
             .then(|| PackedJointAnimation::from_handle(self.handle.clone()))
@@ -208,6 +234,7 @@ impl Object {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O object container counterpart.
 pub struct ObjectContainer {
     handle: ObjectHandle,
 }
@@ -233,14 +260,17 @@ impl ObjectContainerComponent for ObjectContainer {
 }
 
 impl ObjectContainer {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O object container counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O object container counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O object container counterpart.
     pub fn new() -> Result<Self> {
         let mut out_container = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -254,12 +284,14 @@ impl ObjectContainer {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object container counterpart.
     pub fn count(&self) -> usize {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_object_container_count(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object container counterpart.
     pub fn object_at(&self, index: usize) -> Option<Object> {
         let ptr =
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -269,17 +301,20 @@ impl ObjectContainer {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object container counterpart.
     pub fn objects(&self) -> Vec<Object> {
         (0..self.count())
             .filter_map(|index| self.object_at(index))
             .collect()
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object container counterpart.
     pub fn add_object(&self, object: &Object) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_object_container_add_object(self.handle.as_ptr(), object.as_ptr()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object container counterpart.
     pub fn remove_object(&self, object: &Object) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_object_container_remove_object(self.handle.as_ptr(), object.as_ptr()) };

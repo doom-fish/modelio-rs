@@ -10,19 +10,23 @@ use crate::util::{c_string, parse_json, required_handle};
 use crate::vertex_attribute::VertexDescriptor;
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O mesh counterpart.
 pub struct Mesh {
     handle: ObjectHandle,
 }
 
 impl Mesh {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O mesh counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O mesh counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O mesh counterpart.
     pub fn new_box(
         extent: [f32; 3],
         segments: [u32; 3],
@@ -50,6 +54,7 @@ impl Mesh {
         Ok(Self::from_handle(required_handle(out_mesh, "MDLMesh box")?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O mesh counterpart.
     pub fn new_ellipsoid(
         extent: [f32; 3],
         segments: [u32; 2],
@@ -81,6 +86,7 @@ impl Mesh {
         )?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O mesh counterpart.
     pub fn new_sphere(
         radius: f32,
         segments: [u32; 2],
@@ -96,6 +102,7 @@ impl Mesh {
         )
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O mesh counterpart.
     pub fn new_cylinder(
         extent: [f32; 3],
         segments: [u32; 2],
@@ -129,6 +136,7 @@ impl Mesh {
         )?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O mesh counterpart.
     pub fn new_plane(
         extent: [f32; 3],
         segments: [u32; 2],
@@ -156,6 +164,7 @@ impl Mesh {
         )?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O mesh counterpart.
     pub fn new_icosahedron(
         extent: [f32; 3],
         inward_normals: bool,
@@ -183,18 +192,21 @@ impl Mesh {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh counterpart.
     pub fn vertex_count(&self) -> usize {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_mesh_vertex_count(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh counterpart.
     pub fn vertex_buffer_count(&self) -> usize {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_mesh_vertex_buffer_count(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh counterpart.
     pub fn vertex_buffer(&self, index: usize) -> Option<MeshBuffer> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_mesh_vertex_buffer_at(self.handle.as_ptr(), index as u64) };
@@ -203,6 +215,7 @@ impl Mesh {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh counterpart.
     pub fn vertex_buffers(&self) -> Vec<MeshBuffer> {
         (0..self.vertex_buffer_count())
             .filter_map(|index| self.vertex_buffer(index))
@@ -210,12 +223,14 @@ impl Mesh {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh counterpart.
     pub fn submesh_count(&self) -> usize {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_mesh_submesh_count(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh counterpart.
     pub fn submesh(&self, index: usize) -> Option<Submesh> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_mesh_submesh_at(self.handle.as_ptr(), index as u64) };
@@ -224,6 +239,7 @@ impl Mesh {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh counterpart.
     pub fn submeshes(&self) -> Vec<Submesh> {
         (0..self.submesh_count())
             .filter_map(|index| self.submesh(index))
@@ -231,6 +247,7 @@ impl Mesh {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh counterpart.
     pub fn bounding_box(&self) -> BoundingBox {
         let mut min = [0.0_f32; 3];
         let mut max = [0.0_f32; 3];
@@ -250,6 +267,7 @@ impl Mesh {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh counterpart.
     pub fn vertex_descriptor(&self) -> Option<VertexDescriptor> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_mesh_vertex_descriptor(self.handle.as_ptr()) };
@@ -257,6 +275,7 @@ impl Mesh {
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(VertexDescriptor::from_handle)
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh counterpart.
     pub fn vertex_attribute_data_named(
         &self,
         attribute_name: &str,
@@ -271,25 +290,30 @@ impl Mesh {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh counterpart.
     pub fn as_object(&self) -> Object {
         Object::from_handle(self.handle.clone())
     }
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O mesh buffer counterpart.
 pub struct MeshBuffer {
     handle: ObjectHandle,
 }
 
 impl MeshBuffer {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O mesh buffer counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O mesh buffer counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer counterpart.
     pub fn info(&self) -> Result<MeshBufferInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -298,6 +322,7 @@ impl MeshBuffer {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer counterpart.
     pub fn bytes(&self) -> Result<Vec<u8>> {
         let info = self.info()?;
         let mut bytes = vec![0_u8; info.length];
@@ -318,15 +343,18 @@ impl MeshBuffer {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O vertex attribute data counterpart.
 pub struct VertexAttributeData {
     handle: ObjectHandle,
 }
 
 impl VertexAttributeData {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O vertex attribute data counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex attribute data counterpart.
     pub fn info(&self) -> Result<VertexAttributeInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -335,6 +363,7 @@ impl VertexAttributeData {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex attribute data counterpart.
     pub fn bytes(&self) -> Result<Vec<u8>> {
         let info = self.info()?;
         let mut bytes = vec![0_u8; info.buffer_size];

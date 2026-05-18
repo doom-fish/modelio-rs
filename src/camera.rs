@@ -9,15 +9,18 @@ use crate::types::{BoundingBox, CameraInfo, CameraProjection, StereoscopicCamera
 use crate::util::{parse_json, required_handle};
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O camera counterpart.
 pub struct Camera {
     handle: ObjectHandle,
 }
 
 impl Camera {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O camera counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O camera counterpart.
     pub fn new() -> Result<Self> {
         let mut out_camera = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -27,6 +30,7 @@ impl Camera {
         Ok(Self::from_handle(required_handle(out_camera, "MDLCamera")?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O camera counterpart.
     pub fn info(&self) -> Result<CameraInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -35,21 +39,25 @@ impl Camera {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O camera counterpart.
     pub fn set_projection(&self, projection: CameraProjection) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_camera_set_projection(self.handle.as_ptr(), projection.as_raw()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O camera counterpart.
     pub fn set_near_visibility_distance(&self, value: f32) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_camera_set_near_visibility_distance(self.handle.as_ptr(), value) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O camera counterpart.
     pub fn set_far_visibility_distance(&self, value: f32) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_camera_set_far_visibility_distance(self.handle.as_ptr(), value) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O camera counterpart.
     pub fn set_world_to_meters_conversion_scale(&self, value: f32) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -57,21 +65,25 @@ impl Camera {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O camera counterpart.
     pub fn set_focal_length(&self, value: f32) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_camera_set_focal_length(self.handle.as_ptr(), value) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O camera counterpart.
     pub fn set_focus_distance(&self, value: f32) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_camera_set_focus_distance(self.handle.as_ptr(), value) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O camera counterpart.
     pub fn set_field_of_view(&self, value: f32) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_camera_set_field_of_view(self.handle.as_ptr(), value) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O camera counterpart.
     pub fn look_at(&self, focus_position: [f32; 3]) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -84,6 +96,7 @@ impl Camera {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O camera counterpart.
     pub fn look_at_from(&self, focus_position: [f32; 3], camera_position: [f32; 3]) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -99,6 +112,7 @@ impl Camera {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O camera counterpart.
     pub fn frame_bounding_box(&self, bounding_box: BoundingBox, set_near_and_far: bool) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -116,6 +130,7 @@ impl Camera {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O camera counterpart.
     pub fn ray_to(&self, pixel: [i32; 2], viewport: [i32; 2]) -> [f32; 3] {
         let mut ray = [0.0_f32; 3];
         // SAFETY: The unsafe operation is valid in this context.
@@ -135,6 +150,7 @@ impl Camera {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O camera counterpart.
     pub fn bokeh_kernel(&self, size: [i32; 2]) -> Option<Texture> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_camera_bokeh_kernel(self.handle.as_ptr(), size[0], size[1]) };
@@ -143,21 +159,25 @@ impl Camera {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O camera counterpart.
     pub fn as_object(&self) -> Object {
         Object::from_handle(self.handle.clone())
     }
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O stereoscopic camera counterpart.
 pub struct StereoscopicCamera {
     handle: ObjectHandle,
 }
 
 impl StereoscopicCamera {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O stereoscopic camera counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O stereoscopic camera counterpart.
     pub fn new() -> Result<Self> {
         let mut out_camera = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -170,6 +190,7 @@ impl StereoscopicCamera {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O stereoscopic camera counterpart.
     pub fn info(&self) -> Result<StereoscopicCameraInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -178,6 +199,7 @@ impl StereoscopicCamera {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O stereoscopic camera counterpart.
     pub fn set_inter_pupillary_distance(&self, value: f32) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -185,27 +207,32 @@ impl StereoscopicCamera {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O stereoscopic camera counterpart.
     pub fn set_left_vergence(&self, value: f32) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_stereoscopic_camera_set_left_vergence(self.handle.as_ptr(), value) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O stereoscopic camera counterpart.
     pub fn set_right_vergence(&self, value: f32) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_stereoscopic_camera_set_right_vergence(self.handle.as_ptr(), value) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O stereoscopic camera counterpart.
     pub fn set_overlap(&self, value: f32) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_stereoscopic_camera_set_overlap(self.handle.as_ptr(), value) };
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O stereoscopic camera counterpart.
     pub fn as_camera(&self) -> Camera {
         Camera::from_handle(self.handle.clone())
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O stereoscopic camera counterpart.
     pub fn as_object(&self) -> Object {
         Object::from_handle(self.handle.clone())
     }

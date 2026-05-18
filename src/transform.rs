@@ -45,35 +45,42 @@ where
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O transform component counterpart.
 pub struct TransformComponent {
     handle: ObjectHandle,
 }
 
 impl TransformComponent {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O transform component counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O transform component counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform component counterpart.
     pub fn matrix(&self) -> [f32; 16] {
         copy_matrix(self.handle.as_ptr(), ffi::mdl_transform_component_matrix)
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform component counterpart.
     pub fn set_matrix(&self, matrix: [f32; 16]) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_transform_component_set_matrix(self.handle.as_ptr(), matrix.as_ptr()) };
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform component counterpart.
     pub fn resets_transform(&self) -> bool {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_transform_component_resets_transform(self.handle.as_ptr()) != 0 }
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform component counterpart.
     pub fn set_resets_transform(&self, resets_transform: bool) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -85,18 +92,21 @@ impl TransformComponent {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform component counterpart.
     pub fn minimum_time(&self) -> f64 {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_transform_component_minimum_time(self.handle.as_ptr()) }
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform component counterpart.
     pub fn maximum_time(&self) -> f64 {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_transform_component_maximum_time(self.handle.as_ptr()) }
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform component counterpart.
     pub fn key_times(&self) -> Vec<f64> {
         let count =
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -118,6 +128,7 @@ impl TransformComponent {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform component counterpart.
     pub fn local_transform_at_time(&self, time: f64) -> [f32; 16] {
         let mut matrix = [0.0_f32; 16];
         // SAFETY: The unsafe operation is valid in this context.
@@ -132,6 +143,7 @@ impl TransformComponent {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform component counterpart.
     pub fn as_transform(&self) -> Option<Transform> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         (unsafe { ffi::mdl_transform_component_is_transform(self.handle.as_ptr()) != 0 })
@@ -139,6 +151,7 @@ impl TransformComponent {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform component counterpart.
     pub fn as_transform_stack(&self) -> Option<TransformStack> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         (unsafe { ffi::mdl_transform_component_is_transform_stack(self.handle.as_ptr()) != 0 })
@@ -146,6 +159,7 @@ impl TransformComponent {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform component counterpart.
     pub fn global_transform_with_object(object: &Object, time: f64) -> [f32; 16] {
         let mut matrix = [0.0_f32; 16];
         // SAFETY: The unsafe operation is valid in this context.
@@ -161,6 +175,7 @@ impl TransformComponent {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O transform counterpart.
 pub struct Transform {
     handle: ObjectHandle,
 }
@@ -168,14 +183,17 @@ pub struct Transform {
 impl Component for Transform {}
 
 impl Transform {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O transform counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O transform counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O transform counterpart.
     pub fn new() -> Result<Self> {
         let mut out_transform = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -188,6 +206,7 @@ impl Transform {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn from_component(component: &TransformComponent) -> Result<Self> {
         let mut out_transform = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -206,6 +225,7 @@ impl Transform {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn from_component_with_resets_transform(
         component: &TransformComponent,
         resets_transform: bool,
@@ -228,6 +248,7 @@ impl Transform {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn from_matrix(matrix: [f32; 16]) -> Result<Self> {
         let mut out_transform = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -242,6 +263,7 @@ impl Transform {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn from_matrix_with_resets_transform(
         matrix: [f32; 16],
         resets_transform: bool,
@@ -265,50 +287,60 @@ impl Transform {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn matrix(&self) -> [f32; 16] {
         self.as_transform_component().matrix()
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn set_matrix(&self, matrix: [f32; 16]) {
         self.as_transform_component().set_matrix(matrix);
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn resets_transform(&self) -> bool {
         self.as_transform_component().resets_transform()
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn set_resets_transform(&self, resets_transform: bool) {
         self.as_transform_component()
             .set_resets_transform(resets_transform);
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn minimum_time(&self) -> f64 {
         self.as_transform_component().minimum_time()
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn maximum_time(&self) -> f64 {
         self.as_transform_component().maximum_time()
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn key_times(&self) -> Vec<f64> {
         self.as_transform_component().key_times()
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn local_transform_at_time(&self, time: f64) -> [f32; 16] {
         self.as_transform_component().local_transform_at_time(time)
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn set_identity(&self) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_transform_set_identity(self.handle.as_ptr()) };
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn translation_at_time(&self, time: f64) -> [f32; 3] {
         let mut value = [0.0_f32; 3];
         // SAFETY: The unsafe operation is valid in this context.
@@ -319,6 +351,7 @@ impl Transform {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn rotation_at_time(&self, time: f64) -> [f32; 3] {
         let mut value = [0.0_f32; 3];
         // SAFETY: The unsafe operation is valid in this context.
@@ -329,6 +362,7 @@ impl Transform {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn shear_at_time(&self, time: f64) -> [f32; 3] {
         let mut value = [0.0_f32; 3];
         // SAFETY: The unsafe operation is valid in this context.
@@ -339,6 +373,7 @@ impl Transform {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn scale_at_time(&self, time: f64) -> [f32; 3] {
         let mut value = [0.0_f32; 3];
         // SAFETY: The unsafe operation is valid in this context.
@@ -348,6 +383,7 @@ impl Transform {
         value
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn set_matrix_for_time(&self, matrix: [f32; 16], time: f64) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -355,6 +391,7 @@ impl Transform {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn set_translation_for_time(&self, translation: [f32; 3], time: f64) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -368,6 +405,7 @@ impl Transform {
         }
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn set_rotation_for_time(&self, rotation: [f32; 3], time: f64) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -381,6 +419,7 @@ impl Transform {
         }
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn set_shear_for_time(&self, shear: [f32; 3], time: f64) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -394,6 +433,7 @@ impl Transform {
         }
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn set_scale_for_time(&self, scale: [f32; 3], time: f64) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -408,6 +448,7 @@ impl Transform {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn rotation_matrix_at_time(&self, time: f64) -> [f32; 16] {
         let mut matrix = [0.0_f32; 16];
         // SAFETY: The unsafe operation is valid in this context.
@@ -422,6 +463,7 @@ impl Transform {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn translation(&self) -> [f32; 3] {
         let mut value = [0.0_f32; 3];
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -429,6 +471,7 @@ impl Transform {
         value
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn set_translation(&self, translation: [f32; 3]) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -442,6 +485,7 @@ impl Transform {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn rotation(&self) -> [f32; 3] {
         let mut value = [0.0_f32; 3];
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -449,6 +493,7 @@ impl Transform {
         value
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn set_rotation(&self, rotation: [f32; 3]) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -462,6 +507,7 @@ impl Transform {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn shear(&self) -> [f32; 3] {
         let mut value = [0.0_f32; 3];
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -469,6 +515,7 @@ impl Transform {
         value
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn set_shear(&self, shear: [f32; 3]) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -477,6 +524,7 @@ impl Transform {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn scale(&self) -> [f32; 3] {
         let mut value = [0.0_f32; 3];
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -484,6 +532,7 @@ impl Transform {
         value
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn set_scale(&self, scale: [f32; 3]) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -492,34 +541,40 @@ impl Transform {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform counterpart.
     pub fn as_transform_component(&self) -> TransformComponent {
         TransformComponent::from_handle(self.handle.clone())
     }
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O transform op counterpart.
 pub struct TransformOp {
     handle: ObjectHandle,
 }
 
 impl TransformOp {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O transform op counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform op counterpart.
     pub fn name(&self) -> Option<String> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_transform_op_name_string(self.handle.as_ptr()) })
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform op counterpart.
     pub fn is_inverse(&self) -> bool {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_transform_op_is_inverse(self.handle.as_ptr()) != 0 }
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform op counterpart.
     pub fn float4x4_at_time(&self, time: f64) -> [f32; 16] {
         let mut matrix = [0.0_f32; 16];
         // SAFETY: The unsafe operation is valid in this context.
@@ -537,31 +592,37 @@ impl TransformOp {
 macro_rules! define_transform_op {
     ($name:ident, $ffi_name:ident, $animated:ty) => {
         #[derive(Debug, Clone)]
+        /// Wraps the corresponding Model I/O counterpart.
         pub struct $name {
             handle: ObjectHandle,
         }
 
         impl $name {
+            /// Builds this wrapper from the retained handle of the wrapped Model I/O name counterpart.
             pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
                 Self { handle }
             }
 
             #[must_use]
+            /// Calls the corresponding Model I/O method on the wrapped Model I/O name counterpart.
             pub fn name(&self) -> Option<String> {
                 TransformOp::from_handle(self.handle.clone()).name()
             }
 
             #[must_use]
+            /// Calls the corresponding Model I/O method on the wrapped Model I/O name counterpart.
             pub fn is_inverse(&self) -> bool {
                 TransformOp::from_handle(self.handle.clone()).is_inverse()
             }
 
             #[must_use]
+            /// Calls the corresponding Model I/O method on the wrapped Model I/O name counterpart.
             pub fn float4x4_at_time(&self, time: f64) -> [f32; 16] {
                 TransformOp::from_handle(self.handle.clone()).float4x4_at_time(time)
             }
 
             #[must_use]
+            /// Calls the corresponding Model I/O method on the wrapped Model I/O name counterpart.
             pub fn animated_value(&self) -> Option<$animated> {
                 // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
                 let ptr = unsafe { ffi::$ffi_name(self.handle.as_ptr()) };
@@ -570,6 +631,7 @@ macro_rules! define_transform_op {
             }
 
             #[must_use]
+            /// Calls the corresponding Model I/O method on the wrapped Model I/O name counterpart.
             pub fn as_transform_op(&self) -> TransformOp {
                 TransformOp::from_handle(self.handle.clone())
             }
@@ -619,15 +681,18 @@ define_transform_op!(
 );
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O transform stack counterpart.
 pub struct TransformStack {
     handle: ObjectHandle,
 }
 
 impl TransformStack {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O transform stack counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O transform stack counterpart.
     pub fn new() -> Result<Self> {
         let mut out_stack = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -641,44 +706,53 @@ impl TransformStack {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn matrix(&self) -> [f32; 16] {
         self.as_transform_component().matrix()
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn set_matrix(&self, matrix: [f32; 16]) {
         self.as_transform_component().set_matrix(matrix);
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn resets_transform(&self) -> bool {
         self.as_transform_component().resets_transform()
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn set_resets_transform(&self, resets_transform: bool) {
         self.as_transform_component()
             .set_resets_transform(resets_transform);
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn minimum_time(&self) -> f64 {
         self.as_transform_component().minimum_time()
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn maximum_time(&self) -> f64 {
         self.as_transform_component().maximum_time()
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn key_times(&self) -> Vec<f64> {
         self.as_transform_component().key_times()
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn local_transform_at_time(&self, time: f64) -> [f32; 16] {
         self.as_transform_component().local_transform_at_time(time)
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn add_translate_op(&self, name: &str, inverse: bool) -> Result<TransformTranslateOp> {
         let name = c_string(name)?;
         // SAFETY: The unsafe operation is valid in this context.
@@ -695,6 +769,7 @@ impl TransformStack {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn add_rotate_x_op(&self, name: &str, inverse: bool) -> Result<TransformRotateXOp> {
         let name = c_string(name)?;
         // SAFETY: The unsafe operation is valid in this context.
@@ -711,6 +786,7 @@ impl TransformStack {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn add_rotate_y_op(&self, name: &str, inverse: bool) -> Result<TransformRotateYOp> {
         let name = c_string(name)?;
         // SAFETY: The unsafe operation is valid in this context.
@@ -727,6 +803,7 @@ impl TransformStack {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn add_rotate_z_op(&self, name: &str, inverse: bool) -> Result<TransformRotateZOp> {
         let name = c_string(name)?;
         // SAFETY: The unsafe operation is valid in this context.
@@ -743,6 +820,7 @@ impl TransformStack {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn add_rotate_op(
         &self,
         name: &str,
@@ -765,6 +843,7 @@ impl TransformStack {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn add_scale_op(&self, name: &str, inverse: bool) -> Result<TransformScaleOp> {
         let name = c_string(name)?;
         // SAFETY: The unsafe operation is valid in this context.
@@ -781,6 +860,7 @@ impl TransformStack {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn add_matrix_op(&self, name: &str, inverse: bool) -> Result<TransformMatrixOp> {
         let name = c_string(name)?;
         // SAFETY: The unsafe operation is valid in this context.
@@ -797,6 +877,7 @@ impl TransformStack {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn add_orient_op(&self, name: &str, inverse: bool) -> Result<TransformOrientOp> {
         let name = c_string(name)?;
         // SAFETY: The unsafe operation is valid in this context.
@@ -813,6 +894,7 @@ impl TransformStack {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn animated_value_named(&self, name: &str) -> Result<Option<AnimatedValue>> {
         let name = c_string(name)?;
         // SAFETY: The unsafe operation is valid in this context.
@@ -824,6 +906,7 @@ impl TransformStack {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn float4x4_at_time(&self, time: f64) -> [f32; 16] {
         let mut matrix = [0.0_f32; 16];
         // SAFETY: The unsafe operation is valid in this context.
@@ -838,11 +921,13 @@ impl TransformStack {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn count(&self) -> usize {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_transform_stack_count(self.handle.as_ptr()) as usize }
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn transform_ops(&self) -> Result<Vec<TransformOp>> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_transform_stack_transform_ops(self.handle.as_ptr()) };
@@ -857,6 +942,7 @@ impl TransformStack {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform stack counterpart.
     pub fn as_transform_component(&self) -> TransformComponent {
         TransformComponent::from_handle(self.handle.clone())
     }
@@ -864,6 +950,7 @@ impl TransformStack {
 
 impl Object {
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn transform_component(&self) -> Option<TransformComponent> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_object_transform_component(self.as_ptr()) };
@@ -871,6 +958,7 @@ impl Object {
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(TransformComponent::from_handle)
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object counterpart.
     pub fn set_transform_component(&self, component: Option<&TransformComponent>) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {

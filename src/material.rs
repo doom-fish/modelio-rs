@@ -38,6 +38,7 @@ where
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O material counterpart.
 pub struct Material {
     handle: ObjectHandle,
 }
@@ -53,14 +54,17 @@ impl Named for Material {
 }
 
 impl Material {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O material counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O material counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O material counterpart.
     pub fn new(name: &str, physically_plausible: bool) -> Result<Self> {
         let name = c_string(name)?;
         let mut out_material = ptr::null_mut();
@@ -81,6 +85,7 @@ impl Material {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material counterpart.
     pub fn info(&self) -> Result<MaterialInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -90,17 +95,20 @@ impl Material {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material counterpart.
     pub fn count(&self) -> usize {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_count(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material counterpart.
     pub fn name(&self) -> Option<String> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_material_name_string(self.handle.as_ptr()) })
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material counterpart.
     pub fn set_name(&self, name: &str) -> Result<()> {
         let name = c_string(name)?;
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -109,21 +117,25 @@ impl Material {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material counterpart.
     pub fn material_face(&self) -> Option<MaterialFace> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         MaterialFace::from_raw(unsafe { ffi::mdl_material_material_face(self.handle.as_ptr()) })
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material counterpart.
     pub fn set_material_face(&self, face: MaterialFace) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_set_material_face(self.handle.as_ptr(), face.as_raw()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material counterpart.
     pub fn remove_all_properties(&self) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_remove_all_properties(self.handle.as_ptr()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material counterpart.
     pub fn load_textures_using_resolver(&self, resolver: &AssetResolver) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -132,6 +144,7 @@ impl Material {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material counterpart.
     pub fn property(&self, index: usize) -> Option<MaterialProperty> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_material_property_at(self.handle.as_ptr(), index as u64) };
@@ -139,6 +152,7 @@ impl Material {
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(MaterialProperty::from_handle)
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material counterpart.
     pub fn property_named(&self, name: &str) -> Result<Option<MaterialProperty>> {
         let name = c_string(name)?;
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -148,6 +162,7 @@ impl Material {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material counterpart.
     pub fn property_with_semantic(&self, semantic: MaterialSemantic) -> Option<MaterialProperty> {
         // SAFETY: The unsafe operation is valid in this context.
         let ptr = unsafe {
@@ -158,6 +173,7 @@ impl Material {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material counterpart.
     pub fn properties(&self) -> Vec<MaterialProperty> {
         (0..self.count())
             .filter_map(|index| self.property(index))
@@ -166,6 +182,7 @@ impl Material {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O material property counterpart.
 pub struct MaterialProperty {
     handle: ObjectHandle,
 }
@@ -181,14 +198,17 @@ impl Named for MaterialProperty {
 }
 
 impl MaterialProperty {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O material property counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O material property counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O material property counterpart.
     pub fn new(name: &str, semantic: MaterialSemantic) -> Result<Self> {
         let name = c_string(name)?;
         let mut out_property = ptr::null_mut();
@@ -210,11 +230,13 @@ impl MaterialProperty {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property counterpart.
     pub fn name(&self) -> Option<String> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_named_name_string(self.handle.as_ptr()) })
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property counterpart.
     pub fn set_name(&self, name: &str) -> Result<()> {
         let name = c_string(name)?;
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -222,6 +244,7 @@ impl MaterialProperty {
         Ok(())
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property counterpart.
     pub fn info(&self) -> Result<MaterialPropertyInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -231,6 +254,7 @@ impl MaterialProperty {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property counterpart.
     pub fn texture(&self) -> Option<Texture> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_material_property_texture(self.handle.as_ptr()) };
@@ -239,6 +263,7 @@ impl MaterialProperty {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property counterpart.
     pub fn texture_sampler(&self) -> Option<TextureSampler> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_material_property_texture_sampler(self.handle.as_ptr()) };
@@ -246,6 +271,7 @@ impl MaterialProperty {
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(TextureSampler::from_handle)
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property counterpart.
     pub fn set_texture_sampler(&self, sampler: Option<&TextureSampler>) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -256,16 +282,19 @@ impl MaterialProperty {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property counterpart.
     pub fn set_float(&self, value: f32) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_property_set_float(self.handle.as_ptr(), value) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property counterpart.
     pub fn set_float2(&self, value: [f32; 2]) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_property_set_float2(self.handle.as_ptr(), value[0], value[1]) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property counterpart.
     pub fn set_float3(&self, value: [f32; 3]) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -278,6 +307,7 @@ impl MaterialProperty {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property counterpart.
     pub fn set_float4(&self, value: [f32; 4]) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -291,11 +321,13 @@ impl MaterialProperty {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property counterpart.
     pub fn set_matrix4x4(&self, value: [f32; 16]) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_property_set_matrix4x4(self.handle.as_ptr(), value.as_ptr()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property counterpart.
     pub fn set_string(&self, value: Option<&str>) -> Result<()> {
         let value = value.map(c_string).transpose()?;
         // SAFETY: The unsafe operation is valid in this context.
@@ -308,6 +340,7 @@ impl MaterialProperty {
         Ok(())
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property counterpart.
     pub fn set_url(&self, path: Option<impl AsRef<Path>>) -> Result<()> {
         let path = path
             .map(|path| path_to_c_string(path.as_ref()))
@@ -322,6 +355,7 @@ impl MaterialProperty {
         Ok(())
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property counterpart.
     pub fn set_color(&self, color: [f32; 4]) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -335,6 +369,7 @@ impl MaterialProperty {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property counterpart.
     pub fn set_luminance(&self, value: f32) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_property_set_luminance(self.handle.as_ptr(), value) };
@@ -342,19 +377,23 @@ impl MaterialProperty {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O texture filter counterpart.
 pub struct TextureFilter {
     handle: ObjectHandle,
 }
 
 impl TextureFilter {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O texture filter counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O texture filter counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O texture filter counterpart.
     pub fn new() -> Result<Self> {
         let mut out_filter = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -367,6 +406,7 @@ impl TextureFilter {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture filter counterpart.
     pub fn info(&self) -> Result<TextureFilterInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -375,31 +415,37 @@ impl TextureFilter {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture filter counterpart.
     pub fn set_s_wrap_mode(&self, value: MaterialTextureWrapMode) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_texture_filter_set_s_wrap_mode(self.handle.as_ptr(), value.as_raw()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture filter counterpart.
     pub fn set_t_wrap_mode(&self, value: MaterialTextureWrapMode) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_texture_filter_set_t_wrap_mode(self.handle.as_ptr(), value.as_raw()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture filter counterpart.
     pub fn set_r_wrap_mode(&self, value: MaterialTextureWrapMode) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_texture_filter_set_r_wrap_mode(self.handle.as_ptr(), value.as_raw()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture filter counterpart.
     pub fn set_min_filter(&self, value: MaterialTextureFilterMode) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_texture_filter_set_min_filter(self.handle.as_ptr(), value.as_raw()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture filter counterpart.
     pub fn set_mag_filter(&self, value: MaterialTextureFilterMode) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_texture_filter_set_mag_filter(self.handle.as_ptr(), value.as_raw()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture filter counterpart.
     pub fn set_mip_filter(&self, value: MaterialMipMapFilterMode) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_texture_filter_set_mip_filter(self.handle.as_ptr(), value.as_raw()) };
@@ -407,19 +453,23 @@ impl TextureFilter {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O texture sampler counterpart.
 pub struct TextureSampler {
     handle: ObjectHandle,
 }
 
 impl TextureSampler {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O texture sampler counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O texture sampler counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O texture sampler counterpart.
     pub fn new() -> Result<Self> {
         let mut out_sampler = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -432,6 +482,7 @@ impl TextureSampler {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture sampler counterpart.
     pub fn info(&self) -> Result<TextureSamplerInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -441,6 +492,7 @@ impl TextureSampler {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture sampler counterpart.
     pub fn texture(&self) -> Option<Texture> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_texture_sampler_texture(self.handle.as_ptr()) };
@@ -448,6 +500,7 @@ impl TextureSampler {
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Texture::from_handle)
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture sampler counterpart.
     pub fn set_texture(&self, texture: Option<&Texture>) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -459,6 +512,7 @@ impl TextureSampler {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture sampler counterpart.
     pub fn hardware_filter(&self) -> Option<TextureFilter> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_texture_sampler_hardware_filter(self.handle.as_ptr()) };
@@ -466,6 +520,7 @@ impl TextureSampler {
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(TextureFilter::from_handle)
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture sampler counterpart.
     pub fn set_hardware_filter(&self, filter: Option<&TextureFilter>) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -477,6 +532,7 @@ impl TextureSampler {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture sampler counterpart.
     pub fn transform(&self) -> Option<Transform> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_texture_sampler_transform(self.handle.as_ptr()) };
@@ -484,6 +540,7 @@ impl TextureSampler {
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(Transform::from_handle)
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture sampler counterpart.
     pub fn set_transform(&self, transform: Option<&Transform>) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -496,6 +553,7 @@ impl TextureSampler {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O material property connection counterpart.
 pub struct MaterialPropertyConnection {
     handle: ObjectHandle,
 }
@@ -511,14 +569,17 @@ impl Named for MaterialPropertyConnection {
 }
 
 impl MaterialPropertyConnection {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O material property connection counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O material property connection counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O material property connection counterpart.
     pub fn new(output: &MaterialProperty, input: &MaterialProperty) -> Result<Self> {
         let mut out_connection = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -539,11 +600,13 @@ impl MaterialPropertyConnection {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property connection counterpart.
     pub fn name(&self) -> Option<String> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_named_name_string(self.handle.as_ptr()) })
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property connection counterpart.
     pub fn set_name(&self, name: &str) -> Result<()> {
         let name = c_string(name)?;
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -552,6 +615,7 @@ impl MaterialPropertyConnection {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property connection counterpart.
     pub fn output(&self) -> Option<MaterialProperty> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_material_property_connection_output(self.handle.as_ptr()) };
@@ -560,6 +624,7 @@ impl MaterialPropertyConnection {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property connection counterpart.
     pub fn input(&self) -> Option<MaterialProperty> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_material_property_connection_input(self.handle.as_ptr()) };
@@ -569,6 +634,7 @@ impl MaterialPropertyConnection {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O material property node counterpart.
 pub struct MaterialPropertyNode {
     handle: ObjectHandle,
 }
@@ -584,14 +650,17 @@ impl Named for MaterialPropertyNode {
 }
 
 impl MaterialPropertyNode {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O material property node counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O material property node counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O material property node counterpart.
     pub fn new(inputs: &[&MaterialProperty], outputs: &[&MaterialProperty]) -> Result<Self> {
         let input_ptrs = inputs
             .iter()
@@ -622,11 +691,13 @@ impl MaterialPropertyNode {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property node counterpart.
     pub fn name(&self) -> Option<String> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_named_name_string(self.handle.as_ptr()) })
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property node counterpart.
     pub fn set_name(&self, name: &str) -> Result<()> {
         let name = c_string(name)?;
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -634,6 +705,7 @@ impl MaterialPropertyNode {
         Ok(())
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property node counterpart.
     pub fn inputs(&self) -> Result<Vec<MaterialProperty>> {
         array_objects(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -643,6 +715,7 @@ impl MaterialPropertyNode {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property node counterpart.
     pub fn outputs(&self) -> Result<Vec<MaterialProperty>> {
         array_objects(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -654,6 +727,7 @@ impl MaterialPropertyNode {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O material property graph counterpart.
 pub struct MaterialPropertyGraph {
     handle: ObjectHandle,
 }
@@ -669,10 +743,12 @@ impl Named for MaterialPropertyGraph {
 }
 
 impl MaterialPropertyGraph {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O material property graph counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O material property graph counterpart.
     pub fn new(
         nodes: &[&MaterialPropertyNode],
         connections: &[&MaterialPropertyConnection],
@@ -703,11 +779,13 @@ impl MaterialPropertyGraph {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property graph counterpart.
     pub fn name(&self) -> Option<String> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         take_string(unsafe { ffi::mdl_named_name_string(self.handle.as_ptr()) })
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property graph counterpart.
     pub fn set_name(&self, name: &str) -> Result<()> {
         let name = c_string(name)?;
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -715,11 +793,13 @@ impl MaterialPropertyGraph {
         Ok(())
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property graph counterpart.
     pub fn evaluate(&self) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_material_property_graph_evaluate(self.handle.as_ptr()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property graph counterpart.
     pub fn nodes(&self) -> Result<Vec<MaterialPropertyNode>> {
         array_objects(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -729,6 +809,7 @@ impl MaterialPropertyGraph {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property graph counterpart.
     pub fn connections(&self) -> Result<Vec<MaterialPropertyConnection>> {
         array_objects(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -739,6 +820,7 @@ impl MaterialPropertyGraph {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property graph counterpart.
     pub fn as_node(&self) -> MaterialPropertyNode {
         MaterialPropertyNode::from_handle(self.handle.clone())
     }

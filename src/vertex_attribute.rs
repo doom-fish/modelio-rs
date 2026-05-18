@@ -7,15 +7,18 @@ use crate::types::{VertexAttributeDescriptorInfo, VertexDescriptorInfo};
 use crate::util::{c_string, parse_json, required_handle};
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O vertex attribute counterpart.
 pub struct VertexAttribute {
     handle: ObjectHandle,
 }
 
 impl VertexAttribute {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O vertex attribute counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O vertex attribute counterpart.
     pub fn new(name: &str, format: u32, offset: usize, buffer_index: usize) -> Result<Self> {
         let name = c_string(name)?;
         let mut out_attribute = ptr::null_mut();
@@ -38,6 +41,7 @@ impl VertexAttribute {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex attribute counterpart.
     pub fn info(&self) -> Result<VertexAttributeDescriptorInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -46,6 +50,7 @@ impl VertexAttribute {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex attribute counterpart.
     pub fn set_name(&self, name: &str) -> Result<()> {
         let name = c_string(name)?;
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -53,16 +58,19 @@ impl VertexAttribute {
         Ok(())
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex attribute counterpart.
     pub fn set_format(&self, format: u32) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_vertex_attribute_set_format(self.handle.as_ptr(), format) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex attribute counterpart.
     pub fn set_offset(&self, offset: usize) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_vertex_attribute_set_offset(self.handle.as_ptr(), offset as u64) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex attribute counterpart.
     pub fn set_buffer_index(&self, buffer_index: usize) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -70,11 +78,13 @@ impl VertexAttribute {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex attribute counterpart.
     pub fn set_time(&self, time: f64) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_vertex_attribute_set_time(self.handle.as_ptr(), time) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex attribute counterpart.
     pub fn set_initialization_value(&self, value: [f32; 4]) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -90,15 +100,18 @@ impl VertexAttribute {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O vertex buffer layout counterpart.
 pub struct VertexBufferLayout {
     handle: ObjectHandle,
 }
 
 impl VertexBufferLayout {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O vertex buffer layout counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O vertex buffer layout counterpart.
     pub fn new(stride: usize) -> Result<Self> {
         let mut out_layout = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -114,11 +127,13 @@ impl VertexBufferLayout {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex buffer layout counterpart.
     pub fn stride(&self) -> usize {
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
         unsafe { ffi::mdl_vertex_buffer_layout_stride(self.handle.as_ptr()) as usize }
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex buffer layout counterpart.
     pub fn set_stride(&self, stride: usize) {
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
         unsafe { ffi::mdl_vertex_buffer_layout_set_stride(self.handle.as_ptr(), stride as u64) };
@@ -126,15 +141,18 @@ impl VertexBufferLayout {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O vertex descriptor counterpart.
 pub struct VertexDescriptor {
     handle: ObjectHandle,
 }
 
 impl VertexDescriptor {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O vertex descriptor counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex descriptor counterpart.
     pub fn copy(&self) -> Result<Self> {
         let mut out_descriptor = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -153,6 +171,7 @@ impl VertexDescriptor {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex descriptor counterpart.
     pub fn info(&self) -> Result<VertexDescriptorInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -162,12 +181,14 @@ impl VertexDescriptor {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex descriptor counterpart.
     pub fn attribute_count(&self) -> usize {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_vertex_descriptor_attribute_count(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex descriptor counterpart.
     pub fn attribute_at(&self, index: usize) -> Option<VertexAttribute> {
         let ptr =
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -176,6 +197,7 @@ impl VertexDescriptor {
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(VertexAttribute::from_handle)
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex descriptor counterpart.
     pub fn attribute_named(&self, name: &str) -> Result<Option<VertexAttribute>> {
         let name = c_string(name)?;
         // SAFETY: The unsafe operation is valid in this context.
@@ -187,6 +209,7 @@ impl VertexDescriptor {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex descriptor counterpart.
     pub fn attributes(&self) -> Vec<VertexAttribute> {
         (0..self.attribute_count())
             .filter_map(|index| self.attribute_at(index))
@@ -194,12 +217,14 @@ impl VertexDescriptor {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex descriptor counterpart.
     pub fn layout_count(&self) -> usize {
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
         unsafe { ffi::mdl_vertex_descriptor_layout_count(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex descriptor counterpart.
     pub fn layout_at(&self, index: usize) -> Option<VertexBufferLayout> {
         let ptr =
             // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
@@ -209,22 +234,26 @@ impl VertexDescriptor {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex descriptor counterpart.
     pub fn layouts(&self) -> Vec<VertexBufferLayout> {
         (0..self.layout_count())
             .filter_map(|index| self.layout_at(index))
             .collect()
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex descriptor counterpart.
     pub fn reset(&self) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_vertex_descriptor_reset(self.handle.as_ptr()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex descriptor counterpart.
     pub fn set_packed_offsets(&self) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_vertex_descriptor_set_packed_offsets(self.handle.as_ptr()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex descriptor counterpart.
     pub fn set_packed_strides(&self) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_vertex_descriptor_set_packed_strides(self.handle.as_ptr()) };

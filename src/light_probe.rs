@@ -77,15 +77,18 @@ where
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O light probe counterpart.
 pub struct LightProbe {
     handle: ObjectHandle,
 }
 
 impl LightProbe {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O light probe counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O light probe counterpart.
     pub fn new(
         reflective_texture: Option<&Texture>,
         irradiance_texture: Option<&Texture>,
@@ -108,6 +111,7 @@ impl LightProbe {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light probe counterpart.
     pub fn generate_spherical_harmonics_from_irradiance(&self, level: usize) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -119,6 +123,7 @@ impl LightProbe {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light probe counterpart.
     pub fn reflective_texture(&self) -> Option<Texture> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_light_probe_reflective_texture(self.handle.as_ptr()) };
@@ -127,6 +132,7 @@ impl LightProbe {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light probe counterpart.
     pub fn irradiance_texture(&self) -> Option<Texture> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_light_probe_irradiance_texture(self.handle.as_ptr()) };
@@ -135,12 +141,14 @@ impl LightProbe {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light probe counterpart.
     pub fn spherical_harmonics_level(&self) -> usize {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_light_probe_spherical_harmonics_level(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light probe counterpart.
     pub fn spherical_harmonics_coefficients(&self) -> Vec<f32> {
         // SAFETY: The unsafe operation is valid in this context.
         let count = unsafe {
@@ -164,30 +172,36 @@ impl LightProbe {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light probe counterpart.
     pub fn as_light(&self) -> Light {
         Light::from_handle(self.handle.clone())
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light probe counterpart.
     pub fn as_object(&self) -> Object {
         Object::from_handle(self.handle.clone())
     }
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O light probe irradiance data source counterpart.
 pub struct LightProbeIrradianceDataSource {
     handle: ObjectHandle,
 }
 
 impl LightProbeIrradianceDataSource {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O light probe irradiance data source counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O light probe irradiance data source counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light probe irradiance data source counterpart.
     pub fn new<F>(
         bounding_box: BoundingBox,
         spherical_harmonics_level: usize,
@@ -231,6 +245,7 @@ impl LightProbeIrradianceDataSource {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light probe irradiance data source counterpart.
     pub fn bounding_box(&self) -> BoundingBox {
         let mut min = [0.0_f32; 3];
         let mut max = [0.0_f32; 3];
@@ -249,6 +264,7 @@ impl LightProbeIrradianceDataSource {
         BoundingBox { min, max }
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light probe irradiance data source counterpart.
     pub fn set_bounding_box(&self, bounding_box: BoundingBox) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -265,6 +281,7 @@ impl LightProbeIrradianceDataSource {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light probe irradiance data source counterpart.
     pub fn spherical_harmonics_level(&self) -> usize {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -274,6 +291,7 @@ impl LightProbeIrradianceDataSource {
         }
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light probe irradiance data source counterpart.
     pub fn set_spherical_harmonics_level(&self, spherical_harmonics_level: usize) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -286,6 +304,7 @@ impl LightProbeIrradianceDataSource {
 }
 
 impl Asset {
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O asset counterpart.
     pub fn place_light_probes(
         density: f32,
         heuristic: ProbePlacement,

@@ -8,6 +8,7 @@ use crate::types::MeshBufferType;
 use crate::util::required_handle;
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O mesh buffer map counterpart.
 pub struct MeshBufferMap {
     handle: ObjectHandle,
     length: usize,
@@ -18,16 +19,19 @@ impl MeshBufferMap {
         Self { handle, length }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O mesh buffer map counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer map counterpart.
     pub fn length(&self) -> usize {
         self.length
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer map counterpart.
     pub fn bytes(&self) -> Vec<u8> {
         let mut bytes = vec![0_u8; self.length];
         if bytes.is_empty() {
@@ -46,6 +50,7 @@ impl MeshBufferMap {
         bytes
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer map counterpart.
     pub fn write(&self, offset: usize, bytes: &[u8]) -> usize {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -61,19 +66,23 @@ impl MeshBufferMap {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O mesh buffer allocator counterpart.
 pub struct MeshBufferAllocator {
     handle: ObjectHandle,
 }
 
 impl MeshBufferAllocator {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O mesh buffer allocator counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O mesh buffer allocator counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O mesh buffer allocator counterpart.
     pub fn new_zone(&self, capacity: usize) -> Result<MeshBufferZone> {
         let mut out_zone = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -93,6 +102,7 @@ impl MeshBufferAllocator {
         )?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O mesh buffer allocator counterpart.
     pub fn new_zone_for_buffers(
         &self,
         sizes: &[usize],
@@ -129,6 +139,7 @@ impl MeshBufferAllocator {
         )?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O mesh buffer allocator counterpart.
     pub fn new_buffer(&self, length: usize, buffer_type: MeshBufferType) -> Result<MeshBuffer> {
         let mut out_buffer = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -149,6 +160,7 @@ impl MeshBufferAllocator {
         )?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O mesh buffer allocator counterpart.
     pub fn new_buffer_with_data(
         &self,
         data: &[u8],
@@ -174,6 +186,7 @@ impl MeshBufferAllocator {
         )?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O mesh buffer allocator counterpart.
     pub fn new_buffer_from_zone(
         &self,
         zone: Option<&MeshBufferZone>,
@@ -198,6 +211,7 @@ impl MeshBufferAllocator {
         Ok(unsafe { ObjectHandle::from_retained_ptr(out_buffer) }.map(MeshBuffer::from_handle))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O mesh buffer allocator counterpart.
     pub fn new_buffer_from_zone_with_data(
         &self,
         zone: Option<&MeshBufferZone>,
@@ -225,26 +239,31 @@ impl MeshBufferAllocator {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O mesh buffer zone counterpart.
 pub struct MeshBufferZone {
     handle: ObjectHandle,
 }
 
 impl MeshBufferZone {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O mesh buffer zone counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O mesh buffer zone counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer zone counterpart.
     pub fn capacity(&self) -> usize {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_mesh_buffer_zone_capacity(self.as_ptr()) as usize }
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer zone counterpart.
     pub fn allocator(&self) -> Option<MeshBufferAllocator> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_mesh_buffer_zone_allocator(self.as_ptr()) };
@@ -253,6 +272,7 @@ impl MeshBufferZone {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer zone counterpart.
     pub fn as_default(&self) -> Option<MeshBufferZoneDefault> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         (unsafe { ffi::mdl_mesh_buffer_zone_is_default(self.as_ptr()) != 0 })
@@ -261,6 +281,7 @@ impl MeshBufferZone {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O mesh buffer zone default counterpart.
 pub struct MeshBufferZoneDefault {
     handle: ObjectHandle,
 }
@@ -270,6 +291,7 @@ impl MeshBufferZoneDefault {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O mesh buffer zone default counterpart.
     pub fn new() -> Result<Self> {
         let mut out_zone = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -284,12 +306,14 @@ impl MeshBufferZoneDefault {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer zone default counterpart.
     pub fn capacity(&self) -> usize {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_mesh_buffer_zone_capacity(self.handle.as_ptr()) as usize }
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer zone default counterpart.
     pub fn allocator(&self) -> Option<MeshBufferAllocator> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_mesh_buffer_zone_allocator(self.handle.as_ptr()) };
@@ -298,12 +322,14 @@ impl MeshBufferZoneDefault {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer zone default counterpart.
     pub fn as_mesh_buffer_zone(&self) -> MeshBufferZone {
         MeshBufferZone::from_handle(self.handle.clone())
     }
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O mesh buffer data counterpart.
 pub struct MeshBufferData {
     handle: ObjectHandle,
 }
@@ -313,6 +339,7 @@ impl MeshBufferData {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O mesh buffer data counterpart.
     pub fn new(length: usize, buffer_type: MeshBufferType) -> Result<Self> {
         let mut out_buffer = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -332,6 +359,7 @@ impl MeshBufferData {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer data counterpart.
     pub fn from_bytes(data: &[u8], buffer_type: MeshBufferType) -> Result<Self> {
         let mut out_buffer = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -353,6 +381,7 @@ impl MeshBufferData {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer data counterpart.
     pub fn data(&self) -> Vec<u8> {
         let info = self.as_mesh_buffer().info().ok();
         let mut bytes = vec![0_u8; info.map_or(0, |buffer| buffer.length)];
@@ -371,22 +400,26 @@ impl MeshBufferData {
         bytes
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer data counterpart.
     pub fn map(&self) -> Result<MeshBufferMap> {
         self.as_mesh_buffer().map()
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer data counterpart.
     pub fn as_mesh_buffer(&self) -> MeshBuffer {
         MeshBuffer::from_handle(self.handle.clone())
     }
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O mesh buffer data allocator counterpart.
 pub struct MeshBufferDataAllocator {
     handle: ObjectHandle,
 }
 
 impl MeshBufferDataAllocator {
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O mesh buffer data allocator counterpart.
     pub fn new() -> Result<Self> {
         let mut out_allocator = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -400,10 +433,12 @@ impl MeshBufferDataAllocator {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer data allocator counterpart.
     pub fn as_mesh_buffer_allocator(&self) -> MeshBufferAllocator {
         MeshBufferAllocator::from_handle(self.handle.clone())
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O mesh buffer data allocator counterpart.
     pub fn new_default_zone(&self, capacity: usize) -> Result<MeshBufferZoneDefault> {
         self.as_mesh_buffer_allocator()
             .new_zone(capacity)?
@@ -418,6 +453,7 @@ impl MeshBufferDataAllocator {
 }
 
 impl MeshBuffer {
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer counterpart.
     pub fn fill_data(&self, data: &[u8], offset: usize) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -430,6 +466,7 @@ impl MeshBuffer {
         }
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer counterpart.
     pub fn map(&self) -> Result<MeshBufferMap> {
         let length = self.info()?.length;
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -441,6 +478,7 @@ impl MeshBuffer {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer counterpart.
     pub fn allocator(&self) -> Option<MeshBufferAllocator> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_mesh_buffer_allocator(self.as_ptr()) };
@@ -449,6 +487,7 @@ impl MeshBuffer {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer counterpart.
     pub fn zone(&self) -> Option<MeshBufferZone> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_mesh_buffer_zone(self.as_ptr()) };
@@ -457,6 +496,7 @@ impl MeshBuffer {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer counterpart.
     pub fn as_data_buffer(&self) -> Option<MeshBufferData> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         if unsafe { ffi::mdl_mesh_buffer_is_data(self.as_ptr()) == 0 } {

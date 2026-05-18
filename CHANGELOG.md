@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.4] - 2026-05-18
+
+### Changed
+
+- Added rustdoc comments across the public Model I/O wrapper surface, raising measured public-item documentation coverage to 100%.
+
 ## [0.2.3] - 2026-05-17
 
 ### Changed

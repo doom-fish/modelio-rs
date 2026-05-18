@@ -7,6 +7,7 @@ use serde::de::DeserializeOwned;
 use crate::error::{ModelIoError, Result};
 use crate::ffi;
 
+/// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
 pub(crate) fn c_string(value: &str) -> Result<CString> {
     CString::new(value).map_err(|_| {
         ModelIoError::new(
@@ -16,10 +17,12 @@ pub(crate) fn c_string(value: &str) -> Result<CString> {
     })
 }
 
+/// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
 pub(crate) fn path_to_c_string(path: &Path) -> Result<CString> {
     c_string(path.to_string_lossy().as_ref())
 }
 
+/// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
 pub(crate) fn take_string(ptr: *mut c_char) -> Option<String> {
     if ptr.is_null() {
         return None;
@@ -32,6 +35,7 @@ pub(crate) fn take_string(ptr: *mut c_char) -> Option<String> {
     Some(string)
 }
 
+/// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
 pub(crate) fn status_result(status: i32, error_ptr: *mut c_char) -> Result<()> {
     if status == ffi::status::OK {
         return Ok(());
@@ -42,6 +46,7 @@ pub(crate) fn status_result(status: i32, error_ptr: *mut c_char) -> Result<()> {
     Err(ModelIoError::new(status, message))
 }
 
+/// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
 pub(crate) fn required_handle(
     ptr: *mut c_void,
     context: &'static str,
@@ -52,6 +57,7 @@ pub(crate) fn required_handle(
     })
 }
 
+/// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
 pub(crate) fn parse_json<T: DeserializeOwned>(
     ptr: *mut c_char,
     context: &'static str,

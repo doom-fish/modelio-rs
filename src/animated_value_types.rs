@@ -35,38 +35,46 @@ fn convert_vectors<const N: usize>(raw: &[f32]) -> Vec<[f32; N]> {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O animated value counterpart.
 pub struct AnimatedValue {
     handle: ObjectHandle,
 }
 
 impl AnimatedValue {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O animated value counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated value counterpart.
     pub fn info(&self) -> Result<AnimatedValueInfo> {
         animated_info(&self.handle, "MDLAnimatedValue")
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated value counterpart.
     pub fn clear(&self) {
         animated_clear(&self.handle);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated value counterpart.
     pub fn set_interpolation(&self, interpolation: AnimatedValueInterpolation) {
         animated_set_interpolation(&self.handle, interpolation);
     }
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O animated scalar counterpart.
 pub struct AnimatedScalar {
     handle: ObjectHandle,
 }
 
 impl AnimatedScalar {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O animated scalar counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O animated scalar counterpart.
     pub fn new() -> Result<Self> {
         let mut out_value = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -79,24 +87,29 @@ impl AnimatedScalar {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated scalar counterpart.
     pub fn info(&self) -> Result<AnimatedValueInfo> {
         animated_info(&self.handle, "MDLAnimatedScalar")
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated scalar counterpart.
     pub fn clear(&self) {
         animated_clear(&self.handle);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated scalar counterpart.
     pub fn set_interpolation(&self, interpolation: AnimatedValueInterpolation) {
         animated_set_interpolation(&self.handle, interpolation);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated scalar counterpart.
     pub fn set_float(&self, value: f32, time: f64) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_animated_scalar_set_float(self.handle.as_ptr(), value, time) };
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated scalar counterpart.
     pub fn float_value(&self, time: f64) -> f32 {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_animated_scalar_float_value(self.handle.as_ptr(), time) }
@@ -104,15 +117,18 @@ impl AnimatedScalar {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O animated vector2 counterpart.
 pub struct AnimatedVector2 {
     handle: ObjectHandle,
 }
 
 impl AnimatedVector2 {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O animated vector2 counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O animated vector2 counterpart.
     pub fn new() -> Result<Self> {
         let mut out_value = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -125,18 +141,22 @@ impl AnimatedVector2 {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector2 counterpart.
     pub fn info(&self) -> Result<AnimatedValueInfo> {
         animated_info(&self.handle, "MDLAnimatedVector2")
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector2 counterpart.
     pub fn clear(&self) {
         animated_clear(&self.handle);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector2 counterpart.
     pub fn set_interpolation(&self, interpolation: AnimatedValueInterpolation) {
         animated_set_interpolation(&self.handle, interpolation);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector2 counterpart.
     pub fn set_float2(&self, value: [f32; 2], time: f64) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -145,6 +165,7 @@ impl AnimatedVector2 {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector2 counterpart.
     pub fn float2_value(&self, time: f64) -> [f32; 2] {
         let mut value = [0.0_f32; 2];
         // SAFETY: The unsafe operation is valid in this context.
@@ -161,15 +182,18 @@ impl AnimatedVector2 {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O animated vector3 counterpart.
 pub struct AnimatedVector3 {
     handle: ObjectHandle,
 }
 
 impl AnimatedVector3 {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O animated vector3 counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O animated vector3 counterpart.
     pub fn new() -> Result<Self> {
         let mut out_value = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -182,18 +206,22 @@ impl AnimatedVector3 {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector3 counterpart.
     pub fn info(&self) -> Result<AnimatedValueInfo> {
         animated_info(&self.handle, "MDLAnimatedVector3")
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector3 counterpart.
     pub fn clear(&self) {
         animated_clear(&self.handle);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector3 counterpart.
     pub fn set_interpolation(&self, interpolation: AnimatedValueInterpolation) {
         animated_set_interpolation(&self.handle, interpolation);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector3 counterpart.
     pub fn set_float3(&self, value: [f32; 3], time: f64) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -208,6 +236,7 @@ impl AnimatedVector3 {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector3 counterpart.
     pub fn float3_value(&self, time: f64) -> [f32; 3] {
         let mut value = [0.0_f32; 3];
         // SAFETY: The unsafe operation is valid in this context.
@@ -225,15 +254,18 @@ impl AnimatedVector3 {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O animated vector4 counterpart.
 pub struct AnimatedVector4 {
     handle: ObjectHandle,
 }
 
 impl AnimatedVector4 {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O animated vector4 counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O animated vector4 counterpart.
     pub fn new() -> Result<Self> {
         let mut out_value = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -246,18 +278,22 @@ impl AnimatedVector4 {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector4 counterpart.
     pub fn info(&self) -> Result<AnimatedValueInfo> {
         animated_info(&self.handle, "MDLAnimatedVector4")
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector4 counterpart.
     pub fn clear(&self) {
         animated_clear(&self.handle);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector4 counterpart.
     pub fn set_interpolation(&self, interpolation: AnimatedValueInterpolation) {
         animated_set_interpolation(&self.handle, interpolation);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector4 counterpart.
     pub fn set_float4(&self, value: [f32; 4], time: f64) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -273,6 +309,7 @@ impl AnimatedVector4 {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector4 counterpart.
     pub fn float4_value(&self, time: f64) -> [f32; 4] {
         let mut value = [0.0_f32; 4];
         // SAFETY: The unsafe operation is valid in this context.
@@ -291,15 +328,18 @@ impl AnimatedVector4 {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O animated quaternion counterpart.
 pub struct AnimatedQuaternion {
     handle: ObjectHandle,
 }
 
 impl AnimatedQuaternion {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O animated quaternion counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O animated quaternion counterpart.
     pub fn new() -> Result<Self> {
         let mut out_value = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -312,18 +352,22 @@ impl AnimatedQuaternion {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated quaternion counterpart.
     pub fn info(&self) -> Result<AnimatedValueInfo> {
         animated_info(&self.handle, "MDLAnimatedQuaternion")
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated quaternion counterpart.
     pub fn clear(&self) {
         animated_clear(&self.handle);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated quaternion counterpart.
     pub fn set_interpolation(&self, interpolation: AnimatedValueInterpolation) {
         animated_set_interpolation(&self.handle, interpolation);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated quaternion counterpart.
     pub fn set_float_quaternion(&self, value: [f32; 4], time: f64) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -339,6 +383,7 @@ impl AnimatedQuaternion {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated quaternion counterpart.
     pub fn float_quaternion_value(&self, time: f64) -> [f32; 4] {
         let mut raw = [0.0_f32; 4];
         // SAFETY: The unsafe operation is valid in this context.
@@ -354,15 +399,18 @@ impl AnimatedQuaternion {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O animated matrix4x4 counterpart.
 pub struct AnimatedMatrix4x4 {
     handle: ObjectHandle,
 }
 
 impl AnimatedMatrix4x4 {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O animated matrix4x4 counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O animated matrix4x4 counterpart.
     pub fn new() -> Result<Self> {
         let mut out_value = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -375,18 +423,22 @@ impl AnimatedMatrix4x4 {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated matrix4x4 counterpart.
     pub fn info(&self) -> Result<AnimatedValueInfo> {
         animated_info(&self.handle, "MDLAnimatedMatrix4x4")
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated matrix4x4 counterpart.
     pub fn clear(&self) {
         animated_clear(&self.handle);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated matrix4x4 counterpart.
     pub fn set_interpolation(&self, interpolation: AnimatedValueInterpolation) {
         animated_set_interpolation(&self.handle, interpolation);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated matrix4x4 counterpart.
     pub fn set_float4x4(&self, value: [f32; 16], time: f64) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -395,6 +447,7 @@ impl AnimatedMatrix4x4 {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated matrix4x4 counterpart.
     pub fn float4x4_value(&self, time: f64) -> [f32; 16] {
         let mut raw = [0.0_f32; 16];
         // SAFETY: The unsafe operation is valid in this context.
@@ -410,15 +463,18 @@ impl AnimatedMatrix4x4 {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O animated scalar array counterpart.
 pub struct AnimatedScalarArray {
     handle: ObjectHandle,
 }
 
 impl AnimatedScalarArray {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O animated scalar array counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O animated scalar array counterpart.
     pub fn new(element_count: usize) -> Result<Self> {
         let mut out_value = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -433,18 +489,22 @@ impl AnimatedScalarArray {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated scalar array counterpart.
     pub fn info(&self) -> Result<AnimatedValueInfo> {
         animated_info(&self.handle, "MDLAnimatedScalarArray")
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated scalar array counterpart.
     pub fn clear(&self) {
         animated_clear(&self.handle);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated scalar array counterpart.
     pub fn set_interpolation(&self, interpolation: AnimatedValueInterpolation) {
         animated_set_interpolation(&self.handle, interpolation);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated scalar array counterpart.
     pub fn set_float_array(&self, values: &[f32], time: f64) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -457,6 +517,7 @@ impl AnimatedScalarArray {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated scalar array counterpart.
     pub fn float_array_at_time(&self, time: f64) -> Result<Vec<f32>> {
         let element_count = self.info()?.element_count.unwrap_or(0);
         if element_count == 0 {
@@ -478,15 +539,18 @@ impl AnimatedScalarArray {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O animated vector3array counterpart.
 pub struct AnimatedVector3Array {
     handle: ObjectHandle,
 }
 
 impl AnimatedVector3Array {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O animated vector3array counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O animated vector3array counterpart.
     pub fn new(element_count: usize) -> Result<Self> {
         let mut out_value = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -505,18 +569,22 @@ impl AnimatedVector3Array {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector3array counterpart.
     pub fn info(&self) -> Result<AnimatedValueInfo> {
         animated_info(&self.handle, "MDLAnimatedVector3Array")
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector3array counterpart.
     pub fn clear(&self) {
         animated_clear(&self.handle);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector3array counterpart.
     pub fn set_interpolation(&self, interpolation: AnimatedValueInterpolation) {
         animated_set_interpolation(&self.handle, interpolation);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector3array counterpart.
     pub fn set_float3_array(&self, values: &[[f32; 3]], time: f64) {
         let flattened = values
             .iter()
@@ -533,6 +601,7 @@ impl AnimatedVector3Array {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated vector3array counterpart.
     pub fn float3_array_at_time(&self, time: f64) -> Result<Vec<[f32; 3]>> {
         let element_count = self.info()?.element_count.unwrap_or(0);
         if element_count == 0 {
@@ -554,15 +623,18 @@ impl AnimatedVector3Array {
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O animated quaternion array counterpart.
 pub struct AnimatedQuaternionArray {
     handle: ObjectHandle,
 }
 
 impl AnimatedQuaternionArray {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O animated quaternion array counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O animated quaternion array counterpart.
     pub fn new(element_count: usize) -> Result<Self> {
         let mut out_value = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -581,18 +653,22 @@ impl AnimatedQuaternionArray {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated quaternion array counterpart.
     pub fn info(&self) -> Result<AnimatedValueInfo> {
         animated_info(&self.handle, "MDLAnimatedQuaternionArray")
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated quaternion array counterpart.
     pub fn clear(&self) {
         animated_clear(&self.handle);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated quaternion array counterpart.
     pub fn set_interpolation(&self, interpolation: AnimatedValueInterpolation) {
         animated_set_interpolation(&self.handle, interpolation);
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated quaternion array counterpart.
     pub fn set_float_quaternion_array(&self, values: &[[f32; 4]], time: f64) {
         let flattened = values
             .iter()
@@ -609,6 +685,7 @@ impl AnimatedQuaternionArray {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated quaternion array counterpart.
     pub fn float_quaternion_array_at_time(&self, time: f64) -> Result<Vec<[f32; 4]>> {
         let element_count = self.info()?.element_count.unwrap_or(0);
         if element_count == 0 {

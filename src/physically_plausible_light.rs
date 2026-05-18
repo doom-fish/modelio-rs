@@ -11,15 +11,18 @@ use crate::types::{AreaLightInfo, PhotometricLightInfo, PhysicallyPlausibleLight
 use crate::util::{parse_json, path_to_c_string, required_handle};
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O physically plausible light counterpart.
 pub struct PhysicallyPlausibleLight {
     handle: ObjectHandle,
 }
 
 impl PhysicallyPlausibleLight {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O physically plausible light counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O physically plausible light counterpart.
     pub fn new() -> Result<Self> {
         let mut out_light = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -33,6 +36,7 @@ impl PhysicallyPlausibleLight {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible light counterpart.
     pub fn info(&self) -> Result<PhysicallyPlausibleLightInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -41,6 +45,7 @@ impl PhysicallyPlausibleLight {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible light counterpart.
     pub fn set_color_temperature(&self, temperature: f32) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -51,6 +56,7 @@ impl PhysicallyPlausibleLight {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible light counterpart.
     pub fn set_color(&self, color: [f32; 4]) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -64,11 +70,13 @@ impl PhysicallyPlausibleLight {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible light counterpart.
     pub fn set_lumens(&self, lumens: f32) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_physically_plausible_light_set_lumens(self.handle.as_ptr(), lumens) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible light counterpart.
     pub fn set_inner_cone_angle(&self, angle: f32) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -76,6 +84,7 @@ impl PhysicallyPlausibleLight {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible light counterpart.
     pub fn set_outer_cone_angle(&self, angle: f32) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -83,6 +92,7 @@ impl PhysicallyPlausibleLight {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible light counterpart.
     pub fn set_attenuation_start_distance(&self, distance: f32) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -93,6 +103,7 @@ impl PhysicallyPlausibleLight {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible light counterpart.
     pub fn set_attenuation_end_distance(&self, distance: f32) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -104,26 +115,31 @@ impl PhysicallyPlausibleLight {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible light counterpart.
     pub fn as_light(&self) -> Light {
         Light::from_handle(self.handle.clone())
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible light counterpart.
     pub fn as_object(&self) -> Object {
         Object::from_handle(self.handle.clone())
     }
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O area light counterpart.
 pub struct AreaLight {
     handle: ObjectHandle,
 }
 
 impl AreaLight {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O area light counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O area light counterpart.
     pub fn new() -> Result<Self> {
         let mut out_light = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -136,6 +152,7 @@ impl AreaLight {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O area light counterpart.
     pub fn info(&self) -> Result<AreaLightInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -144,11 +161,13 @@ impl AreaLight {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O area light counterpart.
     pub fn set_area_radius(&self, value: f32) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_area_light_set_area_radius(self.handle.as_ptr(), value) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O area light counterpart.
     pub fn set_super_elliptic_power(&self, value: [f32; 2]) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -156,37 +175,44 @@ impl AreaLight {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O area light counterpart.
     pub fn set_aspect(&self, value: f32) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_area_light_set_aspect(self.handle.as_ptr(), value) };
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O area light counterpart.
     pub fn as_physically_plausible_light(&self) -> PhysicallyPlausibleLight {
         PhysicallyPlausibleLight::from_handle(self.handle.clone())
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O area light counterpart.
     pub fn as_light(&self) -> Light {
         Light::from_handle(self.handle.clone())
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O area light counterpart.
     pub fn as_object(&self) -> Object {
         Object::from_handle(self.handle.clone())
     }
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O photometric light counterpart.
 pub struct PhotometricLight {
     handle: ObjectHandle,
 }
 
 impl PhotometricLight {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O photometric light counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O photometric light counterpart.
     pub fn new() -> Result<Self> {
         let mut out_light = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -199,6 +225,7 @@ impl PhotometricLight {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O photometric light counterpart.
     pub fn from_ies_profile(path: impl AsRef<Path>) -> Result<Self> {
         let path = path_to_c_string(path.as_ref())?;
         let mut out_light = ptr::null_mut();
@@ -218,6 +245,7 @@ impl PhotometricLight {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O photometric light counterpart.
     pub fn info(&self) -> Result<PhotometricLightInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -226,6 +254,7 @@ impl PhotometricLight {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O photometric light counterpart.
     pub fn generate_spherical_harmonics_from_light(&self, level: usize) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -236,6 +265,7 @@ impl PhotometricLight {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O photometric light counterpart.
     pub fn generate_cubemap_from_light(&self, texture_size: usize) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -247,6 +277,7 @@ impl PhotometricLight {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O photometric light counterpart.
     pub fn generate_texture(&self, texture_size: usize) -> Option<Texture> {
         // SAFETY: The unsafe operation is valid in this context.
         let ptr = unsafe {
@@ -257,6 +288,7 @@ impl PhotometricLight {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O photometric light counterpart.
     pub fn light_cube_map(&self) -> Option<Texture> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_photometric_light_light_cube_map(self.handle.as_ptr()) };
@@ -265,16 +297,19 @@ impl PhotometricLight {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O photometric light counterpart.
     pub fn as_physically_plausible_light(&self) -> PhysicallyPlausibleLight {
         PhysicallyPlausibleLight::from_handle(self.handle.clone())
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O photometric light counterpart.
     pub fn as_light(&self) -> Light {
         Light::from_handle(self.handle.clone())
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O photometric light counterpart.
     pub fn as_object(&self) -> Object {
         Object::from_handle(self.handle.clone())
     }

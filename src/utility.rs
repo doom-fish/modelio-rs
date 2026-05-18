@@ -5,9 +5,11 @@ use crate::ffi;
 use crate::util::path_to_c_string;
 
 #[derive(Debug, Clone, Copy, Default)]
+/// Wraps the corresponding Model I/O utility counterpart.
 pub struct Utility;
 
 impl Utility {
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O utility counterpart.
     pub fn convert_to_usdz(
         input_url: impl AsRef<Path>,
         output_url: impl AsRef<Path>,

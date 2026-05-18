@@ -28,6 +28,7 @@ fn sdk_constant(code: u32) -> Option<String> {
     take_string(unsafe { ffi::mdl_sdk_constant_string(code) })
 }
 
+/// Groups helper APIs for the corresponding Model I/O ut type symbols.
 pub mod ut_type {
     use super::{
         sdk_constant, UTTYPE_3D_OBJECT, UTTYPE_ALEMBIC, UTTYPE_POLYGON, UTTYPE_STEREOLITHOGRAPHY,
@@ -35,36 +36,43 @@ pub mod ut_type {
     };
 
     #[must_use]
+    /// Returns the corresponding Model I/O helper for ut type.
     pub fn alembic() -> Option<String> {
         sdk_constant(UTTYPE_ALEMBIC)
     }
 
     #[must_use]
+    /// Returns the corresponding Model I/O helper for ut type.
     pub fn object_3d() -> Option<String> {
         sdk_constant(UTTYPE_3D_OBJECT)
     }
 
     #[must_use]
+    /// Returns the corresponding Model I/O helper for ut type.
     pub fn polygon() -> Option<String> {
         sdk_constant(UTTYPE_POLYGON)
     }
 
     #[must_use]
+    /// Returns the corresponding Model I/O helper for ut type.
     pub fn stereolithography() -> Option<String> {
         sdk_constant(UTTYPE_STEREOLITHOGRAPHY)
     }
 
     #[must_use]
+    /// Returns the corresponding Model I/O helper for ut type.
     pub fn universal_scene_description() -> Option<String> {
         sdk_constant(UTTYPE_UNIVERSAL_SCENE_DESCRIPTION)
     }
 
     #[must_use]
+    /// Returns the corresponding Model I/O helper for ut type.
     pub fn universal_scene_description_mobile() -> Option<String> {
         sdk_constant(UTTYPE_UNIVERSAL_SCENE_DESCRIPTION_MOBILE)
     }
 }
 
+/// Groups helper APIs for the corresponding Model I/O vertex attribute name symbols.
 pub mod vertex_attribute_name {
     use super::{
         sdk_constant, VERTEX_ATTRIBUTE_ANISOTROPY, VERTEX_ATTRIBUTE_BINORMAL,
@@ -77,62 +85,77 @@ pub mod vertex_attribute_name {
     };
 
     #[must_use]
+    /// Returns the corresponding Model I/O helper for vertex attribute name.
     pub fn anisotropy() -> Option<String> {
         sdk_constant(VERTEX_ATTRIBUTE_ANISOTROPY)
     }
     #[must_use]
+    /// Returns the corresponding Model I/O helper for vertex attribute name.
     pub fn binormal() -> Option<String> {
         sdk_constant(VERTEX_ATTRIBUTE_BINORMAL)
     }
     #[must_use]
+    /// Returns the corresponding Model I/O helper for vertex attribute name.
     pub fn bitangent() -> Option<String> {
         sdk_constant(VERTEX_ATTRIBUTE_BITANGENT)
     }
     #[must_use]
+    /// Returns the corresponding Model I/O helper for vertex attribute name.
     pub fn color() -> Option<String> {
         sdk_constant(VERTEX_ATTRIBUTE_COLOR)
     }
     #[must_use]
+    /// Returns the corresponding Model I/O helper for vertex attribute name.
     pub fn edge_crease() -> Option<String> {
         sdk_constant(VERTEX_ATTRIBUTE_EDGE_CREASE)
     }
     #[must_use]
+    /// Returns the corresponding Model I/O helper for vertex attribute name.
     pub fn joint_indices() -> Option<String> {
         sdk_constant(VERTEX_ATTRIBUTE_JOINT_INDICES)
     }
     #[must_use]
+    /// Returns the corresponding Model I/O helper for vertex attribute name.
     pub fn joint_weights() -> Option<String> {
         sdk_constant(VERTEX_ATTRIBUTE_JOINT_WEIGHTS)
     }
     #[must_use]
+    /// Returns the corresponding Model I/O helper for vertex attribute name.
     pub fn normal() -> Option<String> {
         sdk_constant(VERTEX_ATTRIBUTE_NORMAL)
     }
     #[must_use]
+    /// Returns the corresponding Model I/O helper for vertex attribute name.
     pub fn occlusion_value() -> Option<String> {
         sdk_constant(VERTEX_ATTRIBUTE_OCCLUSION_VALUE)
     }
     #[must_use]
+    /// Returns the corresponding Model I/O helper for vertex attribute name.
     pub fn position() -> Option<String> {
         sdk_constant(VERTEX_ATTRIBUTE_POSITION)
     }
     #[must_use]
+    /// Returns the corresponding Model I/O helper for vertex attribute name.
     pub fn shading_basis_u() -> Option<String> {
         sdk_constant(VERTEX_ATTRIBUTE_SHADING_BASIS_U)
     }
     #[must_use]
+    /// Returns the corresponding Model I/O helper for vertex attribute name.
     pub fn shading_basis_v() -> Option<String> {
         sdk_constant(VERTEX_ATTRIBUTE_SHADING_BASIS_V)
     }
     #[must_use]
+    /// Returns the corresponding Model I/O helper for vertex attribute name.
     pub fn subdivision_stencil() -> Option<String> {
         sdk_constant(VERTEX_ATTRIBUTE_SUBDIVISION_STENCIL)
     }
     #[must_use]
+    /// Returns the corresponding Model I/O helper for vertex attribute name.
     pub fn tangent() -> Option<String> {
         sdk_constant(VERTEX_ATTRIBUTE_TANGENT)
     }
     #[must_use]
+    /// Returns the corresponding Model I/O helper for vertex attribute name.
     pub fn texture_coordinate() -> Option<String> {
         sdk_constant(VERTEX_ATTRIBUTE_TEXTURE_COORDINATE)
     }

@@ -8,19 +8,23 @@ use crate::types::{TextureChannelEncoding, TextureInfo};
 use crate::util::{c_string, parse_json, path_to_c_string, required_handle};
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O texture counterpart.
 pub struct Texture {
     handle: ObjectHandle,
 }
 
 impl Texture {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O texture counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O texture counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture counterpart.
     pub fn from_url(path: impl AsRef<Path>, name: Option<&str>) -> Result<Self> {
         let path = path_to_c_string(path.as_ref())?;
         let name = name.map(c_string).transpose()?;
@@ -42,6 +46,7 @@ impl Texture {
         )?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O texture counterpart.
     pub fn new_checkerboard(
         divisions: f32,
         name: Option<&str>,
@@ -82,6 +87,7 @@ impl Texture {
         )?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O texture counterpart.
     pub fn new_color_temperature_gradient(
         color_temperature1: f32,
         color_temperature2: f32,
@@ -110,6 +116,7 @@ impl Texture {
         )?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O texture counterpart.
     pub fn new_color_gradient(
         color1: [f32; 4],
         color2: [f32; 4],
@@ -144,6 +151,7 @@ impl Texture {
         )?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O texture counterpart.
     pub fn new_vector_noise(
         smoothness: f32,
         name: Option<&str>,
@@ -172,6 +180,7 @@ impl Texture {
         )?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O texture counterpart.
     pub fn new_scalar_noise(
         smoothness: f32,
         name: Option<&str>,
@@ -204,6 +213,7 @@ impl Texture {
         )?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O texture counterpart.
     pub fn new_cellular_noise(
         frequency: f32,
         name: Option<&str>,
@@ -232,6 +242,7 @@ impl Texture {
         )?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O texture counterpart.
     pub fn new_normal_map(
         source_texture: &Self,
         name: Option<&str>,
@@ -259,6 +270,7 @@ impl Texture {
         )?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O texture counterpart.
     pub fn new_sky_cube(
         name: Option<&str>,
         dimensions: [i32; 2],
@@ -294,6 +306,7 @@ impl Texture {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O texture counterpart.
     pub fn new_sky_cube_with_azimuth(
         name: Option<&str>,
         dimensions: [i32; 2],
@@ -330,11 +343,13 @@ impl Texture {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture counterpart.
     pub fn update_sky_cube(&self) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_sky_cube_texture_update(self.as_ptr()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture counterpart.
     pub fn info(&self) -> Result<TextureInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -343,6 +358,7 @@ impl Texture {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture counterpart.
     pub fn write_to_url(&self, path: impl AsRef<Path>) -> Result<()> {
         let path = path_to_c_string(path.as_ref())?;
         let mut out_error = ptr::null_mut();
@@ -376,11 +392,13 @@ impl Texture {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture counterpart.
     pub fn texel_data_top_left(&self) -> Vec<u8> {
         self.texel_data(true)
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture counterpart.
     pub fn texel_data_bottom_left(&self) -> Vec<u8> {
         self.texel_data(false)
     }

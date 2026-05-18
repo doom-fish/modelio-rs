@@ -94,6 +94,7 @@ pub use value_types::Matrix4x4Array;
 pub use vertex_attribute::{VertexAttribute, VertexBufferLayout, VertexDescriptor};
 pub use voxel_array::VoxelArray;
 
+/// Re-exports the primary Model I/O wrappers for convenient imports.
 pub mod prelude {
     pub use crate::{
         ut_type, vertex_attribute_name, vertex_format, AnimatedMatrix4x4, AnimatedQuaternion,

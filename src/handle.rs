@@ -3,13 +3,20 @@ use std::ptr::NonNull;
 use crate::ffi;
 
 #[derive(Debug)]
+/// Wraps the corresponding Model I/O object handle counterpart.
 pub(crate) struct ObjectHandle(NonNull<core::ffi::c_void>);
 
 impl ObjectHandle {
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object handle counterpart.
+    ///
+    /// # Safety
+    ///
+    /// The caller must uphold the same preconditions required by the corresponding Model I/O API.
     pub(crate) unsafe fn from_retained_ptr(ptr: *mut core::ffi::c_void) -> Option<Self> {
         NonNull::new(ptr).map(Self)
     }
 
+    /// Returns the opaque pointer used to call the wrapped Model I/O object handle counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.0.as_ptr()
     }

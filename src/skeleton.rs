@@ -41,15 +41,19 @@ fn copy_matrices(
 }
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O skeleton counterpart.
 pub struct Skeleton {
+    /// Stores the corresponding Model I/O handle value for this wrapper.
     pub(crate) handle: ObjectHandle,
 }
 
 impl Skeleton {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O skeleton counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O skeleton counterpart.
     pub fn new(name: &str, joint_paths: &[&str]) -> Result<Self> {
         let name = c_string(name)?;
         let (_joint_paths, raw_joint_paths) = c_string_vec(joint_paths)?;
@@ -72,6 +76,7 @@ impl Skeleton {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O skeleton counterpart.
     pub fn info(&self) -> Result<SkeletonInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -80,6 +85,7 @@ impl Skeleton {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O skeleton counterpart.
     pub fn joint_bind_transform_array(&self) -> Result<Matrix4x4Array> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_skeleton_joint_bind_transform_array(self.handle.as_ptr()) };
@@ -89,6 +95,7 @@ impl Skeleton {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O skeleton counterpart.
     pub fn joint_rest_transform_array(&self) -> Result<Matrix4x4Array> {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         let ptr = unsafe { ffi::mdl_skeleton_joint_rest_transform_array(self.handle.as_ptr()) };
@@ -98,6 +105,7 @@ impl Skeleton {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O skeleton counterpart.
     pub fn joint_bind_transforms(&self) -> Result<Vec<[f32; 16]>> {
         let count = self.info()?.joint_bind_transform_count;
         Ok(copy_matrices(
@@ -107,6 +115,7 @@ impl Skeleton {
         ))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O skeleton counterpart.
     pub fn joint_rest_transforms(&self) -> Result<Vec<[f32; 16]>> {
         let count = self.info()?.joint_rest_transform_count;
         Ok(copy_matrices(
@@ -117,6 +126,7 @@ impl Skeleton {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O skeleton counterpart.
     pub fn as_object(&self) -> Object {
         Object::from_handle(self.handle.clone())
     }

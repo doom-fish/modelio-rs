@@ -8,15 +8,18 @@ use crate::types::{LightInfo, LightType};
 use crate::util::{c_string, parse_json, required_handle};
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O light counterpart.
 pub struct Light {
     handle: ObjectHandle,
 }
 
 impl Light {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O light counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O light counterpart.
     pub fn new() -> Result<Self> {
         let mut out_light = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -26,6 +29,7 @@ impl Light {
         Ok(Self::from_handle(required_handle(out_light, "MDLLight")?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light counterpart.
     pub fn info(&self) -> Result<LightInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -34,11 +38,13 @@ impl Light {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light counterpart.
     pub fn set_light_type(&self, light_type: LightType) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_light_set_light_type(self.handle.as_ptr(), light_type.as_raw()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light counterpart.
     pub fn set_color_space(&self, color_space: &str) -> Result<()> {
         let color_space = c_string(color_space)?;
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -47,6 +53,7 @@ impl Light {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light counterpart.
     pub fn irradiance_at_point(&self, point: [f32; 3]) -> [f32; 4] {
         let mut components = [0.0_f32; 4];
         // SAFETY: The unsafe operation is valid in this context.
@@ -66,6 +73,7 @@ impl Light {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light counterpart.
     pub fn as_object(&self) -> Object {
         Object::from_handle(self.handle.clone())
     }

@@ -1,6 +1,7 @@
 use serde::Deserialize;
 
 #[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
+/// Wraps the corresponding Model I/O bounding box counterpart.
 pub struct BoundingBox {
     pub min: [f32; 3],
     pub max: [f32; 3],
@@ -8,6 +9,7 @@ pub struct BoundingBox {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
+/// Mirrors the corresponding Model I/O geometry type enumeration.
 pub enum GeometryType {
     Points = 0,
     Lines = 1,
@@ -19,11 +21,13 @@ pub enum GeometryType {
 
 impl GeometryType {
     #[must_use]
+    /// Returns the raw constant used by the corresponding Model I/O counterpart.
     pub const fn as_raw(self) -> i32 {
         self as i32
     }
 
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: i32) -> Option<Self> {
         match raw {
             0 => Some(Self::Points),
@@ -39,6 +43,7 @@ impl GeometryType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
+/// Mirrors the corresponding Model I/O probe placement enumeration.
 pub enum ProbePlacement {
     UniformGrid = 0,
     IrradianceDistribution = 1,
@@ -46,11 +51,13 @@ pub enum ProbePlacement {
 
 impl ProbePlacement {
     #[must_use]
+    /// Returns the raw constant used by the corresponding Model I/O counterpart.
     pub const fn as_raw(self) -> i32 {
         self as i32
     }
 
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: i32) -> Option<Self> {
         match raw {
             0 => Some(Self::UniformGrid),
@@ -62,6 +69,7 @@ impl ProbePlacement {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
+/// Mirrors the corresponding Model I/O index bit depth enumeration.
 pub enum IndexBitDepth {
     UInt8 = 8,
     UInt16 = 16,
@@ -70,11 +78,13 @@ pub enum IndexBitDepth {
 
 impl IndexBitDepth {
     #[must_use]
+    /// Returns the raw constant used by the corresponding Model I/O counterpart.
     pub const fn as_raw(self) -> u32 {
         self as u32
     }
 
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: u32) -> Option<Self> {
         match raw {
             8 => Some(Self::UInt8),
@@ -87,6 +97,7 @@ impl IndexBitDepth {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
+/// Mirrors the corresponding Model I/O mesh buffer type enumeration.
 pub enum MeshBufferType {
     Vertex = 1,
     Index = 2,
@@ -95,11 +106,13 @@ pub enum MeshBufferType {
 
 impl MeshBufferType {
     #[must_use]
+    /// Returns the raw constant used by the corresponding Model I/O counterpart.
     pub const fn as_raw(self) -> u32 {
         self as u32
     }
 
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: u32) -> Option<Self> {
         match raw {
             1 => Some(Self::Vertex),
@@ -112,6 +125,7 @@ impl MeshBufferType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
+/// Mirrors the corresponding Model I/O material semantic enumeration.
 pub enum MaterialSemantic {
     BaseColor = 0,
     Subsurface = 1,
@@ -143,6 +157,7 @@ pub enum MaterialSemantic {
 
 impl MaterialSemantic {
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: u32) -> Option<Self> {
         match raw {
             0 => Some(Self::BaseColor),
@@ -178,6 +193,7 @@ impl MaterialSemantic {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
+/// Mirrors the corresponding Model I/O material property type enumeration.
 pub enum MaterialPropertyType {
     None = 0,
     String = 1,
@@ -194,6 +210,7 @@ pub enum MaterialPropertyType {
 
 impl MaterialPropertyType {
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: u32) -> Option<Self> {
         match raw {
             0 => Some(Self::None),
@@ -214,6 +231,7 @@ impl MaterialPropertyType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
+/// Mirrors the corresponding Model I/O material face enumeration.
 pub enum MaterialFace {
     Front = 0,
     Back = 1,
@@ -222,11 +240,13 @@ pub enum MaterialFace {
 
 impl MaterialFace {
     #[must_use]
+    /// Returns the raw constant used by the corresponding Model I/O counterpart.
     pub const fn as_raw(self) -> u32 {
         self as u32
     }
 
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: u32) -> Option<Self> {
         match raw {
             0 => Some(Self::Front),
@@ -239,6 +259,7 @@ impl MaterialFace {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
+/// Mirrors the corresponding Model I/O material texture wrap mode enumeration.
 pub enum MaterialTextureWrapMode {
     Clamp = 0,
     Repeat = 1,
@@ -247,11 +268,13 @@ pub enum MaterialTextureWrapMode {
 
 impl MaterialTextureWrapMode {
     #[must_use]
+    /// Returns the raw constant used by the corresponding Model I/O counterpart.
     pub const fn as_raw(self) -> u32 {
         self as u32
     }
 
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: u32) -> Option<Self> {
         match raw {
             0 => Some(Self::Clamp),
@@ -264,6 +287,7 @@ impl MaterialTextureWrapMode {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
+/// Mirrors the corresponding Model I/O material texture filter mode enumeration.
 pub enum MaterialTextureFilterMode {
     Nearest = 0,
     Linear = 1,
@@ -271,11 +295,13 @@ pub enum MaterialTextureFilterMode {
 
 impl MaterialTextureFilterMode {
     #[must_use]
+    /// Returns the raw constant used by the corresponding Model I/O counterpart.
     pub const fn as_raw(self) -> u32 {
         self as u32
     }
 
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: u32) -> Option<Self> {
         match raw {
             0 => Some(Self::Nearest),
@@ -287,6 +313,7 @@ impl MaterialTextureFilterMode {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
+/// Mirrors the corresponding Model I/O material mip map filter mode enumeration.
 pub enum MaterialMipMapFilterMode {
     Nearest = 0,
     Linear = 1,
@@ -294,11 +321,13 @@ pub enum MaterialMipMapFilterMode {
 
 impl MaterialMipMapFilterMode {
     #[must_use]
+    /// Returns the raw constant used by the corresponding Model I/O counterpart.
     pub const fn as_raw(self) -> u32 {
         self as u32
     }
 
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: u32) -> Option<Self> {
         match raw {
             0 => Some(Self::Nearest),
@@ -310,6 +339,7 @@ impl MaterialMipMapFilterMode {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
+/// Mirrors the corresponding Model I/O light type enumeration.
 pub enum LightType {
     Unknown = 0,
     Ambient = 1,
@@ -327,11 +357,13 @@ pub enum LightType {
 
 impl LightType {
     #[must_use]
+    /// Returns the raw constant used by the corresponding Model I/O counterpart.
     pub const fn as_raw(self) -> u32 {
         self as u32
     }
 
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: u32) -> Option<Self> {
         match raw {
             0 => Some(Self::Unknown),
@@ -353,6 +385,7 @@ impl LightType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
+/// Mirrors the corresponding Model I/O camera projection enumeration.
 pub enum CameraProjection {
     Perspective = 0,
     Orthographic = 1,
@@ -360,11 +393,13 @@ pub enum CameraProjection {
 
 impl CameraProjection {
     #[must_use]
+    /// Returns the raw constant used by the corresponding Model I/O counterpart.
     pub const fn as_raw(self) -> u32 {
         self as u32
     }
 
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: u32) -> Option<Self> {
         match raw {
             0 => Some(Self::Perspective),
@@ -376,6 +411,7 @@ impl CameraProjection {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
+/// Mirrors the corresponding Model I/O data precision enumeration.
 pub enum DataPrecision {
     Undefined = 0,
     Float = 1,
@@ -384,6 +420,7 @@ pub enum DataPrecision {
 
 impl DataPrecision {
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: u32) -> Option<Self> {
         match raw {
             0 => Some(Self::Undefined),
@@ -396,6 +433,7 @@ impl DataPrecision {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
+/// Mirrors the corresponding Model I/O animated value interpolation enumeration.
 pub enum AnimatedValueInterpolation {
     Constant = 0,
     Linear = 1,
@@ -403,11 +441,13 @@ pub enum AnimatedValueInterpolation {
 
 impl AnimatedValueInterpolation {
     #[must_use]
+    /// Returns the raw constant used by the corresponding Model I/O counterpart.
     pub const fn as_raw(self) -> u32 {
         self as u32
     }
 
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: u32) -> Option<Self> {
         match raw {
             0 => Some(Self::Constant),
@@ -419,6 +459,7 @@ impl AnimatedValueInterpolation {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u64)]
+/// Mirrors the corresponding Model I/O transform op rotation order enumeration.
 pub enum TransformOpRotationOrder {
     Xyz = 1,
     Xzy = 2,
@@ -430,11 +471,13 @@ pub enum TransformOpRotationOrder {
 
 impl TransformOpRotationOrder {
     #[must_use]
+    /// Returns the raw constant used by the corresponding Model I/O counterpart.
     pub const fn as_raw(self) -> u64 {
         self as u64
     }
 
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: u64) -> Option<Self> {
         match raw {
             1 => Some(Self::Xyz),
@@ -450,6 +493,7 @@ impl TransformOpRotationOrder {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
+/// Mirrors the corresponding Model I/O object kind enumeration.
 pub enum ObjectKind {
     Unknown = 0,
     Object = 1,
@@ -464,6 +508,7 @@ pub enum ObjectKind {
 
 impl ObjectKind {
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: i32) -> Option<Self> {
         match raw {
             0 => Some(Self::Unknown),
@@ -482,6 +527,7 @@ impl ObjectKind {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
+/// Mirrors the corresponding Model I/O texture channel encoding enumeration.
 pub enum TextureChannelEncoding {
     UInt8 = 1,
     UInt16 = 2,
@@ -494,11 +540,13 @@ pub enum TextureChannelEncoding {
 
 impl TextureChannelEncoding {
     #[must_use]
+    /// Returns the raw constant used by the corresponding Model I/O counterpart.
     pub const fn as_raw(self) -> i32 {
         self as i32
     }
 
     #[must_use]
+    /// Builds this Rust value from the raw constant used by the corresponding Model I/O counterpart.
     pub const fn from_raw(raw: i32) -> Option<Self> {
         match raw {
             1 => Some(Self::UInt8),
@@ -514,6 +562,7 @@ impl TextureChannelEncoding {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O mesh buffer info counterpart.
 pub struct MeshBufferInfo {
     pub length: usize,
     pub buffer_type: u32,
@@ -521,12 +570,14 @@ pub struct MeshBufferInfo {
 
 impl MeshBufferInfo {
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer info counterpart.
     pub fn buffer_type_enum(&self) -> Option<MeshBufferType> {
         MeshBufferType::from_raw(self.buffer_type)
     }
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O vertex attribute info counterpart.
 pub struct VertexAttributeInfo {
     pub stride: usize,
     pub format: u32,
@@ -534,6 +585,7 @@ pub struct VertexAttributeInfo {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O texture info counterpart.
 pub struct TextureInfo {
     pub name: Option<String>,
     pub dimensions: [i32; 2],
@@ -548,12 +600,14 @@ pub struct TextureInfo {
 
 impl TextureInfo {
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture info counterpart.
     pub fn channel_encoding_enum(&self) -> Option<TextureChannelEncoding> {
         TextureChannelEncoding::from_raw(self.channel_encoding)
     }
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O material property info counterpart.
 pub struct MaterialPropertyInfo {
     pub name: String,
     pub semantic: u32,
@@ -572,17 +626,20 @@ pub struct MaterialPropertyInfo {
 
 impl MaterialPropertyInfo {
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property info counterpart.
     pub fn semantic_enum(&self) -> Option<MaterialSemantic> {
         MaterialSemantic::from_raw(self.semantic)
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material property info counterpart.
     pub fn property_type_enum(&self) -> Option<MaterialPropertyType> {
         MaterialPropertyType::from_raw(self.property_type)
     }
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O material info counterpart.
 pub struct MaterialInfo {
     pub name: String,
     pub count: usize,
@@ -591,12 +648,14 @@ pub struct MaterialInfo {
 
 impl MaterialInfo {
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material info counterpart.
     pub fn material_face_enum(&self) -> Option<MaterialFace> {
         MaterialFace::from_raw(self.material_face)
     }
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O texture filter info counterpart.
 pub struct TextureFilterInfo {
     pub s_wrap_mode: u32,
     pub t_wrap_mode: u32,
@@ -608,37 +667,44 @@ pub struct TextureFilterInfo {
 
 impl TextureFilterInfo {
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture filter info counterpart.
     pub fn s_wrap_mode_enum(&self) -> Option<MaterialTextureWrapMode> {
         MaterialTextureWrapMode::from_raw(self.s_wrap_mode)
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture filter info counterpart.
     pub fn t_wrap_mode_enum(&self) -> Option<MaterialTextureWrapMode> {
         MaterialTextureWrapMode::from_raw(self.t_wrap_mode)
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture filter info counterpart.
     pub fn r_wrap_mode_enum(&self) -> Option<MaterialTextureWrapMode> {
         MaterialTextureWrapMode::from_raw(self.r_wrap_mode)
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture filter info counterpart.
     pub fn min_filter_enum(&self) -> Option<MaterialTextureFilterMode> {
         MaterialTextureFilterMode::from_raw(self.min_filter)
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture filter info counterpart.
     pub fn mag_filter_enum(&self) -> Option<MaterialTextureFilterMode> {
         MaterialTextureFilterMode::from_raw(self.mag_filter)
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O texture filter info counterpart.
     pub fn mip_filter_enum(&self) -> Option<MaterialMipMapFilterMode> {
         MaterialMipMapFilterMode::from_raw(self.mip_filter)
     }
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O texture sampler info counterpart.
 pub struct TextureSamplerInfo {
     pub has_texture: bool,
     pub has_hardware_filter: bool,
@@ -646,6 +712,7 @@ pub struct TextureSamplerInfo {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O asset info counterpart.
 pub struct AssetInfo {
     pub count: usize,
     pub frame_interval: f64,
@@ -657,6 +724,7 @@ pub struct AssetInfo {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O object info counterpart.
 pub struct ObjectInfo {
     pub kind: i32,
     pub name: String,
@@ -671,12 +739,14 @@ pub struct ObjectInfo {
 
 impl ObjectInfo {
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O object info counterpart.
     pub fn kind_enum(&self) -> Option<ObjectKind> {
         ObjectKind::from_raw(self.kind)
     }
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O light info counterpart.
 pub struct LightInfo {
     pub light_type: u32,
     pub color_space: String,
@@ -684,12 +754,14 @@ pub struct LightInfo {
 
 impl LightInfo {
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O light info counterpart.
     pub fn light_type_enum(&self) -> Option<LightType> {
         LightType::from_raw(self.light_type)
     }
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O physically plausible light info counterpart.
 pub struct PhysicallyPlausibleLightInfo {
     pub light_type: u32,
     pub color_space: String,
@@ -703,12 +775,14 @@ pub struct PhysicallyPlausibleLightInfo {
 
 impl PhysicallyPlausibleLightInfo {
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible light info counterpart.
     pub fn light_type_enum(&self) -> Option<LightType> {
         LightType::from_raw(self.light_type)
     }
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O area light info counterpart.
 pub struct AreaLightInfo {
     pub light_type: u32,
     pub color_space: String,
@@ -725,12 +799,14 @@ pub struct AreaLightInfo {
 
 impl AreaLightInfo {
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O area light info counterpart.
     pub fn light_type_enum(&self) -> Option<LightType> {
         LightType::from_raw(self.light_type)
     }
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O photometric light info counterpart.
 pub struct PhotometricLightInfo {
     pub light_type: u32,
     pub color_space: String,
@@ -747,12 +823,14 @@ pub struct PhotometricLightInfo {
 
 impl PhotometricLightInfo {
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O photometric light info counterpart.
     pub fn light_type_enum(&self) -> Option<LightType> {
         LightType::from_raw(self.light_type)
     }
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O camera info counterpart.
 pub struct CameraInfo {
     pub projection: u32,
     pub projection_matrix: [f32; 16],
@@ -781,12 +859,14 @@ pub struct CameraInfo {
 
 impl CameraInfo {
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O camera info counterpart.
     pub fn projection_enum(&self) -> Option<CameraProjection> {
         CameraProjection::from_raw(self.projection)
     }
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O stereoscopic camera info counterpart.
 pub struct StereoscopicCameraInfo {
     pub inter_pupillary_distance: f32,
     pub left_vergence: f32,
@@ -799,12 +879,14 @@ pub struct StereoscopicCameraInfo {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O voxel index extent counterpart.
 pub struct VoxelIndexExtent {
     pub minimum_extent: [i32; 4],
     pub maximum_extent: [i32; 4],
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O voxel array info counterpart.
 pub struct VoxelArrayInfo {
     pub count: usize,
     pub bounding_box: BoundingBox,
@@ -815,6 +897,7 @@ pub struct VoxelArrayInfo {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O animated value info counterpart.
 pub struct AnimatedValueInfo {
     pub is_animated: bool,
     pub precision: u32,
@@ -828,17 +911,20 @@ pub struct AnimatedValueInfo {
 
 impl AnimatedValueInfo {
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated value info counterpart.
     pub fn precision_enum(&self) -> Option<DataPrecision> {
         DataPrecision::from_raw(self.precision)
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O animated value info counterpart.
     pub fn interpolation_enum(&self) -> Option<AnimatedValueInterpolation> {
         AnimatedValueInterpolation::from_raw(self.interpolation)
     }
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O packed joint animation info counterpart.
 pub struct PackedJointAnimationInfo {
     pub name: String,
     pub path: String,
@@ -847,6 +933,7 @@ pub struct PackedJointAnimationInfo {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O animation bind component info counterpart.
 pub struct AnimationBindComponentInfo {
     pub has_skeleton: bool,
     pub has_joint_animation: bool,
@@ -855,6 +942,7 @@ pub struct AnimationBindComponentInfo {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O skeleton info counterpart.
 pub struct SkeletonInfo {
     pub name: String,
     pub path: String,
@@ -865,6 +953,7 @@ pub struct SkeletonInfo {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O matrix4x4array info counterpart.
 pub struct Matrix4x4ArrayInfo {
     pub element_count: usize,
     pub precision: u32,
@@ -872,12 +961,14 @@ pub struct Matrix4x4ArrayInfo {
 
 impl Matrix4x4ArrayInfo {
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O matrix4x4array info counterpart.
     pub fn precision_enum(&self) -> Option<DataPrecision> {
         DataPrecision::from_raw(self.precision)
     }
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O vertex attribute descriptor info counterpart.
 pub struct VertexAttributeDescriptorInfo {
     pub name: String,
     pub format: u32,
@@ -888,89 +979,155 @@ pub struct VertexAttributeDescriptorInfo {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+/// Wraps the corresponding Model I/O vertex descriptor info counterpart.
 pub struct VertexDescriptorInfo {
     pub attribute_count: usize,
     pub attributes: Vec<VertexAttributeDescriptorInfo>,
     pub layout_strides: Vec<usize>,
 }
 
+/// Groups helper APIs for the corresponding Model I/O vertex format symbols.
 pub mod vertex_format {
+    /// Exposes the corresponding Model I/O constant for invalid: u32.
     pub const INVALID: u32 = 0;
+    /// Exposes the corresponding Model I/O constant for packed bit: u32.
     pub const PACKED_BIT: u32 = 0x1000;
 
+    /// Exposes the corresponding Model I/O constant for uchar bits: u32.
     pub const UCHAR_BITS: u32 = 0x10000;
+    /// Exposes the corresponding Model I/O constant for char bits: u32.
     pub const CHAR_BITS: u32 = 0x20000;
+    /// Exposes the corresponding Model I/O constant for uchar normalized bits: u32.
     pub const UCHAR_NORMALIZED_BITS: u32 = 0x30000;
+    /// Exposes the corresponding Model I/O constant for char normalized bits: u32.
     pub const CHAR_NORMALIZED_BITS: u32 = 0x40000;
+    /// Exposes the corresponding Model I/O constant for ushort bits: u32.
     pub const USHORT_BITS: u32 = 0x50000;
+    /// Exposes the corresponding Model I/O constant for short bits: u32.
     pub const SHORT_BITS: u32 = 0x60000;
+    /// Exposes the corresponding Model I/O constant for ushort normalized bits: u32.
     pub const USHORT_NORMALIZED_BITS: u32 = 0x70000;
+    /// Exposes the corresponding Model I/O constant for short normalized bits: u32.
     pub const SHORT_NORMALIZED_BITS: u32 = 0x80000;
+    /// Exposes the corresponding Model I/O constant for uint bits: u32.
     pub const UINT_BITS: u32 = 0x90000;
+    /// Exposes the corresponding Model I/O constant for int bits: u32.
     pub const INT_BITS: u32 = 0xA0000;
+    /// Exposes the corresponding Model I/O constant for half bits: u32.
     pub const HALF_BITS: u32 = 0xB0000;
+    /// Exposes the corresponding Model I/O constant for float bits: u32.
     pub const FLOAT_BITS: u32 = 0xC0000;
 
+    /// Exposes the corresponding Model I/O constant for uchar: u32.
     pub const UCHAR: u32 = UCHAR_BITS | 1;
+    /// Exposes the corresponding Model I/O constant for uchar2: u32.
     pub const UCHAR2: u32 = UCHAR_BITS | 2;
+    /// Exposes the corresponding Model I/O constant for uchar3: u32.
     pub const UCHAR3: u32 = UCHAR_BITS | 3;
+    /// Exposes the corresponding Model I/O constant for uchar4: u32.
     pub const UCHAR4: u32 = UCHAR_BITS | 4;
 
+    /// Exposes the corresponding Model I/O constant for char: u32.
     pub const CHAR: u32 = CHAR_BITS | 1;
+    /// Exposes the corresponding Model I/O constant for char2: u32.
     pub const CHAR2: u32 = CHAR_BITS | 2;
+    /// Exposes the corresponding Model I/O constant for char3: u32.
     pub const CHAR3: u32 = CHAR_BITS | 3;
+    /// Exposes the corresponding Model I/O constant for char4: u32.
     pub const CHAR4: u32 = CHAR_BITS | 4;
 
+    /// Exposes the corresponding Model I/O constant for uchar normalized: u32.
     pub const UCHAR_NORMALIZED: u32 = UCHAR_NORMALIZED_BITS | 1;
+    /// Exposes the corresponding Model I/O constant for uchar2 normalized: u32.
     pub const UCHAR2_NORMALIZED: u32 = UCHAR_NORMALIZED_BITS | 2;
+    /// Exposes the corresponding Model I/O constant for uchar3 normalized: u32.
     pub const UCHAR3_NORMALIZED: u32 = UCHAR_NORMALIZED_BITS | 3;
+    /// Exposes the corresponding Model I/O constant for uchar4 normalized: u32.
     pub const UCHAR4_NORMALIZED: u32 = UCHAR_NORMALIZED_BITS | 4;
 
+    /// Exposes the corresponding Model I/O constant for char normalized: u32.
     pub const CHAR_NORMALIZED: u32 = CHAR_NORMALIZED_BITS | 1;
+    /// Exposes the corresponding Model I/O constant for char2 normalized: u32.
     pub const CHAR2_NORMALIZED: u32 = CHAR_NORMALIZED_BITS | 2;
+    /// Exposes the corresponding Model I/O constant for char3 normalized: u32.
     pub const CHAR3_NORMALIZED: u32 = CHAR_NORMALIZED_BITS | 3;
+    /// Exposes the corresponding Model I/O constant for char4 normalized: u32.
     pub const CHAR4_NORMALIZED: u32 = CHAR_NORMALIZED_BITS | 4;
 
+    /// Exposes the corresponding Model I/O constant for ushort: u32.
     pub const USHORT: u32 = USHORT_BITS | 1;
+    /// Exposes the corresponding Model I/O constant for ushort2: u32.
     pub const USHORT2: u32 = USHORT_BITS | 2;
+    /// Exposes the corresponding Model I/O constant for ushort3: u32.
     pub const USHORT3: u32 = USHORT_BITS | 3;
+    /// Exposes the corresponding Model I/O constant for ushort4: u32.
     pub const USHORT4: u32 = USHORT_BITS | 4;
 
+    /// Exposes the corresponding Model I/O constant for short: u32.
     pub const SHORT: u32 = SHORT_BITS | 1;
+    /// Exposes the corresponding Model I/O constant for short2: u32.
     pub const SHORT2: u32 = SHORT_BITS | 2;
+    /// Exposes the corresponding Model I/O constant for short3: u32.
     pub const SHORT3: u32 = SHORT_BITS | 3;
+    /// Exposes the corresponding Model I/O constant for short4: u32.
     pub const SHORT4: u32 = SHORT_BITS | 4;
 
+    /// Exposes the corresponding Model I/O constant for ushort normalized: u32.
     pub const USHORT_NORMALIZED: u32 = USHORT_NORMALIZED_BITS | 1;
+    /// Exposes the corresponding Model I/O constant for ushort2 normalized: u32.
     pub const USHORT2_NORMALIZED: u32 = USHORT_NORMALIZED_BITS | 2;
+    /// Exposes the corresponding Model I/O constant for ushort3 normalized: u32.
     pub const USHORT3_NORMALIZED: u32 = USHORT_NORMALIZED_BITS | 3;
+    /// Exposes the corresponding Model I/O constant for ushort4 normalized: u32.
     pub const USHORT4_NORMALIZED: u32 = USHORT_NORMALIZED_BITS | 4;
 
+    /// Exposes the corresponding Model I/O constant for short normalized: u32.
     pub const SHORT_NORMALIZED: u32 = SHORT_NORMALIZED_BITS | 1;
+    /// Exposes the corresponding Model I/O constant for short2 normalized: u32.
     pub const SHORT2_NORMALIZED: u32 = SHORT_NORMALIZED_BITS | 2;
+    /// Exposes the corresponding Model I/O constant for short3 normalized: u32.
     pub const SHORT3_NORMALIZED: u32 = SHORT_NORMALIZED_BITS | 3;
+    /// Exposes the corresponding Model I/O constant for short4 normalized: u32.
     pub const SHORT4_NORMALIZED: u32 = SHORT_NORMALIZED_BITS | 4;
 
+    /// Exposes the corresponding Model I/O constant for uint: u32.
     pub const UINT: u32 = UINT_BITS | 1;
+    /// Exposes the corresponding Model I/O constant for uint2: u32.
     pub const UINT2: u32 = UINT_BITS | 2;
+    /// Exposes the corresponding Model I/O constant for uint3: u32.
     pub const UINT3: u32 = UINT_BITS | 3;
+    /// Exposes the corresponding Model I/O constant for uint4: u32.
     pub const UINT4: u32 = UINT_BITS | 4;
 
+    /// Exposes the corresponding Model I/O constant for int: u32.
     pub const INT: u32 = INT_BITS | 1;
+    /// Exposes the corresponding Model I/O constant for int2: u32.
     pub const INT2: u32 = INT_BITS | 2;
+    /// Exposes the corresponding Model I/O constant for int3: u32.
     pub const INT3: u32 = INT_BITS | 3;
+    /// Exposes the corresponding Model I/O constant for int4: u32.
     pub const INT4: u32 = INT_BITS | 4;
 
+    /// Exposes the corresponding Model I/O constant for half: u32.
     pub const HALF: u32 = HALF_BITS | 1;
+    /// Exposes the corresponding Model I/O constant for half2: u32.
     pub const HALF2: u32 = HALF_BITS | 2;
+    /// Exposes the corresponding Model I/O constant for half3: u32.
     pub const HALF3: u32 = HALF_BITS | 3;
+    /// Exposes the corresponding Model I/O constant for half4: u32.
     pub const HALF4: u32 = HALF_BITS | 4;
 
+    /// Exposes the corresponding Model I/O constant for float: u32.
     pub const FLOAT: u32 = FLOAT_BITS | 1;
+    /// Exposes the corresponding Model I/O constant for float2: u32.
     pub const FLOAT2: u32 = FLOAT_BITS | 2;
+    /// Exposes the corresponding Model I/O constant for float3: u32.
     pub const FLOAT3: u32 = FLOAT_BITS | 3;
+    /// Exposes the corresponding Model I/O constant for float4: u32.
     pub const FLOAT4: u32 = FLOAT_BITS | 4;
 
+    /// Exposes the corresponding Model I/O constant for int1010102 normalized: u32.
     pub const INT1010102_NORMALIZED: u32 = INT_BITS | PACKED_BIT | 4;
+    /// Exposes the corresponding Model I/O constant for uint1010102 normalized: u32.
     pub const UINT1010102_NORMALIZED: u32 = UINT_BITS | PACKED_BIT | 4;
 }

@@ -11,15 +11,18 @@ use crate::types::{BoundingBox, VoxelArrayInfo, VoxelIndexExtent};
 use crate::util::{parse_json, required_handle};
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O voxel array counterpart.
 pub struct VoxelArray {
     handle: ObjectHandle,
 }
 
 impl VoxelArray {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O voxel array counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O voxel array counterpart.
     pub fn new(
         voxel_indices: &[[i32; 4]],
         bounding_box: BoundingBox,
@@ -54,6 +57,7 @@ impl VoxelArray {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn from_asset(asset: &Asset, divisions: i32, patch_radius: f32) -> Result<Self> {
         let mut out_voxel_array = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -74,6 +78,7 @@ impl VoxelArray {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn info(&self) -> Result<VoxelArrayInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -83,11 +88,13 @@ impl VoxelArray {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn count(&self) -> usize {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_voxel_array_count(self.handle.as_ptr()) as usize }
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn set_voxel(&self, index: [i32; 4]) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -101,6 +108,7 @@ impl VoxelArray {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn set_voxels_for_mesh(&self, mesh: &Mesh, divisions: i32, patch_radius: f32) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -115,6 +123,7 @@ impl VoxelArray {
 
     #[must_use]
     #[allow(clippy::fn_params_excessive_bools)]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn voxel_exists(
         &self,
         index: [i32; 4],
@@ -140,6 +149,7 @@ impl VoxelArray {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn voxel_indices(&self) -> Vec<[i32; 4]> {
         let count = self.count();
         if count == 0 {
@@ -162,6 +172,7 @@ impl VoxelArray {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn voxels_within_extent(&self, extent: &VoxelIndexExtent) -> Vec<[i32; 4]> {
         let capacity = self.count();
         if capacity == 0 {
@@ -191,22 +202,26 @@ impl VoxelArray {
             .collect()
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn union_with(&self, other: &Self) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_voxel_array_union(self.handle.as_ptr(), other.handle.as_ptr()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn intersect_with(&self, other: &Self) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_voxel_array_intersect(self.handle.as_ptr(), other.handle.as_ptr()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn difference_with(&self, other: &Self) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_voxel_array_difference(self.handle.as_ptr(), other.handle.as_ptr()) };
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn index_of_spatial_location(&self, location: [f32; 3]) -> [i32; 4] {
         let mut values = [0_i32; 4];
         // SAFETY: The unsafe operation is valid in this context.
@@ -223,6 +238,7 @@ impl VoxelArray {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn spatial_location_of_index(&self, index: [i32; 4]) -> [f32; 3] {
         let mut values = [0.0_f32; 3];
         // SAFETY: The unsafe operation is valid in this context.
@@ -242,6 +258,7 @@ impl VoxelArray {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn voxel_bounding_box_at_index(&self, index: [i32; 4]) -> BoundingBox {
         let mut min = [0.0_f32; 3];
         let mut max = [0.0_f32; 3];
@@ -264,11 +281,13 @@ impl VoxelArray {
         BoundingBox { min, max }
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn convert_to_signed_shell_field(&self) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_voxel_array_convert_to_signed_shell_field(self.handle.as_ptr()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn set_shell_field_interior_thickness(&self, value: f32) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -276,6 +295,7 @@ impl VoxelArray {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn set_shell_field_exterior_thickness(&self, value: f32) {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
@@ -284,11 +304,13 @@ impl VoxelArray {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn coarse_mesh(&self) -> Option<Mesh> {
         self.coarse_mesh_with_allocator(None)
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn coarse_mesh_with_allocator(
         &self,
         allocator: Option<&MeshBufferAllocator>,
@@ -305,11 +327,13 @@ impl VoxelArray {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn mesh(&self) -> Option<Mesh> {
         self.mesh_with_allocator(None)
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn mesh_with_allocator(&self, allocator: Option<&MeshBufferAllocator>) -> Option<Mesh> {
         // SAFETY: The unsafe operation is valid in this context.
         let ptr = unsafe {
@@ -323,6 +347,7 @@ impl VoxelArray {
     }
 
     #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O voxel array counterpart.
     pub fn as_object(&self) -> Object {
         Object::from_handle(self.handle.clone())
     }

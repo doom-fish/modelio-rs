@@ -7,20 +7,24 @@ use crate::types::Matrix4x4ArrayInfo;
 use crate::util::{parse_json, required_handle};
 
 #[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O matrix4x4array counterpart.
 pub struct Matrix4x4Array {
     handle: ObjectHandle,
 }
 
 impl Matrix4x4Array {
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O matrix4x4array counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
     }
 
     #[allow(dead_code)]
+    /// Returns the opaque pointer used to call the wrapped Model I/O matrix4x4array counterpart.
     pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
         self.handle.as_ptr()
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O matrix4x4array counterpart.
     pub fn new(element_count: usize) -> Result<Self> {
         let mut out_array = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -35,6 +39,7 @@ impl Matrix4x4Array {
         )?))
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O matrix4x4array counterpart.
     pub fn info(&self) -> Result<Matrix4x4ArrayInfo> {
         parse_json(
             // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
@@ -43,11 +48,13 @@ impl Matrix4x4Array {
         )
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O matrix4x4array counterpart.
     pub fn clear(&self) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
         unsafe { ffi::mdl_matrix4x4_array_clear(self.handle.as_ptr()) };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O matrix4x4array counterpart.
     pub fn set_float_matrices(&self, values: &[[f32; 16]]) {
         let flattened = values
             .iter()
@@ -63,6 +70,7 @@ impl Matrix4x4Array {
         };
     }
 
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O matrix4x4array counterpart.
     pub fn float_matrices(&self) -> Result<Vec<[f32; 16]>> {
         let count = self.info()?.element_count;
         if count == 0 {
