@@ -50,7 +50,8 @@ pub use animated_value_types::{
 pub use animation::{AnimationBindComponent, PackedJointAnimation};
 pub use asset::Asset;
 pub use asset_resolver::{
-    AssetResolver, BundleAssetResolver, PathAssetResolver, RelativeAssetResolver,
+    AssetResolver, AssetResolverEvent, AssetResolverResponse, BundleAssetResolver,
+    PathAssetResolver, RelativeAssetResolver,
 };
 pub use camera::{Camera, StereoscopicCamera};
 pub use error::{ModelIoError, Result};
@@ -58,12 +59,13 @@ pub use light::Light;
 pub use light_probe::{LightProbe, LightProbeIrradianceDataSource};
 pub use material::{
     Material, MaterialProperty, MaterialPropertyConnection, MaterialPropertyGraph,
-    MaterialPropertyNode, TextureFilter, TextureSampler,
+    MaterialPropertyNode, PhysicallyPlausibleScatteringFunction, ScatteringFunction,
+    TextureFilter, TextureSampler,
 };
 pub use mesh::{Mesh, MeshBuffer, VertexAttributeData};
 pub use mesh_buffer::{
-    MeshBufferAllocator, MeshBufferData, MeshBufferDataAllocator, MeshBufferMap, MeshBufferZone,
-    MeshBufferZoneDefault,
+    MeshBufferAllocator, MeshBufferAllocatorEvent, MeshBufferAllocatorResponse, MeshBufferData,
+    MeshBufferDataAllocator, MeshBufferMap, MeshBufferZone, MeshBufferZoneDefault,
 };
 pub use object::{Object, ObjectContainer};
 pub use physically_plausible_light::{AreaLight, PhotometricLight, PhysicallyPlausibleLight};
@@ -73,7 +75,8 @@ pub use skeleton::Skeleton;
 pub use submesh::{Submesh, SubmeshTopology};
 pub use texture::Texture;
 pub use transform::{
-    Transform, TransformComponent, TransformMatrixOp, TransformOp, TransformOrientOp,
+    Transform, TransformComponent, TransformComponentEvent, TransformComponentResponse,
+    TransformMatrixOp, TransformOp, TransformOpEvent, TransformOpResponse, TransformOrientOp,
     TransformRotateOp, TransformRotateXOp, TransformRotateYOp, TransformRotateZOp,
     TransformScaleOp, TransformStack, TransformTranslateOp,
 };
@@ -101,26 +104,30 @@ pub mod prelude {
         AnimatedQuaternionArray, AnimatedScalar, AnimatedScalarArray, AnimatedValue,
         AnimatedValueInfo, AnimatedValueInterpolation, AnimatedVector2, AnimatedVector3,
         AnimatedVector3Array, AnimatedVector4, AnimationBindComponent, AreaLight, AreaLightInfo,
-        Asset, AssetInfo, AssetResolver, BoundingBox, BundleAssetResolver, Camera, CameraInfo,
-        CameraProjection, Component, DataPrecision, GeometryType, IndexBitDepth, JointAnimation,
-        Light, LightInfo, LightProbe, LightProbeIrradianceDataSource, LightType, Material,
-        MaterialFace, MaterialInfo, MaterialMipMapFilterMode, MaterialProperty,
-        MaterialPropertyConnection, MaterialPropertyGraph, MaterialPropertyInfo,
-        MaterialPropertyNode, MaterialPropertyType, MaterialSemantic, MaterialTextureFilterMode,
+        Asset, AssetInfo, AssetResolver, AssetResolverEvent, AssetResolverResponse, BoundingBox,
+        BundleAssetResolver, Camera, CameraInfo, CameraProjection, Component, DataPrecision,
+        GeometryType, IndexBitDepth, JointAnimation, Light, LightInfo, LightProbe,
+        LightProbeIrradianceDataSource, LightType, Material, MaterialFace, MaterialInfo,
+        MaterialMipMapFilterMode, MaterialProperty, MaterialPropertyConnection,
+        MaterialPropertyGraph, MaterialPropertyInfo, MaterialPropertyNode,
+        MaterialPropertyType, MaterialSemantic, MaterialTextureFilterMode,
         MaterialTextureWrapMode, Matrix4x4Array, Matrix4x4ArrayInfo, Mesh, MeshBuffer,
-        MeshBufferAllocator, MeshBufferData, MeshBufferDataAllocator, MeshBufferInfo,
-        MeshBufferMap, MeshBufferType, MeshBufferZone, MeshBufferZoneDefault, ModelIoError, Named,
-        Object, ObjectContainer, ObjectContainerComponent, ObjectInfo, ObjectKind,
-        PackedJointAnimation, PackedJointAnimationInfo, PathAssetResolver, PhotometricLight,
-        PhotometricLightInfo, PhysicallyPlausibleLight, PhysicallyPlausibleLightInfo,
-        ProbePlacement, RelativeAssetResolver, Result, Skeleton, SkeletonInfo, StereoscopicCamera,
-        StereoscopicCameraInfo, Submesh, SubmeshTopology, Texture, TextureChannelEncoding,
-        TextureFilter, TextureFilterInfo, TextureInfo, TextureSampler, TextureSamplerInfo,
-        Transform, TransformComponent, TransformMatrixOp, TransformOp, TransformOpRotationOrder,
-        TransformOrientOp, TransformRotateOp, TransformRotateXOp, TransformRotateYOp,
-        TransformRotateZOp, TransformScaleOp, TransformStack, TransformTranslateOp, Utility,
-        VertexAttribute, VertexAttributeData, VertexAttributeDescriptorInfo, VertexAttributeInfo,
-        VertexBufferLayout, VertexDescriptor, VertexDescriptorInfo, VoxelArray, VoxelArrayInfo,
-        VoxelIndexExtent,
+        MeshBufferAllocator, MeshBufferAllocatorEvent, MeshBufferAllocatorResponse,
+        MeshBufferData, MeshBufferDataAllocator, MeshBufferInfo, MeshBufferMap,
+        MeshBufferType, MeshBufferZone, MeshBufferZoneDefault, ModelIoError, Named, Object,
+        ObjectContainer, ObjectContainerComponent, ObjectInfo, ObjectKind,
+        PackedJointAnimation, PackedJointAnimationInfo, PathAssetResolver,
+        PhotometricLight, PhotometricLightInfo, PhysicallyPlausibleLight,
+        PhysicallyPlausibleLightInfo, PhysicallyPlausibleScatteringFunction, ProbePlacement,
+        RelativeAssetResolver, Result, ScatteringFunction, Skeleton, SkeletonInfo,
+        StereoscopicCamera, StereoscopicCameraInfo, Submesh, SubmeshTopology, Texture,
+        TextureChannelEncoding, TextureFilter, TextureFilterInfo, TextureInfo, TextureSampler,
+        TextureSamplerInfo, Transform, TransformComponent, TransformComponentEvent,
+        TransformComponentResponse, TransformMatrixOp, TransformOp, TransformOpEvent,
+        TransformOpResponse, TransformOpRotationOrder, TransformOrientOp, TransformRotateOp,
+        TransformRotateXOp, TransformRotateYOp, TransformRotateZOp, TransformScaleOp,
+        TransformStack, TransformTranslateOp, Utility, VertexAttribute, VertexAttributeData,
+        VertexAttributeDescriptorInfo, VertexAttributeInfo, VertexBufferLayout,
+        VertexDescriptor, VertexDescriptorInfo, VoxelArray, VoxelArrayInfo, VoxelIndexExtent,
     };
 }

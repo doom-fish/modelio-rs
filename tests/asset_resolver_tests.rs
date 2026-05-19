@@ -41,3 +41,34 @@ fn asset_resolvers_handle_fixture_paths() {
     let material = Material::new("ResolverMaterial", true).expect("material");
     material.load_textures_using_resolver(&path_resolver.as_asset_resolver());
 }
+
+#[test]
+fn custom_asset_resolver_callback_round_trip() {
+    let resolver = AssetResolver::new(|event| match event {
+        AssetResolverEvent::CanResolveAssetNamed(name) => {
+            AssetResolverResponse::Bool(name == "embedded.usdz")
+        }
+        AssetResolverEvent::ResolveAssetNamed(name) => AssetResolverResponse::Url(
+            (name == "embedded.usdz").then(|| format!("file:///virtual/{name}")),
+        ),
+    })
+    .expect("custom resolver");
+
+    assert!(resolver
+        .can_resolve_asset_named("embedded.usdz")
+        .expect("can resolve embedded"));
+    assert!(!resolver
+        .can_resolve_asset_named("missing.usdz")
+        .expect("can resolve missing"));
+    assert_eq!(
+        resolver
+            .resolve_asset_named("embedded.usdz")
+            .expect("resolve embedded")
+            .as_deref(),
+        Some("file:///virtual/embedded.usdz")
+    );
+    assert!(resolver
+        .resolve_asset_named("missing.usdz")
+        .expect("resolve missing")
+        .is_none());
+}

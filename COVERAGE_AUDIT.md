@@ -1,6 +1,6 @@
-# modelio-rs coverage audit (vs MacOSX26.2.sdk)
+# modelio-rs coverage audit (vs MacOSX26.5.sdk)
 
-Method: unique top-level ModelIO public classes, protocols, enums, structs, and exported SDK constants from the macOS 26.2 SDK headers.
+Method: unique top-level ModelIO public classes, protocols, enums, structs, and exported SDK constants from the macOS 26.5 SDK headers.
 
 SDK_PUBLIC_SYMBOLS: 117  
 VERIFIED: 117  
@@ -10,65 +10,24 @@ COVERAGE_PCT: 100.0%
 
 ## Result
 
-All 41 previously-audited gaps are now wrapped in `v0.2.2`.
+Top-level coverage remains complete in `v0.3.0`, and the last protocol/class abstractions that were only covered indirectly are now exposed as first-class Rust wrappers.
 
-## Newly closed gap groups
+## v0.3.0 wrapper promotions
 
-### Protocols and shared types
-- `MDLJointAnimation`
-- `MDLComponent`
-- `MDLNamed`
-- `MDLObjectContainerComponent`
-- `MDLMatrix4x4Array`
+### Protocol adapters
+- `MDLAssetResolver`
+- `MDLMeshBufferAllocator`
+- `MDLTransformComponent`
+- `MDLTransformOp`
 
-### Cameras and lights
-- `MDLStereoscopicCamera`
-- `MDLAreaLight`
-- `MDLPhotometricLight`
-
-### Materials
-- `MDLMaterialTextureWrapMode`
-- `MDLMaterialTextureFilterMode`
-- `MDLMaterialMipMapFilterMode`
-- `MDLTextureFilter`
-- `MDLTextureSampler`
-- `MDLMaterialPropertyConnection`
-- `MDLMaterialPropertyNode`
-- `MDLMaterialPropertyGraph`
-
-### Objects, submeshes, and vertex layout
-- `MDLObjectContainer`
-- `MDLSubmeshTopology`
-- `MDLVertexBufferLayout`
-
-### SDK constants and utility helpers
-- `kUTType3dObject`
-- `kUTTypeAlembic`
-- `kUTTypePolygon`
-- `kUTTypeStereolithography`
-- `kUTTypeUniversalSceneDescription`
-- `kUTTypeUniversalSceneDescriptionMobile`
-- `MDLVertexAttributeAnisotropy`
-- `MDLVertexAttributeBinormal`
-- `MDLVertexAttributeBitangent`
-- `MDLVertexAttributeColor`
-- `MDLVertexAttributeEdgeCrease`
-- `MDLVertexAttributeJointIndices`
-- `MDLVertexAttributeJointWeights`
-- `MDLVertexAttributeNormal`
-- `MDLVertexAttributeOcclusionValue`
-- `MDLVertexAttributePosition`
-- `MDLVertexAttributeShadingBasisU`
-- `MDLVertexAttributeShadingBasisV`
-- `MDLVertexAttributeSubdivisionStencil`
-- `MDLVertexAttributeTangent`
-- `MDLVertexAttributeTextureCoordinate`
-- `MDLUtility`
+### Material scattering classes
+- `MDLScatteringFunction`
+- `MDLPhysicallyPlausibleScatteringFunction`
 
 ## Validation
 
-- `tests/api_coverage.rs` verifies the bridge symbols and SDK header surface
-- Integration tests cover the newly-added sampler/filter, material-property, matrix-array, constant, and utility APIs
+- `tests/api_coverage.rs` verifies the active SDK header surface and the bridge symbols for callback-backed protocol constructors and scattering-function thunks
+- Integration tests cover custom resolvers, custom mesh-buffer allocators, scattering functions, and callback-backed transform components/ops
 
 ## Remaining gaps
 

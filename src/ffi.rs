@@ -264,6 +264,36 @@ extern "C" {
         out_error_message: *mut *mut c_char,
     ) -> i32;
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
+    pub fn mdl_material_new_with_scattering_function(
+        name: *const c_char,
+        scattering_function: *mut c_void,
+        out_material: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
+    pub fn mdl_material_scattering_function(handle: *mut c_void) -> *mut c_void;
+    /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
+    pub fn mdl_scattering_function_new(
+        out_scattering_function: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
+    pub fn mdl_scattering_function_property(handle: *mut c_void, code: u32) -> *mut c_void;
+    /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
+    pub fn mdl_scattering_function_is_physically_plausible(handle: *mut c_void) -> i32;
+    /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
+    pub fn mdl_physically_plausible_scattering_function_new(
+        out_scattering_function: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
+    pub fn mdl_physically_plausible_scattering_function_version(handle: *mut c_void) -> i64;
+    /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
+    pub fn mdl_physically_plausible_scattering_function_property(
+        handle: *mut c_void,
+        code: u32,
+    ) -> *mut c_void;
+    /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_material_info_json(handle: *mut c_void) -> *mut c_char;
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_material_count(handle: *mut c_void) -> u64;
@@ -1139,6 +1169,12 @@ extern "C" {
     pub fn mdl_sdk_constant_string(code: u32) -> *mut c_char;
 
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
+    pub fn mdl_asset_resolver_new_with_callback(
+        callback_context: *mut c_void,
+        out_resolver: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_asset_resolver_can_resolve_named(handle: *mut c_void, name: *const c_char) -> i32;
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_asset_resolver_resolve_named(
@@ -1233,6 +1269,12 @@ extern "C" {
         count: u64,
         offset: u64,
     ) -> u64;
+    /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
+    pub fn mdl_mesh_buffer_allocator_new_with_callback(
+        callback_context: *mut c_void,
+        out_allocator: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_mesh_buffer_allocator_new_zone(
         handle: *mut c_void,
@@ -1402,6 +1444,12 @@ extern "C" {
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_object_transform_component(handle: *mut c_void) -> *mut c_void;
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
+    pub fn mdl_transform_component_new_with_callback(
+        callback_context: *mut c_void,
+        out_component: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_object_set_transform_component(handle: *mut c_void, component: *mut c_void);
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_transform_component_matrix(handle: *mut c_void, out_values: *mut f32);
@@ -1525,6 +1573,12 @@ extern "C" {
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_transform_set_scale(handle: *mut c_void, x: f32, y: f32, z: f32);
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
+    pub fn mdl_transform_op_new_with_callback(
+        callback_context: *mut c_void,
+        out_transform_op: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_transform_op_name_string(handle: *mut c_void) -> *mut c_char;
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_transform_op_is_inverse(handle: *mut c_void) -> i32;
@@ -1533,6 +1587,12 @@ extern "C" {
         handle: *mut c_void,
         time: f64,
         out_values: *mut f32,
+    );
+    /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
+    pub fn mdl_transform_op_copy_double4x4_at_time(
+        handle: *mut c_void,
+        time: f64,
+        out_values: *mut f64,
     );
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_transform_rotate_x_op_animated_value(handle: *mut c_void) -> *mut c_void;

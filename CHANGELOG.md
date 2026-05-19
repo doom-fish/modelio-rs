@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0] - 2026-05-19
+
+### Added
+
+- Added callback-backed `MDLAssetResolver`, `MDLMeshBufferAllocator`, `MDLTransformComponent`, and `MDLTransformOp` wrappers via `AssetResolver`, `MeshBufferAllocator`, `TransformComponent`, and `TransformOp` event/response APIs.
+- Added first-class `ScatteringFunction` and `PhysicallyPlausibleScatteringFunction` wrappers plus `Material::new_with_scattering_function` and `Material::scattering_function`.
+- Added integration coverage for custom resolvers, custom mesh-buffer allocators, scattering functions, and callback-backed transform components/ops.
+
+### Changed
+
+- Updated the coverage docs and SDK audit to call out the six first-class ModelIO wrappers promoted in `v0.3.0`.
+
 ## [0.2.4] - 2026-05-18
 
 ### Changed

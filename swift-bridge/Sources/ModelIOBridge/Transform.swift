@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 import ModelIO
 import simd
@@ -16,6 +17,241 @@ private func mdl_copy_doubles(
     return UInt64(valueCount)
 }
 
+private func mdl_double_matrix_to_array(_ matrix: matrix_double4x4) -> [Double] {
+    [
+        matrix.columns.0.x, matrix.columns.0.y, matrix.columns.0.z, matrix.columns.0.w,
+        matrix.columns.1.x, matrix.columns.1.y, matrix.columns.1.z, matrix.columns.1.w,
+        matrix.columns.2.x, matrix.columns.2.y, matrix.columns.2.z, matrix.columns.2.w,
+        matrix.columns.3.x, matrix.columns.3.y, matrix.columns.3.z, matrix.columns.3.w,
+    ]
+}
+
+private func mdl_double_matrix_from_array(_ values: UnsafePointer<Double>?) -> matrix_double4x4 {
+    guard let values else { return matrix_identity_double4x4 }
+    return matrix_double4x4(columns: (
+        SIMD4<Double>(values[0], values[1], values[2], values[3]),
+        SIMD4<Double>(values[4], values[5], values[6], values[7]),
+        SIMD4<Double>(values[8], values[9], values[10], values[11]),
+        SIMD4<Double>(values[12], values[13], values[14], values[15])
+    ))
+}
+
+@_silgen_name("mdlx_transform_component_copy_matrix")
+private func mdlx_transform_component_copy_matrix(
+    _ context: UnsafeMutableRawPointer?,
+    _ outValues: UnsafeMutablePointer<Float>?
+)
+
+@_silgen_name("mdlx_transform_component_set_matrix")
+private func mdlx_transform_component_set_matrix(
+    _ context: UnsafeMutableRawPointer?,
+    _ values: UnsafePointer<Float>?
+)
+
+@_silgen_name("mdlx_transform_component_resets_transform")
+private func mdlx_transform_component_resets_transform(_ context: UnsafeMutableRawPointer?) -> Int32
+
+@_silgen_name("mdlx_transform_component_set_resets_transform")
+private func mdlx_transform_component_set_resets_transform(
+    _ context: UnsafeMutableRawPointer?,
+    _ resetsTransform: Int32
+)
+
+@_silgen_name("mdlx_transform_component_minimum_time")
+private func mdlx_transform_component_minimum_time(_ context: UnsafeMutableRawPointer?) -> Double
+
+@_silgen_name("mdlx_transform_component_maximum_time")
+private func mdlx_transform_component_maximum_time(_ context: UnsafeMutableRawPointer?) -> Double
+
+@_silgen_name("mdlx_transform_component_key_time_count")
+private func mdlx_transform_component_key_time_count(_ context: UnsafeMutableRawPointer?) -> UInt64
+
+@_silgen_name("mdlx_transform_component_copy_key_times")
+private func mdlx_transform_component_copy_key_times(
+    _ context: UnsafeMutableRawPointer?,
+    _ outValues: UnsafeMutablePointer<Double>?,
+    _ capacity: UInt64
+) -> UInt64
+
+@_silgen_name("mdlx_transform_component_set_local_transform")
+private func mdlx_transform_component_set_local_transform(
+    _ context: UnsafeMutableRawPointer?,
+    _ values: UnsafePointer<Float>?
+)
+
+@_silgen_name("mdlx_transform_component_set_local_transform_for_time")
+private func mdlx_transform_component_set_local_transform_for_time(
+    _ context: UnsafeMutableRawPointer?,
+    _ values: UnsafePointer<Float>?,
+    _ time: Double
+)
+
+@_silgen_name("mdlx_transform_component_copy_local_transform_at_time")
+private func mdlx_transform_component_copy_local_transform_at_time(
+    _ context: UnsafeMutableRawPointer?,
+    _ time: Double,
+    _ outValues: UnsafeMutablePointer<Float>?
+)
+
+@_silgen_name("mdlx_transform_component_release")
+private func mdlx_transform_component_release(_ context: UnsafeMutableRawPointer?)
+
+@_silgen_name("mdlx_transform_op_name")
+private func mdlx_transform_op_name(_ context: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>?
+
+@_silgen_name("mdlx_transform_op_is_inverse")
+private func mdlx_transform_op_is_inverse(_ context: UnsafeMutableRawPointer?) -> Int32
+
+@_silgen_name("mdlx_transform_op_copy_float4x4_at_time")
+private func mdlx_transform_op_copy_float4x4_at_time(
+    _ context: UnsafeMutableRawPointer?,
+    _ time: Double,
+    _ outValues: UnsafeMutablePointer<Float>?
+)
+
+@_silgen_name("mdlx_transform_op_copy_double4x4_at_time")
+private func mdlx_transform_op_copy_double4x4_at_time(
+    _ context: UnsafeMutableRawPointer?,
+    _ time: Double,
+    _ outValues: UnsafeMutablePointer<Double>?
+)
+
+@_silgen_name("mdlx_transform_op_release")
+private func mdlx_transform_op_release(_ context: UnsafeMutableRawPointer?)
+
+private final class RustTransformComponent: NSObject, MDLTransformComponent {
+    private let callbackContext: UnsafeMutableRawPointer?
+
+    init(callbackContext: UnsafeMutableRawPointer?) {
+        self.callbackContext = callbackContext
+        super.init()
+    }
+
+    deinit {
+        mdlx_transform_component_release(callbackContext)
+    }
+
+    var matrix: matrix_float4x4 {
+        get {
+            var values = [Float](repeating: 0, count: 16)
+            values.withUnsafeMutableBufferPointer { buffer in
+                mdlx_transform_component_copy_matrix(callbackContext, buffer.baseAddress)
+            }
+            return values.withUnsafeBufferPointer { buffer in
+                mdl_matrix_from_array(buffer.baseAddress)
+            }
+        }
+        set {
+            let values = mdl_matrix_to_array(newValue)
+            values.withUnsafeBufferPointer { buffer in
+                mdlx_transform_component_set_matrix(callbackContext, buffer.baseAddress)
+            }
+        }
+    }
+
+    var resetsTransform: Bool {
+        get { mdlx_transform_component_resets_transform(callbackContext) != 0 }
+        set { mdlx_transform_component_set_resets_transform(callbackContext, newValue ? 1 : 0) }
+    }
+
+    var minimumTime: TimeInterval {
+        mdlx_transform_component_minimum_time(callbackContext)
+    }
+
+    var maximumTime: TimeInterval {
+        mdlx_transform_component_maximum_time(callbackContext)
+    }
+
+    var keyTimes: [NSNumber] {
+        let count = Int(mdlx_transform_component_key_time_count(callbackContext))
+        guard count > 0 else { return [] }
+        var values = [Double](repeating: 0, count: count)
+        let copied = values.withUnsafeMutableBufferPointer { buffer in
+            mdlx_transform_component_copy_key_times(
+                callbackContext,
+                buffer.baseAddress,
+                UInt64(buffer.count)
+            )
+        }
+        return Array(values.prefix(min(count, Int(copied)))).map(NSNumber.init(value:))
+    }
+
+    func setLocalTransform(_ transform: matrix_float4x4) {
+        let values = mdl_matrix_to_array(transform)
+        values.withUnsafeBufferPointer { buffer in
+            mdlx_transform_component_set_local_transform(callbackContext, buffer.baseAddress)
+        }
+    }
+
+    func setLocalTransform(_ transform: matrix_float4x4, forTime time: TimeInterval) {
+        let values = mdl_matrix_to_array(transform)
+        values.withUnsafeBufferPointer { buffer in
+            mdlx_transform_component_set_local_transform_for_time(
+                callbackContext,
+                buffer.baseAddress,
+                time
+            )
+        }
+    }
+
+    func localTransform(atTime time: TimeInterval) -> matrix_float4x4 {
+        var values = [Float](repeating: 0, count: 16)
+        values.withUnsafeMutableBufferPointer { buffer in
+            mdlx_transform_component_copy_local_transform_at_time(
+                callbackContext,
+                time,
+                buffer.baseAddress
+            )
+        }
+        return values.withUnsafeBufferPointer { buffer in
+            mdl_matrix_from_array(buffer.baseAddress)
+        }
+    }
+}
+
+private final class RustTransformOp: NSObject, MDLTransformOp {
+    private let callbackContext: UnsafeMutableRawPointer?
+
+    init(callbackContext: UnsafeMutableRawPointer?) {
+        self.callbackContext = callbackContext
+        super.init()
+    }
+
+    deinit {
+        mdlx_transform_op_release(callbackContext)
+    }
+
+    var name: String {
+        guard let pointer = mdlx_transform_op_name(callbackContext) else { return "" }
+        defer { free(pointer) }
+        return String(cString: pointer)
+    }
+
+    func isInverseOp() -> Bool {
+        mdlx_transform_op_is_inverse(callbackContext) != 0
+    }
+
+    func float4x4(atTime time: TimeInterval) -> matrix_float4x4 {
+        var values = [Float](repeating: 0, count: 16)
+        values.withUnsafeMutableBufferPointer { buffer in
+            mdlx_transform_op_copy_float4x4_at_time(callbackContext, time, buffer.baseAddress)
+        }
+        return values.withUnsafeBufferPointer { buffer in
+            mdl_matrix_from_array(buffer.baseAddress)
+        }
+    }
+
+    func double4x4(atTime time: TimeInterval) -> matrix_double4x4 {
+        var values = [Double](repeating: 0, count: 16)
+        values.withUnsafeMutableBufferPointer { buffer in
+            mdlx_transform_op_copy_double4x4_at_time(callbackContext, time, buffer.baseAddress)
+        }
+        return values.withUnsafeBufferPointer { buffer in
+            mdl_double_matrix_from_array(buffer.baseAddress)
+        }
+    }
+}
+
 private func mdl_transform_component(_ handle: UnsafeMutableRawPointer?) -> (any MDLTransformComponent)? {
     mdl_borrow_object(handle) as? any MDLTransformComponent
 }
@@ -29,6 +265,20 @@ private func mdl_transform_rotation_order(_ rawValue: UInt64) throws -> MDLTrans
         throw ModelIOBridgeError.invalidArgument("invalid MDLTransformOpRotationOrder: \(rawValue)")
     }
     return order
+}
+
+@_cdecl("mdl_transform_component_new_with_callback")
+public func mdl_transform_component_new_with_callback(
+    _ callbackContext: UnsafeMutableRawPointer?,
+    _ outComponent: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outComponent else {
+            throw ModelIOBridgeError.invalidArgument("missing output transform component pointer")
+        }
+        outComponent.pointee = mdl_retain(RustTransformComponent(callbackContext: callbackContext))
+    }
 }
 
 @_cdecl("mdl_transform_component_matrix")
@@ -384,6 +634,20 @@ public func mdl_transform_set_scale(_ handle: UnsafeMutableRawPointer?, _ x: Flo
     transform.scale = SIMD3<Float>(x, y, z)
 }
 
+@_cdecl("mdl_transform_op_new_with_callback")
+public func mdl_transform_op_new_with_callback(
+    _ callbackContext: UnsafeMutableRawPointer?,
+    _ outTransformOp: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outTransformOp else {
+            throw ModelIOBridgeError.invalidArgument("missing output transform op pointer")
+        }
+        outTransformOp.pointee = mdl_retain(RustTransformOp(callbackContext: callbackContext))
+    }
+}
+
 @_cdecl("mdl_transform_op_name_string")
 public func mdl_transform_op_name_string(_ handle: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let transformOp = mdl_transform_op(handle) else { return nil }
@@ -392,8 +656,8 @@ public func mdl_transform_op_name_string(_ handle: UnsafeMutableRawPointer?) -> 
 
 @_cdecl("mdl_transform_op_is_inverse")
 public func mdl_transform_op_is_inverse(_ handle: UnsafeMutableRawPointer?) -> Int32 {
-    guard let transformOp = mdl_borrow_object(handle) else { return 0 }
-    return ((transformOp as AnyObject).value(forKey: "inverse") as? NSNumber)?.boolValue == true ? 1 : 0
+    guard let transformOp = mdl_transform_op(handle) else { return 0 }
+    return transformOp.isInverseOp() ? 1 : 0
 }
 
 @_cdecl("mdl_transform_op_copy_float4x4_at_time")
@@ -404,6 +668,20 @@ public func mdl_transform_op_copy_float4x4_at_time(
 ) {
     guard let transformOp = mdl_transform_op(handle) else { return }
     _ = mdl_copy_floats(mdl_matrix_to_array(transformOp.float4x4(atTime: time)), to: outValues, capacity: 16)
+}
+
+@_cdecl("mdl_transform_op_copy_double4x4_at_time")
+public func mdl_transform_op_copy_double4x4_at_time(
+    _ handle: UnsafeMutableRawPointer?,
+    _ time: Double,
+    _ outValues: UnsafeMutablePointer<Double>?
+) {
+    guard let transformOp = mdl_transform_op(handle) else { return }
+    _ = mdl_copy_doubles(
+        mdl_double_matrix_to_array(transformOp.double4x4(atTime: time)),
+        to: outValues,
+        capacity: 16
+    )
 }
 
 @_cdecl("mdl_transform_rotate_x_op_animated_value")

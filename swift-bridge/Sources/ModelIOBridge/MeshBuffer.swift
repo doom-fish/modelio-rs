@@ -2,6 +2,159 @@ import Darwin
 import Foundation
 import ModelIO
 
+@_silgen_name("mdlx_mesh_buffer_allocator_new_zone")
+private func mdlx_mesh_buffer_allocator_new_zone(
+    _ context: UnsafeMutableRawPointer?,
+    _ capacity: UInt64
+) -> UnsafeMutableRawPointer?
+
+@_silgen_name("mdlx_mesh_buffer_allocator_new_zone_for_buffers_with_size")
+private func mdlx_mesh_buffer_allocator_new_zone_for_buffers_with_size(
+    _ context: UnsafeMutableRawPointer?,
+    _ sizes: UnsafePointer<UInt64>?,
+    _ types: UnsafePointer<UInt32>?,
+    _ count: UInt64
+) -> UnsafeMutableRawPointer?
+
+@_silgen_name("mdlx_mesh_buffer_allocator_new_buffer")
+private func mdlx_mesh_buffer_allocator_new_buffer(
+    _ context: UnsafeMutableRawPointer?,
+    _ length: UInt64,
+    _ bufferTypeRaw: UInt32
+) -> UnsafeMutableRawPointer?
+
+@_silgen_name("mdlx_mesh_buffer_allocator_new_buffer_with_data")
+private func mdlx_mesh_buffer_allocator_new_buffer_with_data(
+    _ context: UnsafeMutableRawPointer?,
+    _ bytes: UnsafePointer<UInt8>?,
+    _ count: UInt64,
+    _ bufferTypeRaw: UInt32
+) -> UnsafeMutableRawPointer?
+
+@_silgen_name("mdlx_mesh_buffer_allocator_new_buffer_from_zone_length")
+private func mdlx_mesh_buffer_allocator_new_buffer_from_zone_length(
+    _ context: UnsafeMutableRawPointer?,
+    _ zone: UnsafeMutableRawPointer?,
+    _ length: UInt64,
+    _ bufferTypeRaw: UInt32
+) -> UnsafeMutableRawPointer?
+
+@_silgen_name("mdlx_mesh_buffer_allocator_new_buffer_from_zone_data")
+private func mdlx_mesh_buffer_allocator_new_buffer_from_zone_data(
+    _ context: UnsafeMutableRawPointer?,
+    _ zone: UnsafeMutableRawPointer?,
+    _ bytes: UnsafePointer<UInt8>?,
+    _ count: UInt64,
+    _ bufferTypeRaw: UInt32
+) -> UnsafeMutableRawPointer?
+
+@_silgen_name("mdlx_mesh_buffer_allocator_release")
+private func mdlx_mesh_buffer_allocator_release(_ context: UnsafeMutableRawPointer?)
+
+private final class RustMeshBufferAllocator: NSObject, MDLMeshBufferAllocator {
+    private let callbackContext: UnsafeMutableRawPointer?
+    private let fallbackAllocator = MDLMeshBufferDataAllocator()
+
+    init(callbackContext: UnsafeMutableRawPointer?) {
+        self.callbackContext = callbackContext
+        super.init()
+    }
+
+    deinit {
+        mdlx_mesh_buffer_allocator_release(callbackContext)
+    }
+
+    func newZone(_ capacity: Int) -> any MDLMeshBufferZone {
+        guard let zone = mdl_take_retained_object(
+            mdlx_mesh_buffer_allocator_new_zone(callbackContext, UInt64(capacity))
+        ) as? any MDLMeshBufferZone else {
+            return fallbackAllocator.newZone(capacity)
+        }
+        return zone
+    }
+
+    func newZoneForBuffers(withSize sizes: [NSNumber], andType types: [NSNumber]) -> any MDLMeshBufferZone {
+        guard sizes.count == types.count else {
+            return fallbackAllocator.newZoneForBuffers(withSize: sizes, andType: types)
+        }
+        let rawSizes = sizes.map(\.uint64Value)
+        let rawTypes = types.map(\.uint32Value)
+        let handle = rawSizes.withUnsafeBufferPointer { sizeBuffer in
+            rawTypes.withUnsafeBufferPointer { typeBuffer in
+                mdlx_mesh_buffer_allocator_new_zone_for_buffers_with_size(
+                    callbackContext,
+                    sizeBuffer.baseAddress,
+                    typeBuffer.baseAddress,
+                    UInt64(rawSizes.count)
+                )
+            }
+        }
+        guard let zone = mdl_take_retained_object(handle) as? any MDLMeshBufferZone else {
+            return fallbackAllocator.newZoneForBuffers(withSize: sizes, andType: types)
+        }
+        return zone
+    }
+
+    func newBuffer(_ length: Int, type: MDLMeshBufferType) -> any MDLMeshBuffer {
+        guard let buffer = mdl_take_retained_object(
+            mdlx_mesh_buffer_allocator_new_buffer(
+                callbackContext,
+                UInt64(length),
+                UInt32(type.rawValue)
+            )
+        ) as? any MDLMeshBuffer else {
+            return fallbackAllocator.newBuffer(length, type: type)
+        }
+        return buffer
+    }
+
+    func newBuffer(with data: Data, type: MDLMeshBufferType) -> any MDLMeshBuffer {
+        let handle = data.withUnsafeBytes { rawBuffer in
+            mdlx_mesh_buffer_allocator_new_buffer_with_data(
+                callbackContext,
+                rawBuffer.bindMemory(to: UInt8.self).baseAddress,
+                UInt64(data.count),
+                UInt32(type.rawValue)
+            )
+        }
+        guard let buffer = mdl_take_retained_object(handle) as? any MDLMeshBuffer else {
+            return fallbackAllocator.newBuffer(with: data, type: type)
+        }
+        return buffer
+    }
+
+    func newBuffer(from zone: (any MDLMeshBufferZone)?, length: Int, type: MDLMeshBufferType) -> (any MDLMeshBuffer)? {
+        let zoneHandle = zone.map { mdl_retain($0 as AnyObject) }
+        let handle = mdlx_mesh_buffer_allocator_new_buffer_from_zone_length(
+            callbackContext,
+            zoneHandle,
+            UInt64(length),
+            UInt32(type.rawValue)
+        )
+        if let buffer = mdl_take_retained_object(handle) as? any MDLMeshBuffer {
+            return buffer
+        }
+        return fallbackAllocator.newBuffer(from: zone, length: length, type: type)
+    }
+
+    func newBuffer(from zone: (any MDLMeshBufferZone)?, data: Data, type: MDLMeshBufferType) -> (any MDLMeshBuffer)? {
+        let zoneHandle = zone.map { mdl_retain($0 as AnyObject) }
+        let handle = data.withUnsafeBytes { rawBuffer in
+            mdlx_mesh_buffer_allocator_new_buffer_from_zone_data(
+                callbackContext,
+                zoneHandle,
+                rawBuffer.bindMemory(to: UInt8.self).baseAddress,
+                UInt64(data.count),
+                UInt32(type.rawValue)
+            )
+        }
+        if let buffer = mdl_take_retained_object(handle) as? any MDLMeshBuffer {
+            return buffer
+        }
+        return fallbackAllocator.newBuffer(from: zone, data: data, type: type)
+    }
+}
+
 private func mdl_mesh_buffer_type(_ rawValue: UInt32) throws -> MDLMeshBufferType {
     guard let bufferType = MDLMeshBufferType(rawValue: UInt(rawValue)) else {
         throw ModelIOBridgeError.invalidArgument("invalid MDLMeshBufferType: \(rawValue)")
@@ -142,6 +295,20 @@ public func mdl_mesh_buffer_map_write_bytes(
     guard writeCount > 0 else { return 0 }
     memcpy(destination.advanced(by: Int(offset)), bytes, writeCount)
     return UInt64(writeCount)
+}
+
+@_cdecl("mdl_mesh_buffer_allocator_new_with_callback")
+public func mdl_mesh_buffer_allocator_new_with_callback(
+    _ callbackContext: UnsafeMutableRawPointer?,
+    _ outAllocator: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outAllocator else {
+            throw ModelIOBridgeError.invalidArgument("missing output allocator pointer")
+        }
+        outAllocator.pointee = mdl_retain(RustMeshBufferAllocator(callbackContext: callbackContext))
+    }
 }
 
 @_cdecl("mdl_mesh_buffer_allocator_new_zone")

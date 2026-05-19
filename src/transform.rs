@@ -1,3 +1,4 @@
+use std::panic::AssertUnwindSafe;
 use std::ptr;
 
 use crate::animated_value_types::{
@@ -44,13 +45,407 @@ where
     Ok(values)
 }
 
+const IDENTITY_MATRIX_F32: [f32; 16] = [
+    1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+];
+const IDENTITY_MATRIX_F64: [f64; 16] = [
+    1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+];
+
+type TransformComponentCallbackFn =
+    dyn Fn(TransformComponentEvent) -> TransformComponentResponse + Send + Sync + 'static;
+type TransformOpCallbackFn = dyn Fn(TransformOpEvent) -> TransformOpResponse + Send + Sync + 'static;
+
+struct TransformComponentCallback {
+    callback: Box<TransformComponentCallbackFn>,
+}
+
+struct TransformOpCallback {
+    callback: Box<TransformOpCallbackFn>,
+}
+
+#[derive(Debug, Clone)]
+/// Describes one `MDLTransformComponent` protocol request routed into Rust.
+pub enum TransformComponentEvent {
+    /// Requests the current matrix.
+    Matrix,
+    /// Updates the current matrix.
+    SetMatrix([f32; 16]),
+    /// Requests whether the transform resets parent-space transforms.
+    ResetsTransform,
+    /// Updates whether the transform resets parent-space transforms.
+    SetResetsTransform(bool),
+    /// Requests the minimum sample time.
+    MinimumTime,
+    /// Requests the maximum sample time.
+    MaximumTime,
+    /// Requests the stored key times.
+    KeyTimes,
+    /// Sets a non-animated local transform.
+    SetLocalTransform([f32; 16]),
+    /// Sets a sampled local transform at the requested time.
+    SetLocalTransformForTime { transform: [f32; 16], time: f64 },
+    /// Requests the local transform at the requested time.
+    LocalTransformAtTime(f64),
+}
+
+#[derive(Debug, Clone)]
+/// Returns the result of one `MDLTransformComponent` protocol request.
+pub enum TransformComponentResponse {
+    /// Returns a matrix result.
+    Matrix([f32; 16]),
+    /// Returns a boolean result.
+    Bool(bool),
+    /// Returns a time result.
+    Time(f64),
+    /// Returns a key-time array result.
+    KeyTimes(Vec<f64>),
+    /// Indicates that the callback did not provide a value.
+    None,
+}
+
+#[derive(Debug, Clone)]
+/// Describes one `MDLTransformOp` protocol request routed into Rust.
+pub enum TransformOpEvent {
+    /// Requests the operation name.
+    Name,
+    /// Requests the single-precision matrix at the requested time.
+    Float4x4AtTime(f64),
+    /// Requests the double-precision matrix at the requested time.
+    Double4x4AtTime(f64),
+    /// Requests whether the operation is inverse.
+    IsInverseOp,
+}
+
+#[derive(Debug, Clone)]
+/// Returns the result of one `MDLTransformOp` protocol request.
+pub enum TransformOpResponse {
+    /// Returns an optional name.
+    Name(Option<String>),
+    /// Returns a single-precision matrix.
+    Float4x4([f32; 16]),
+    /// Returns a double-precision matrix.
+    Double4x4([f64; 16]),
+    /// Returns a boolean result.
+    Bool(bool),
+    /// Indicates that the callback did not provide a value.
+    None,
+}
+
+fn duplicate_c_string(value: &str) -> *mut core::ffi::c_char {
+    let Ok(value) = std::ffi::CString::new(value) else {
+        return ptr::null_mut();
+    };
+    // SAFETY: The unsafe operation is valid in this context.
+    unsafe { libc::strdup(value.as_ptr()) }
+}
+
+fn matrix_f32_from_ptr(values: *const f32) -> [f32; 16] {
+    if values.is_null() {
+        return IDENTITY_MATRIX_F32;
+    }
+    let mut matrix = [0.0_f32; 16];
+    // SAFETY: The unsafe operation is valid in this context.
+    unsafe { matrix.as_mut_ptr().copy_from_nonoverlapping(values, matrix.len()) };
+    matrix
+}
+
+fn write_matrix_f32(out_values: *mut f32, values: [f32; 16]) {
+    if out_values.is_null() {
+        return;
+    }
+    // SAFETY: The unsafe operation is valid in this context.
+    unsafe { out_values.copy_from_nonoverlapping(values.as_ptr(), values.len()) };
+}
+
+fn write_matrix_f64(out_values: *mut f64, values: [f64; 16]) {
+    if out_values.is_null() {
+        return;
+    }
+    // SAFETY: The unsafe operation is valid in this context.
+    unsafe { out_values.copy_from_nonoverlapping(values.as_ptr(), values.len()) };
+}
+
+fn transform_component_response(
+    context: *mut core::ffi::c_void,
+    event: TransformComponentEvent,
+) -> Option<TransformComponentResponse> {
+    let context = (!context.is_null()).then_some(context.cast::<TransformComponentCallback>())?;
+    std::panic::catch_unwind(AssertUnwindSafe(|| {
+        // SAFETY: The unsafe operation is valid in this context.
+        (unsafe { &*context }.callback)(event)
+    }))
+    .ok()
+}
+
+fn transform_component_matrix_response(context: *mut core::ffi::c_void) -> [f32; 16] {
+    match transform_component_response(context, TransformComponentEvent::Matrix) {
+        Some(TransformComponentResponse::Matrix(matrix)) => matrix,
+        _ => IDENTITY_MATRIX_F32,
+    }
+}
+
+fn transform_component_key_times_response(context: *mut core::ffi::c_void) -> Vec<f64> {
+    match transform_component_response(context, TransformComponentEvent::KeyTimes) {
+        Some(TransformComponentResponse::KeyTimes(key_times)) => key_times,
+        _ => vec![0.0],
+    }
+}
+
+fn transform_op_response(
+    context: *mut core::ffi::c_void,
+    event: TransformOpEvent,
+) -> Option<TransformOpResponse> {
+    let context = (!context.is_null()).then_some(context.cast::<TransformOpCallback>())?;
+    std::panic::catch_unwind(AssertUnwindSafe(|| {
+        // SAFETY: The unsafe operation is valid in this context.
+        (unsafe { &*context }.callback)(event)
+    }))
+    .ok()
+}
+
+fn transform_op_matrix_f32(context: *mut core::ffi::c_void, time: f64) -> [f32; 16] {
+    match transform_op_response(context, TransformOpEvent::Float4x4AtTime(time)) {
+        Some(TransformOpResponse::Float4x4(matrix)) => matrix,
+        Some(TransformOpResponse::Double4x4(matrix)) => matrix.map(|value| value as f32),
+        _ => IDENTITY_MATRIX_F32,
+    }
+}
+
+fn transform_op_matrix_f64(context: *mut core::ffi::c_void, time: f64) -> [f64; 16] {
+    match transform_op_response(context, TransformOpEvent::Double4x4AtTime(time)) {
+        Some(TransformOpResponse::Double4x4(matrix)) => matrix,
+        Some(TransformOpResponse::Float4x4(matrix)) => matrix.map(f64::from),
+        _ => IDENTITY_MATRIX_F64,
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_component_copy_matrix(
+    context: *mut core::ffi::c_void,
+    out_values: *mut f32,
+) {
+    write_matrix_f32(out_values, transform_component_matrix_response(context));
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_component_set_matrix(
+    context: *mut core::ffi::c_void,
+    values: *const f32,
+) {
+    let _ = transform_component_response(
+        context,
+        TransformComponentEvent::SetMatrix(matrix_f32_from_ptr(values)),
+    );
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_component_resets_transform(
+    context: *mut core::ffi::c_void,
+) -> i32 {
+    match transform_component_response(context, TransformComponentEvent::ResetsTransform) {
+        Some(TransformComponentResponse::Bool(resets_transform)) => i32::from(resets_transform),
+        _ => 0,
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_component_set_resets_transform(
+    context: *mut core::ffi::c_void,
+    resets_transform: i32,
+) {
+    let _ = transform_component_response(
+        context,
+        TransformComponentEvent::SetResetsTransform(resets_transform != 0),
+    );
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_component_minimum_time(
+    context: *mut core::ffi::c_void,
+) -> f64 {
+    match transform_component_response(context, TransformComponentEvent::MinimumTime) {
+        Some(TransformComponentResponse::Time(time)) => time,
+        _ => 0.0,
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_component_maximum_time(
+    context: *mut core::ffi::c_void,
+) -> f64 {
+    match transform_component_response(context, TransformComponentEvent::MaximumTime) {
+        Some(TransformComponentResponse::Time(time)) => time,
+        _ => 0.0,
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_component_key_time_count(
+    context: *mut core::ffi::c_void,
+) -> u64 {
+    transform_component_key_times_response(context).len() as u64
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_component_copy_key_times(
+    context: *mut core::ffi::c_void,
+    out_values: *mut f64,
+    capacity: u64,
+) -> u64 {
+    let values = transform_component_key_times_response(context);
+    let total = values.len();
+    if out_values.is_null() || capacity == 0 {
+        return total as u64;
+    }
+    let write_count = total.min(capacity as usize);
+    // SAFETY: The unsafe operation is valid in this context.
+    unsafe { out_values.copy_from_nonoverlapping(values.as_ptr(), write_count) };
+    total as u64
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_component_set_local_transform(
+    context: *mut core::ffi::c_void,
+    values: *const f32,
+) {
+    let _ = transform_component_response(
+        context,
+        TransformComponentEvent::SetLocalTransform(matrix_f32_from_ptr(values)),
+    );
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_component_set_local_transform_for_time(
+    context: *mut core::ffi::c_void,
+    values: *const f32,
+    time: f64,
+) {
+    let _ = transform_component_response(
+        context,
+        TransformComponentEvent::SetLocalTransformForTime {
+            transform: matrix_f32_from_ptr(values),
+            time,
+        },
+    );
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_component_copy_local_transform_at_time(
+    context: *mut core::ffi::c_void,
+    time: f64,
+    out_values: *mut f32,
+) {
+    let matrix = match transform_component_response(context, TransformComponentEvent::LocalTransformAtTime(time)) {
+        Some(TransformComponentResponse::Matrix(matrix)) => matrix,
+        _ => transform_component_matrix_response(context),
+    };
+    write_matrix_f32(out_values, matrix);
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_component_release(context: *mut core::ffi::c_void) {
+    if context.is_null() {
+        return;
+    }
+    // SAFETY: The unsafe operation is valid in this context.
+    unsafe { drop(Box::from_raw(context.cast::<TransformComponentCallback>())) };
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_op_name(
+    context: *mut core::ffi::c_void,
+) -> *mut core::ffi::c_char {
+    match transform_op_response(context, TransformOpEvent::Name) {
+        Some(TransformOpResponse::Name(Some(name))) => duplicate_c_string(&name),
+        _ => ptr::null_mut(),
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_op_is_inverse(context: *mut core::ffi::c_void) -> i32 {
+    match transform_op_response(context, TransformOpEvent::IsInverseOp) {
+        Some(TransformOpResponse::Bool(is_inverse)) => i32::from(is_inverse),
+        _ => 0,
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_op_copy_float4x4_at_time(
+    context: *mut core::ffi::c_void,
+    time: f64,
+    out_values: *mut f32,
+) {
+    write_matrix_f32(out_values, transform_op_matrix_f32(context, time));
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_op_copy_double4x4_at_time(
+    context: *mut core::ffi::c_void,
+    time: f64,
+    out_values: *mut f64,
+) {
+    write_matrix_f64(out_values, transform_op_matrix_f64(context, time));
+}
+
+#[no_mangle]
+pub extern "C" fn mdlx_transform_op_release(context: *mut core::ffi::c_void) {
+    if context.is_null() {
+        return;
+    }
+    // SAFETY: The unsafe operation is valid in this context.
+    unsafe { drop(Box::from_raw(context.cast::<TransformOpCallback>())) };
+}
+
+fn release_transform_component_callback_context(context: *mut core::ffi::c_void) {
+    mdlx_transform_component_release(context);
+}
+
+fn release_transform_op_callback_context(context: *mut core::ffi::c_void) {
+    mdlx_transform_op_release(context);
+}
+
 #[derive(Debug, Clone)]
 /// Wraps the corresponding Model I/O transform component counterpart.
 pub struct TransformComponent {
     handle: ObjectHandle,
 }
 
+impl Component for TransformComponent {}
+
 impl TransformComponent {
+    /// Wraps a Rust callback as the corresponding Model I/O transform component protocol counterpart.
+    pub fn new<F>(callback: F) -> Result<Self>
+    where
+        F: Fn(TransformComponentEvent) -> TransformComponentResponse + Send + Sync + 'static,
+    {
+        let callback = Box::new(TransformComponentCallback {
+            callback: Box::new(callback),
+        });
+        let callback_ptr = Box::into_raw(callback).cast::<core::ffi::c_void>();
+        let mut out_component = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
+        let status = unsafe {
+            ffi::mdl_transform_component_new_with_callback(
+                callback_ptr,
+                &mut out_component,
+                &mut out_error,
+            )
+        };
+        if let Err(error) = crate::util::status_result(status, out_error) {
+            release_transform_component_callback_context(callback_ptr);
+            return Err(error);
+        }
+        match required_handle(out_component, "MDLTransformComponent") {
+            Ok(handle) => Ok(Self::from_handle(handle)),
+            Err(error) => {
+                release_transform_component_callback_context(callback_ptr);
+                Err(error)
+            }
+        }
+    }
+
     /// Builds this wrapper from the retained handle of the wrapped Model I/O transform component counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
@@ -554,6 +949,38 @@ pub struct TransformOp {
 }
 
 impl TransformOp {
+    /// Wraps a Rust callback as the corresponding Model I/O transform op protocol counterpart.
+    pub fn new<F>(callback: F) -> Result<Self>
+    where
+        F: Fn(TransformOpEvent) -> TransformOpResponse + Send + Sync + 'static,
+    {
+        let callback = Box::new(TransformOpCallback {
+            callback: Box::new(callback),
+        });
+        let callback_ptr = Box::into_raw(callback).cast::<core::ffi::c_void>();
+        let mut out_transform_op = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
+        let status = unsafe {
+            ffi::mdl_transform_op_new_with_callback(
+                callback_ptr,
+                &mut out_transform_op,
+                &mut out_error,
+            )
+        };
+        if let Err(error) = crate::util::status_result(status, out_error) {
+            release_transform_op_callback_context(callback_ptr);
+            return Err(error);
+        }
+        match required_handle(out_transform_op, "MDLTransformOp") {
+            Ok(handle) => Ok(Self::from_handle(handle)),
+            Err(error) => {
+                release_transform_op_callback_context(callback_ptr);
+                Err(error)
+            }
+        }
+    }
+
     /// Builds this wrapper from the retained handle of the wrapped Model I/O transform op counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
@@ -580,6 +1007,21 @@ impl TransformOp {
         // SAFETY: The unsafe operation is valid in this context.
         unsafe {
             ffi::mdl_transform_op_copy_float4x4_at_time(
+                self.handle.as_ptr(),
+                time,
+                matrix.as_mut_ptr(),
+            );
+        };
+        matrix
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O transform op counterpart.
+    pub fn double4x4_at_time(&self, time: f64) -> [f64; 16] {
+        let mut matrix = [0.0_f64; 16];
+        // SAFETY: The unsafe operation is valid in this context.
+        unsafe {
+            ffi::mdl_transform_op_copy_double4x4_at_time(
                 self.handle.as_ptr(),
                 time,
                 matrix.as_mut_ptr(),

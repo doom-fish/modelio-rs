@@ -1,8 +1,68 @@
+import Darwin
 import Foundation
 import ModelIO
 
+@_silgen_name("mdlx_asset_resolver_can_resolve_named")
+private func mdlx_asset_resolver_can_resolve_named(
+    _ context: UnsafeMutableRawPointer?,
+    _ name: UnsafePointer<CChar>?
+) -> Int32
+
+@_silgen_name("mdlx_asset_resolver_resolve_named")
+private func mdlx_asset_resolver_resolve_named(
+    _ context: UnsafeMutableRawPointer?,
+    _ name: UnsafePointer<CChar>?
+) -> UnsafeMutablePointer<CChar>?
+
+@_silgen_name("mdlx_asset_resolver_release")
+private func mdlx_asset_resolver_release(_ context: UnsafeMutableRawPointer?)
+
+private final class RustAssetResolver: NSObject, MDLAssetResolver {
+    private let callbackContext: UnsafeMutableRawPointer?
+
+    init(callbackContext: UnsafeMutableRawPointer?) {
+        self.callbackContext = callbackContext
+        super.init()
+    }
+
+    deinit {
+        mdlx_asset_resolver_release(callbackContext)
+    }
+
+    func canResolveAssetNamed(_ name: String) -> Bool {
+        name.withCString { mdlx_asset_resolver_can_resolve_named(callbackContext, $0) != 0 }
+    }
+
+    func resolveAssetNamed(_ name: String) -> URL {
+        let pointer = name.withCString { mdlx_asset_resolver_resolve_named(callbackContext, $0) }
+        guard let pointer else {
+            return URL(fileURLWithPath: name)
+        }
+        defer { free(pointer) }
+        let value = String(cString: pointer)
+        if let url = URL(string: value), url.scheme != nil {
+            return url
+        }
+        return URL(fileURLWithPath: value)
+    }
+}
+
 private func mdl_asset_resolver(_ handle: UnsafeMutableRawPointer?) -> (any MDLAssetResolver)? {
     mdl_borrow_object(handle) as? any MDLAssetResolver
+}
+
+@_cdecl("mdl_asset_resolver_new_with_callback")
+public func mdl_asset_resolver_new_with_callback(
+    _ callbackContext: UnsafeMutableRawPointer?,
+    _ outResolver: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outResolver else {
+            throw ModelIOBridgeError.invalidArgument("missing output resolver pointer")
+        }
+        outResolver.pointee = mdl_retain(RustAssetResolver(callbackContext: callbackContext))
+    }
 }
 
 @_cdecl("mdl_asset_resolver_can_resolve_named")

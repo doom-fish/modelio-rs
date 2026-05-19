@@ -85,6 +85,30 @@ impl Material {
         )?))
     }
 
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O material counterpart.
+    pub fn new_with_scattering_function(
+        name: &str,
+        scattering_function: &ScatteringFunction,
+    ) -> Result<Self> {
+        let name = c_string(name)?;
+        let mut out_material = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
+        let status = unsafe {
+            ffi::mdl_material_new_with_scattering_function(
+                name.as_ptr(),
+                scattering_function.as_ptr(),
+                &mut out_material,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_material,
+            "MDLMaterial",
+        )?))
+    }
+
     /// Calls the corresponding Model I/O method on the wrapped Model I/O material counterpart.
     pub fn info(&self) -> Result<MaterialInfo> {
         parse_json(
@@ -178,6 +202,301 @@ impl Material {
         (0..self.count())
             .filter_map(|index| self.property(index))
             .collect()
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O material counterpart.
+    pub fn scattering_function(&self) -> Option<ScatteringFunction> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
+        let ptr = unsafe { ffi::mdl_material_scattering_function(self.handle.as_ptr()) };
+        // SAFETY: The unsafe operation is valid in this context.
+        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(ScatteringFunction::from_handle)
+    }
+}
+
+mod scattering_property_code {
+    pub const BASE_COLOR: u32 = 1;
+    pub const EMISSION: u32 = 2;
+    pub const SPECULAR: u32 = 3;
+    pub const MATERIAL_INDEX_OF_REFRACTION: u32 = 4;
+    pub const INTERFACE_INDEX_OF_REFRACTION: u32 = 5;
+    pub const NORMAL: u32 = 6;
+    pub const AMBIENT_OCCLUSION: u32 = 7;
+    pub const AMBIENT_OCCLUSION_SCALE: u32 = 8;
+}
+
+mod physically_plausible_scattering_property_code {
+    pub const SUBSURFACE: u32 = 1;
+    pub const METALLIC: u32 = 2;
+    pub const SPECULAR_AMOUNT: u32 = 3;
+    pub const SPECULAR_TINT: u32 = 4;
+    pub const ROUGHNESS: u32 = 5;
+    pub const ANISOTROPIC: u32 = 6;
+    pub const ANISOTROPIC_ROTATION: u32 = 7;
+    pub const SHEEN: u32 = 8;
+    pub const SHEEN_TINT: u32 = 9;
+    pub const CLEARCOAT: u32 = 10;
+    pub const CLEARCOAT_GLOSS: u32 = 11;
+}
+
+#[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O scattering function counterpart.
+pub struct ScatteringFunction {
+    handle: ObjectHandle,
+}
+
+impl Named for ScatteringFunction {
+    fn name(&self) -> Option<String> {
+        self.name()
+    }
+
+    fn set_name(&self, name: &str) -> Result<()> {
+        self.set_name(name)
+    }
+}
+
+impl ScatteringFunction {
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O scattering function counterpart.
+    pub fn new() -> Result<Self> {
+        let mut out_scattering = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
+        let status = unsafe { ffi::mdl_scattering_function_new(&mut out_scattering, &mut out_error) };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_scattering,
+            "MDLScatteringFunction",
+        )?))
+    }
+
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O scattering function counterpart.
+    pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
+        Self { handle }
+    }
+
+    /// Returns the opaque pointer used to call the wrapped Model I/O scattering function counterpart.
+    pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
+        self.handle.as_ptr()
+    }
+
+    fn property(&self, code: u32) -> Option<MaterialProperty> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
+        let ptr = unsafe { ffi::mdl_scattering_function_property(self.handle.as_ptr(), code) };
+        // SAFETY: The unsafe operation is valid in this context.
+        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(MaterialProperty::from_handle)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O scattering function counterpart.
+    pub fn name(&self) -> Option<String> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
+        take_string(unsafe { ffi::mdl_named_name_string(self.handle.as_ptr()) })
+    }
+
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O scattering function counterpart.
+    pub fn set_name(&self, name: &str) -> Result<()> {
+        let name = c_string(name)?;
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
+        unsafe { ffi::mdl_named_set_name(self.handle.as_ptr(), name.as_ptr()) };
+        Ok(())
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O scattering function counterpart.
+    pub fn base_color(&self) -> Option<MaterialProperty> {
+        self.property(scattering_property_code::BASE_COLOR)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O scattering function counterpart.
+    pub fn emission(&self) -> Option<MaterialProperty> {
+        self.property(scattering_property_code::EMISSION)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O scattering function counterpart.
+    pub fn specular(&self) -> Option<MaterialProperty> {
+        self.property(scattering_property_code::SPECULAR)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O scattering function counterpart.
+    pub fn material_index_of_refraction(&self) -> Option<MaterialProperty> {
+        self.property(scattering_property_code::MATERIAL_INDEX_OF_REFRACTION)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O scattering function counterpart.
+    pub fn interface_index_of_refraction(&self) -> Option<MaterialProperty> {
+        self.property(scattering_property_code::INTERFACE_INDEX_OF_REFRACTION)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O scattering function counterpart.
+    pub fn normal(&self) -> Option<MaterialProperty> {
+        self.property(scattering_property_code::NORMAL)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O scattering function counterpart.
+    pub fn ambient_occlusion(&self) -> Option<MaterialProperty> {
+        self.property(scattering_property_code::AMBIENT_OCCLUSION)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O scattering function counterpart.
+    pub fn ambient_occlusion_scale(&self) -> Option<MaterialProperty> {
+        self.property(scattering_property_code::AMBIENT_OCCLUSION_SCALE)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O scattering function counterpart.
+    pub fn as_physically_plausible_scattering_function(
+        &self,
+    ) -> Option<PhysicallyPlausibleScatteringFunction> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
+        (unsafe { ffi::mdl_scattering_function_is_physically_plausible(self.handle.as_ptr()) != 0 })
+            .then(|| PhysicallyPlausibleScatteringFunction::from_handle(self.handle.clone()))
+    }
+}
+
+#[derive(Debug, Clone)]
+/// Wraps the corresponding Model I/O physically plausible scattering function counterpart.
+pub struct PhysicallyPlausibleScatteringFunction {
+    handle: ObjectHandle,
+}
+
+impl Named for PhysicallyPlausibleScatteringFunction {
+    fn name(&self) -> Option<String> {
+        self.name()
+    }
+
+    fn set_name(&self, name: &str) -> Result<()> {
+        self.set_name(name)
+    }
+}
+
+impl PhysicallyPlausibleScatteringFunction {
+    /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O physically plausible scattering function counterpart.
+    pub fn new() -> Result<Self> {
+        let mut out_scattering = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        // SAFETY: The unsafe operation is valid in this context.
+        let status = unsafe {
+            ffi::mdl_physically_plausible_scattering_function_new(
+                &mut out_scattering,
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_scattering,
+            "MDLPhysicallyPlausibleScatteringFunction",
+        )?))
+    }
+
+    /// Builds this wrapper from the retained handle of the wrapped Model I/O physically plausible scattering function counterpart.
+    pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
+        Self { handle }
+    }
+
+    fn property(&self, code: u32) -> Option<MaterialProperty> {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
+        let ptr = unsafe {
+            ffi::mdl_physically_plausible_scattering_function_property(self.handle.as_ptr(), code)
+        };
+        // SAFETY: The unsafe operation is valid in this context.
+        unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(MaterialProperty::from_handle)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible scattering function counterpart.
+    pub fn version(&self) -> i64 {
+        // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
+        unsafe { ffi::mdl_physically_plausible_scattering_function_version(self.handle.as_ptr()) }
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible scattering function counterpart.
+    pub fn name(&self) -> Option<String> {
+        self.as_scattering_function().name()
+    }
+
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible scattering function counterpart.
+    pub fn set_name(&self, name: &str) -> Result<()> {
+        self.as_scattering_function().set_name(name)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible scattering function counterpart.
+    pub fn subsurface(&self) -> Option<MaterialProperty> {
+        self.property(physically_plausible_scattering_property_code::SUBSURFACE)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible scattering function counterpart.
+    pub fn metallic(&self) -> Option<MaterialProperty> {
+        self.property(physically_plausible_scattering_property_code::METALLIC)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible scattering function counterpart.
+    pub fn specular_amount(&self) -> Option<MaterialProperty> {
+        self.property(physically_plausible_scattering_property_code::SPECULAR_AMOUNT)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible scattering function counterpart.
+    pub fn specular_tint(&self) -> Option<MaterialProperty> {
+        self.property(physically_plausible_scattering_property_code::SPECULAR_TINT)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible scattering function counterpart.
+    pub fn roughness(&self) -> Option<MaterialProperty> {
+        self.property(physically_plausible_scattering_property_code::ROUGHNESS)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible scattering function counterpart.
+    pub fn anisotropic(&self) -> Option<MaterialProperty> {
+        self.property(physically_plausible_scattering_property_code::ANISOTROPIC)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible scattering function counterpart.
+    pub fn anisotropic_rotation(&self) -> Option<MaterialProperty> {
+        self.property(physically_plausible_scattering_property_code::ANISOTROPIC_ROTATION)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible scattering function counterpart.
+    pub fn sheen(&self) -> Option<MaterialProperty> {
+        self.property(physically_plausible_scattering_property_code::SHEEN)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible scattering function counterpart.
+    pub fn sheen_tint(&self) -> Option<MaterialProperty> {
+        self.property(physically_plausible_scattering_property_code::SHEEN_TINT)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible scattering function counterpart.
+    pub fn clearcoat(&self) -> Option<MaterialProperty> {
+        self.property(physically_plausible_scattering_property_code::CLEARCOAT)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible scattering function counterpart.
+    pub fn clearcoat_gloss(&self) -> Option<MaterialProperty> {
+        self.property(physically_plausible_scattering_property_code::CLEARCOAT_GLOSS)
+    }
+
+    #[must_use]
+    /// Calls the corresponding Model I/O method on the wrapped Model I/O physically plausible scattering function counterpart.
+    pub fn as_scattering_function(&self) -> ScatteringFunction {
+        ScatteringFunction::from_handle(self.handle.clone())
     }
 }
 

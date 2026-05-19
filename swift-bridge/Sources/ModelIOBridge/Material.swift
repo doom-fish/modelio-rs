@@ -52,6 +52,53 @@ private func mdl_named(_ handle: UnsafeMutableRawPointer?) -> (NSObject & MDLNam
     mdl_borrow_object(handle) as? (NSObject & MDLNamed)
 }
 
+private func mdl_scattering_function(_ handle: UnsafeMutableRawPointer?) -> MDLScatteringFunction? {
+    mdl_borrow_object(handle) as? MDLScatteringFunction
+}
+
+private func mdl_physically_plausible_scattering_function(
+    _ handle: UnsafeMutableRawPointer?
+) -> MDLPhysicallyPlausibleScatteringFunction? {
+    mdl_borrow_object(handle) as? MDLPhysicallyPlausibleScatteringFunction
+}
+
+private func mdl_scattering_property(
+    _ scatteringFunction: MDLScatteringFunction,
+    code: UInt32
+) -> MDLMaterialProperty? {
+    switch code {
+    case 1: return scatteringFunction.baseColor
+    case 2: return scatteringFunction.emission
+    case 3: return scatteringFunction.specular
+    case 4: return scatteringFunction.materialIndexOfRefraction
+    case 5: return scatteringFunction.interfaceIndexOfRefraction
+    case 6: return scatteringFunction.normal
+    case 7: return scatteringFunction.ambientOcclusion
+    case 8: return scatteringFunction.ambientOcclusionScale
+    default: return nil
+    }
+}
+
+private func mdl_physically_plausible_scattering_property(
+    _ scatteringFunction: MDLPhysicallyPlausibleScatteringFunction,
+    code: UInt32
+) -> MDLMaterialProperty? {
+    switch code {
+    case 1: return scatteringFunction.subsurface
+    case 2: return scatteringFunction.metallic
+    case 3: return scatteringFunction.specularAmount
+    case 4: return scatteringFunction.specularTint
+    case 5: return scatteringFunction.roughness
+    case 6: return scatteringFunction.anisotropic
+    case 7: return scatteringFunction.anisotropicRotation
+    case 8: return scatteringFunction.sheen
+    case 9: return scatteringFunction.sheenTint
+    case 10: return scatteringFunction.clearcoat
+    case 11: return scatteringFunction.clearcoatGloss
+    default: return nil
+    }
+}
+
 private func mdl_texture_wrap_mode(_ rawValue: UInt32) -> MDLMaterialTextureWrapMode? {
     switch rawValue {
     case 0: return .clamp
@@ -120,6 +167,101 @@ public func mdl_material_new(
             : MDLScatteringFunction()
         outMaterial.pointee = mdl_retain(MDLMaterial(name: materialName, scatteringFunction: scatteringFunction))
     }
+}
+
+@_cdecl("mdl_material_new_with_scattering_function")
+public func mdl_material_new_with_scattering_function(
+    _ name: UnsafePointer<CChar>?,
+    _ scatteringFunctionHandle: UnsafeMutableRawPointer?,
+    _ outMaterial: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let name,
+              let scatteringFunction = mdl_scattering_function(scatteringFunctionHandle),
+              let outMaterial
+        else {
+            throw ModelIOBridgeError.invalidArgument("missing material name, scattering function, or output pointer")
+        }
+        outMaterial.pointee = mdl_retain(
+            MDLMaterial(
+                name: String(cString: name),
+                scatteringFunction: scatteringFunction
+            )
+        )
+    }
+}
+
+@_cdecl("mdl_material_scattering_function")
+public func mdl_material_scattering_function(_ handle: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
+    guard let material = mdl_borrow_object(handle) as? MDLMaterial else { return nil }
+    return mdl_retain(material.scatteringFunction)
+}
+
+@_cdecl("mdl_scattering_function_new")
+public func mdl_scattering_function_new(
+    _ outScatteringFunction: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outScatteringFunction else {
+            throw ModelIOBridgeError.invalidArgument("missing output scattering function pointer")
+        }
+        outScatteringFunction.pointee = mdl_retain(MDLScatteringFunction())
+    }
+}
+
+@_cdecl("mdl_scattering_function_property")
+public func mdl_scattering_function_property(
+    _ handle: UnsafeMutableRawPointer?,
+    _ code: UInt32
+) -> UnsafeMutableRawPointer? {
+    guard let scatteringFunction = mdl_scattering_function(handle),
+          let property = mdl_scattering_property(scatteringFunction, code: code)
+    else {
+        return nil
+    }
+    return mdl_retain(property)
+}
+
+@_cdecl("mdl_scattering_function_is_physically_plausible")
+public func mdl_scattering_function_is_physically_plausible(_ handle: UnsafeMutableRawPointer?) -> Int32 {
+    guard let scatteringFunction = mdl_borrow_object(handle) else { return 0 }
+    return scatteringFunction is MDLPhysicallyPlausibleScatteringFunction ? 1 : 0
+}
+
+@_cdecl("mdl_physically_plausible_scattering_function_new")
+public func mdl_physically_plausible_scattering_function_new(
+    _ outScatteringFunction: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outScatteringFunction else {
+            throw ModelIOBridgeError.invalidArgument("missing output scattering function pointer")
+        }
+        outScatteringFunction.pointee = mdl_retain(MDLPhysicallyPlausibleScatteringFunction())
+    }
+}
+
+@_cdecl("mdl_physically_plausible_scattering_function_version")
+public func mdl_physically_plausible_scattering_function_version(_ handle: UnsafeMutableRawPointer?) -> Int64 {
+    guard let scatteringFunction = mdl_physically_plausible_scattering_function(handle) else {
+        return 0
+    }
+    return Int64(scatteringFunction.version)
+}
+
+@_cdecl("mdl_physically_plausible_scattering_function_property")
+public func mdl_physically_plausible_scattering_function_property(
+    _ handle: UnsafeMutableRawPointer?,
+    _ code: UInt32
+) -> UnsafeMutableRawPointer? {
+    guard let scatteringFunction = mdl_physically_plausible_scattering_function(handle),
+          let property = mdl_physically_plausible_scattering_property(scatteringFunction, code: code)
+    else {
+        return nil
+    }
+    return mdl_retain(property)
 }
 
 @_cdecl("mdl_material_info_json")

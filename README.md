@@ -2,18 +2,18 @@
 
 Safe Rust bindings for Apple's [ModelIO](https://developer.apple.com/documentation/modelio) framework on macOS. The published Cargo package is `modelio-rs`; the Rust library target is `modelio`.
 
-> **Status:** v0.2.2 brings the SDK audit to 117/117 top-level ModelIO symbols (100%) and adds material graphs/samplers, stereoscopic cameras, area/photometric lights, object containers, matrix arrays, voxel extras, SDK constants, and USDZ conversion helpers.
+> **Status:** v0.3.0 keeps the SDK audit at 117/117 top-level ModelIO symbols (100%) and adds callback-backed protocol wrappers for asset resolvers, mesh-buffer allocators, transform components/ops, plus first-class scattering-function wrappers.
 
 ## Highlights
 
 - `Asset` for loading, exporting, and walking ModelIO assets
 - `Mesh` for procedural primitives, vertex buffer reads, submesh inspection, and vertex descriptor access
-- `Material`, `MaterialProperty`, `TextureFilter`, `TextureSampler`, and material-graph wrappers for physically plausible materials, standalone properties, and sampler/graph authoring
+- `Material`, `ScatteringFunction`, `PhysicallyPlausibleScatteringFunction`, `MaterialProperty`, `TextureFilter`, `TextureSampler`, and material-graph wrappers for physically plausible materials, scattering models, standalone properties, and sampler/graph authoring
 - `Light`, `AreaLight`, `PhotometricLight`, `PhysicallyPlausibleLight`, `Camera`, and `StereoscopicCamera` for scene-lighting and camera control surfaces
 - `Object` and `ObjectContainer` for hierarchy creation, child traversal, path lookup, and transform-component attachment
-- `Transform`, `TransformStack`, and typed transform ops for explicit transform authoring
-- `MeshBufferData`, `MeshBufferDataAllocator`, and related wrappers for buffer-authoring workflows
-- `AssetResolver` plus path, bundle, and relative resolvers for asset lookup control
+- `Transform`, callback-backed `TransformComponent`/`TransformOp`, `TransformStack`, and typed transform ops for explicit transform authoring
+- `MeshBufferData`, callback-backed `MeshBufferAllocator`, `MeshBufferDataAllocator`, and related wrappers for buffer-authoring workflows
+- `AssetResolver` plus path, bundle, relative, and callback-backed custom resolvers for asset lookup control
 - `VoxelArray` for sparse voxel grids, asset/mesh voxelization, boolean ops, and coarse/smooth mesh generation
 - `Texture` for URL-backed textures, checkerboards, procedural gradients/noise/sky cubes, metadata, writes, and texel extraction
 - `LightProbe` and `LightProbeIrradianceDataSource` for probe generation and placement helpers

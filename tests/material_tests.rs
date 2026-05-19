@@ -114,3 +114,47 @@ fn material_sampler_filter_and_graph_surfaces_round_trip() {
     assert_eq!(graph.nodes().expect("graph nodes").len(), 1);
     assert_eq!(graph.connections().expect("graph connections").len(), 0);
 }
+
+#[test]
+fn scattering_function_wrappers_round_trip() {
+    let scattering = ScatteringFunction::new().expect("scattering function");
+    scattering.set_name("Lambert").expect("scattering name");
+    assert_eq!(scattering.name().as_deref(), Some("Lambert"));
+
+    let base_color = scattering.base_color().expect("base color");
+    base_color.set_color([0.6, 0.5, 0.4, 1.0]);
+    assert_eq!(
+        base_color.info().expect("base color info").color,
+        Some([0.6, 0.5, 0.4, 1.0])
+    );
+
+    let pbr = PhysicallyPlausibleScatteringFunction::new().expect("pbr scattering");
+    assert_eq!(pbr.version(), 1);
+    pbr.metallic().expect("metallic").set_float(0.75);
+    pbr.clearcoat().expect("clearcoat").set_float(0.25);
+
+    let material = Material::new_with_scattering_function("CustomPbr", &pbr.as_scattering_function())
+        .expect("material with scattering");
+    let material_scattering = material.scattering_function().expect("material scattering");
+    let pbr_scattering = material_scattering
+        .as_physically_plausible_scattering_function()
+        .expect("physically plausible scattering");
+    assert_eq!(
+        pbr_scattering
+            .metallic()
+            .expect("material metallic")
+            .info()
+            .expect("material metallic info")
+            .float_value,
+        Some(0.75)
+    );
+    assert_eq!(
+        pbr_scattering
+            .clearcoat()
+            .expect("material clearcoat")
+            .info()
+            .expect("material clearcoat info")
+            .float_value,
+        Some(0.25)
+    );
+}

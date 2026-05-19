@@ -32,6 +32,12 @@ public func mdl_borrow_object(_ handle: UnsafeMutableRawPointer?) -> AnyObject? 
     return Unmanaged<AnyObject>.fromOpaque(handle).takeUnretainedValue()
 }
 
+@inline(__always)
+public func mdl_take_retained_object(_ handle: UnsafeMutableRawPointer?) -> AnyObject? {
+    guard let handle else { return nil }
+    return Unmanaged<AnyObject>.fromOpaque(handle).takeRetainedValue()
+}
+
 public enum ModelIOBridgeError: Error, CustomStringConvertible {
     case invalidArgument(String)
     case nullResult(String)

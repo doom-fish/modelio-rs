@@ -1,3 +1,5 @@
+use std::sync::{Arc, Mutex};
+
 use modelio::prelude::*;
 
 #[test]
@@ -126,4 +128,107 @@ fn transform_and_transform_stack_round_trip() {
         .local_transform_at_time(0.0)
         .iter()
         .all(|value| value.is_finite()));
+}
+
+#[test]
+#[allow(clippy::significant_drop_tightening)]
+fn custom_transform_component_callback_round_trip() {
+    let state = Arc::new(Mutex::new((
+        [
+            1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 2.0, 3.0, 1.0,
+        ],
+        false,
+    )));
+    let component = {
+        let state = Arc::clone(&state);
+        TransformComponent::new(move |event| {
+            let mut state = state.lock().expect("state lock");
+            match event {
+                TransformComponentEvent::Matrix => TransformComponentResponse::Matrix(state.0),
+                TransformComponentEvent::SetMatrix(matrix)
+                | TransformComponentEvent::SetLocalTransform(matrix) => {
+                    state.0 = matrix;
+                    TransformComponentResponse::None
+                }
+                TransformComponentEvent::ResetsTransform => {
+                    TransformComponentResponse::Bool(state.1)
+                }
+                TransformComponentEvent::SetResetsTransform(resets_transform) => {
+                    state.1 = resets_transform;
+                    TransformComponentResponse::None
+                }
+                TransformComponentEvent::MinimumTime => TransformComponentResponse::Time(0.0),
+                TransformComponentEvent::MaximumTime => TransformComponentResponse::Time(1.0),
+                TransformComponentEvent::KeyTimes => {
+                    TransformComponentResponse::KeyTimes(vec![0.0, 1.0])
+                }
+                TransformComponentEvent::SetLocalTransformForTime { transform, time: _ } => {
+                    state.0 = transform;
+                    TransformComponentResponse::None
+                }
+                TransformComponentEvent::LocalTransformAtTime(time) => {
+                    let mut matrix = state.0;
+                    if (time - 1.0).abs() < f64::EPSILON {
+                        matrix[12] = 4.0;
+                        matrix[13] = 5.0;
+                        matrix[14] = 6.0;
+                    }
+                    TransformComponentResponse::Matrix(matrix)
+                }
+            }
+        })
+        .expect("custom transform component")
+    };
+
+    assert_eq!(component.key_times(), vec![0.0, 1.0]);
+    assert!(!component.resets_transform());
+    component.set_resets_transform(true);
+    assert!(component.resets_transform());
+
+    component.set_matrix([
+        1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 7.0, 8.0, 9.0, 1.0,
+    ]);
+    assert_eq!(&state.lock().expect("state").0[12..15], &[7.0, 8.0, 9.0]);
+
+    let local = component.local_transform_at_time(1.0);
+    assert_eq!(&local[12..15], &[4.0, 5.0, 6.0]);
+
+    let object = Object::new().expect("object");
+    object.set_transform_component(Some(&component));
+    let retrieved = object.transform_component().expect("retrieved component");
+    assert!(retrieved.resets_transform());
+    let copied = Transform::from_component(&retrieved).expect("transform copy");
+    assert_eq!(&copied.matrix()[12..15], &[7.0, 8.0, 9.0]);
+}
+
+#[test]
+#[allow(clippy::cast_possible_truncation, clippy::float_cmp)]
+fn custom_transform_op_callback_round_trip() {
+    let op = TransformOp::new(|event| match event {
+        TransformOpEvent::Name => TransformOpResponse::Name(Some("callback-op".to_string())),
+        TransformOpEvent::IsInverseOp => TransformOpResponse::Bool(true),
+        TransformOpEvent::Float4x4AtTime(time) => {
+            let mut matrix = [
+                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+            ];
+            matrix[12] = time as f32;
+            TransformOpResponse::Float4x4(matrix)
+        }
+        TransformOpEvent::Double4x4AtTime(time) => {
+            let mut matrix = [
+                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+            ];
+            matrix[12] = time;
+            matrix[13] = time * 2.0;
+            TransformOpResponse::Double4x4(matrix)
+        }
+    })
+    .expect("custom transform op");
+
+    assert_eq!(op.name().as_deref(), Some("callback-op"));
+    assert!(op.is_inverse());
+    assert_eq!(op.float4x4_at_time(1.5)[12], 1.5);
+    let double = op.double4x4_at_time(2.0);
+    assert_eq!(double[12], 2.0);
+    assert_eq!(double[13], 4.0);
 }
