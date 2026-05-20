@@ -1,4 +1,4 @@
-use std::ffi::{CStr, CString};
+use std::ffi::CString;
 use std::os::raw::{c_char, c_void};
 use std::path::Path;
 
@@ -24,15 +24,9 @@ pub(crate) fn path_to_c_string(path: &Path) -> Result<CString> {
 
 /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
 pub(crate) fn take_string(ptr: *mut c_char) -> Option<String> {
-    if ptr.is_null() {
-        return None;
+    unsafe {
+        doom_fish_utils::ffi_string::take_owned_cstring_c(ptr, |p| libc::free(p.cast::<c_void>()))
     }
-
-    // SAFETY: The unsafe operation is valid in this context.
-    let string = unsafe { CStr::from_ptr(ptr).to_string_lossy().into_owned() };
-    // SAFETY: The unsafe operation is valid in this context.
-    unsafe { libc::free(ptr.cast::<c_void>()) };
-    Some(string)
 }
 
 /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
