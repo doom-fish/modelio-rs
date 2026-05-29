@@ -28,8 +28,14 @@ pub extern "C" fn mdlx_light_probe_irradiance_data_source_coefficients(
     let Some(context) = (!context.is_null()).then_some(context.cast::<IrradianceCallback>()) else {
         return 0;
     };
+    // A panic unwinding across the C ABI into ModelIO is undefined behaviour;
+    // contain any panic from the user closure and report zero coefficients.
     // SAFETY: The unsafe operation is valid in this context.
-    let values = (unsafe { &*context }.callback)([x, y, z]);
+    let Ok(values) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        (unsafe { &*context }.callback)([x, y, z])
+    })) else {
+        return 0;
+    };
     let total = values.len();
     if out_values.is_null() || capacity == 0 {
         return total as u64;
