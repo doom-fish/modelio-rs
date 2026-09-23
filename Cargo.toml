@@ -9,7 +9,7 @@ description = "Safe Rust bindings for Apple's ModelIO framework — assets, mesh
 authors = ["Per Johansson <per@doom.fish>"]
 keywords = ["modelio", "3d", "mesh", "macos", "apple"]
 categories = ["api-bindings", "graphics", "multimedia::images", "os::macos-apis"]
-rust-version = "1.76"
+rust-version = "1.82"
 readme = "README.md"
 build = "build.rs"
 include = [
@@ -40,7 +40,7 @@ crate-type = ["lib"]
 libc = "0.2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-doom-fish-utils = { path = "../doom-fish-utils", version = ">=0.3.2, <0.4" }
+doom-fish-utils = { path = "../doom-fish-utils", version = ">=0.4.1, <0.5" }
 
 [dev-dependencies]
 regex-lite = "0.1"
