@@ -1,11 +1,18 @@
 # ModelIO coverage
 
 Crate: `modelio-rs`  
-Version target: `0.3.0`
+Version target: `0.4.0`
 
-This document tracks **top-level ModelIO public symbol coverage** against the active macOS SDK: public classes, protocols, enums, structs, and exported SDK constants. `v0.3.0` reaches **117 / 117 verified symbols (100%)** in that audit.
+This document tracks **top-level ModelIO public symbol coverage** against the active macOS SDK: public classes, protocols, enums, structs, and exported SDK constants. The audit counts **117 / 117 symbols (100%)**.
 
-> Status in this document refers to top-level symbol coverage, not every Objective-C convenience selector. The Rust API intentionally wraps the safe, high-value ModelIO surface rather than mirroring every overload 1:1.
+> The 100% figure means every top-level symbol has a Rust counterpart. It does not measure methods or properties: a class counts as covered once any wrapper exists for it. Method-level coverage is thinner; the known gaps are listed below.
+
+## Known method-level gaps
+
+- `MDLMesh`: no initializers from caller-supplied vertex buffers (`initWithVertexBuffers:...`), no `addNormals`/`addTangentBasis`/`addUnwrappedTextureCoordinates`, no subdivision (`newSubdividedMesh:`), and no mesh-level `vertexAttributeDataForAttributeNamed:asFormat:`.
+- `MDLSubmesh`: no initializers from caller-supplied index buffers.
+- `MDLAsset`: no `childObjectsOfClass:`, animation or `originals`/`masters` accessors.
+- `MDLVertexDescriptor`: `removeAttributeNamed:` and replacing whole layouts are not wrapped; attributes and layouts are edited in place.
 
 ## Summary
 
@@ -33,6 +40,12 @@ This document tracks **top-level ModelIO public symbol coverage** against the ac
 | `MDLAnimation.h` + `MDLAnimatedValueTypes.h` | ✅ | Skeletons, packed joint animation, bind components, animated scalars/vectors/quaternions/matrices, and protocol markers |
 | `MDLSubmesh.h` + `MDLVertexDescriptor.h` | ✅ | `Submesh`, `SubmeshTopology`, `VertexAttribute`, `VertexDescriptor`, and `VertexBufferLayout` |
 | `MDLValueTypes.h` + `MDLUtility.h` + SDK constants | ✅ | `Matrix4x4Array`, `Utility`, `ut_type::*`, and `vertex_attribute_name::*` |
+
+## New in v0.4.0
+
+- `VertexFormat` replaces raw `u32` vertex formats, and `VertexDescriptor` becomes applicable: `VertexDescriptor::new`, `add_or_replace_attribute`, `Mesh::set_vertex_descriptor` and `Asset::from_url_with_options` (all validated before ModelIO sees the descriptor)
+- `Asset::from_url` binds the error-reporting initializer
+- Buffer-safety fixes in `VertexAttributeData::bytes`, `MeshBuffer::fill_data`, custom `MeshBufferAllocator` buffers and the light-probe irradiance data source
 
 ## New in v0.3.0
 

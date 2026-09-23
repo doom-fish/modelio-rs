@@ -2,7 +2,12 @@
 
 Safe Rust bindings for Apple's [ModelIO](https://developer.apple.com/documentation/modelio) framework on macOS. The published Cargo package is `modelio-rs`; the Rust library target is `modelio`.
 
-> **Status:** v0.3.0 keeps the SDK audit at 117/117 top-level ModelIO symbols (100%) and adds callback-backed protocol wrappers for asset resolvers, mesh-buffer allocators, transform components/ops, plus first-class scattering-function wrappers.
+> **Status:** v0.4.0 fixes buffer overruns in `VertexAttributeData::bytes` and `MeshBuffer::fill_data`, makes `Asset::from_url` report load errors, adds a typed `VertexFormat`, and lets a validated `VertexDescriptor` be applied to meshes and asset loads. The SDK audit covers 117/117 top-level ModelIO symbols; that figure counts classes, protocols, enums and constants, not methods (see `COVERAGE.md`).
+
+## Requirements
+
+- macOS 11 or newer (the Swift bridge's deployment target). `Utility::convert_to_usdz` needs macOS 15 and returns an error on older systems.
+- Xcode or the Swift toolchain, used by `build.rs` to build the bridge.
 
 ## Highlights
 
@@ -40,7 +45,7 @@ fn main() -> modelio::Result<()> {
 
 ### Assets + objects
 
-- `Asset::new`, `from_url`, `export_to_url`, `place_light_probes`
+- `Asset::new`, `from_url` (returns ModelIO's load error for missing, corrupt or unsupported files), `from_url_with_options` (vertex descriptor, buffer allocator, preserve topology), `export_to_url`, `place_light_probes`
 - `Asset::count`, `object_at`, `object_at_path`, `mesh_at`, `meshes`
 - `Asset::frame_interval`, `start_time`, `end_time`, `up_axis`
 - `Object::new`, `name`, `path`, `hidden`, `add_child`, `child_at`, `at_path`, `transform_component`, `children_container`
@@ -50,14 +55,16 @@ fn main() -> modelio::Result<()> {
 ### Meshes + submeshes + vertex data
 
 - `Mesh::new_box`, `new_plane`, `new_ellipsoid`, `new_sphere`, `new_cylinder`, `new_icosahedron`
-- `Mesh::vertex_count`, `vertex_buffers`, `submeshes`, `bounding_box`, `vertex_descriptor`
-- `MeshBuffer::map`, `fill_data`, `allocator`, `zone`, `as_data_buffer`
+- `Mesh::vertex_count`, `vertex_buffers`, `submeshes`, `bounding_box`, `vertex_descriptor`, `set_vertex_descriptor`
+- `MeshBuffer::map`, `fill_data` (bounds-checked), `allocator`, `zone`, `as_data_buffer`
 - `MeshBufferData`, `MeshBufferDataAllocator`, `MeshBufferZoneDefault`, and `MeshBufferMap`
-- `VertexAttributeData::info`, `bytes`
+- `VertexAttributeData::info`, `bytes` (from the attribute's first element to the end of its buffer; step through it with `info().stride`)
 - `Submesh::index_count`, `index_type`, `geometry_type`, `index_buffer`, `material`, `set_material`, `topology`
 - `SubmeshTopology::new`, crease/index buffer accessors, and face-count mutation
-- `VertexDescriptor::info`, `attributes`, `attribute_named`, `copy`, `layouts`
-- `VertexAttribute::new`, `info`, `set_initialization_value`
+- `VertexDescriptor::new`, `info`, `attributes`, `attribute_named`, `add_or_replace_attribute`, `copy`, `layouts`
+- `VertexAttribute::new`, `info`, `set_format`, `set_initialization_value`
+- `VertexFormat` (typed `MDLVertexFormat` with `byte_size`, `component_count`, `is_packed`) and the `vertex_format::*` constants
+- Descriptors passed to `Mesh::set_vertex_descriptor` or `Asset::from_url_with_options` are validated first: each attribute with a format needs a layout whose stride fits `offset + format size`, because ModelIO overruns its buffers or raises otherwise
 - `VertexBufferLayout::new`, `stride`, `set_stride`
 
 ### Materials + textures
@@ -70,12 +77,14 @@ fn main() -> modelio::Result<()> {
 - `Texture::from_url`, `new_checkerboard`, `new_color_temperature_gradient`, `new_color_gradient`, `new_vector_noise`, `new_scalar_noise`, `new_cellular_noise`, `new_normal_map`, `new_sky_cube`
 - `Texture::info`, `write_to_url`, `update_sky_cube`, `texel_data_top_left`, `texel_data_bottom_left`
 
+Meshes can only be created from ModelIO's primitives, loaded assets and voxel arrays. Building a mesh from your own vertex buffers or a submesh from your own index buffer, and ModelIO's normal, tangent and subdivision generators, are not wrapped yet.
+
 ### Lights + cameras
 
 - `Light::new`, `info`, `set_light_type`, `set_color_space`, `irradiance_at_point`
 - `AreaLight::new` and `PhotometricLight::new` / `new_with_ies_profile` plus info accessors
 - `LightProbe::new`, `reflective_texture`, `irradiance_texture`, `generate_spherical_harmonics_from_irradiance`
-- `LightProbeIrradianceDataSource::new`, `bounding_box`, `spherical_harmonics_level`
+- `LightProbeIrradianceDataSource::new`, `bounding_box`, `spherical_harmonics_level`; the closure runs once per sample and must return exactly `(level + 1)² × 3` coefficients, otherwise that sample contributes zeros
 - `PhysicallyPlausibleLight::new`, `info`, `set_color_temperature`, `set_lumens`, cone-angle and attenuation setters
 - `Camera::new`, `info`, `set_projection`, `set_field_of_view`, `look_at`, `look_at_from`, `ray_to`, `frame_bounding_box`
 - `StereoscopicCamera::new`, `info`, and optical separation accessors

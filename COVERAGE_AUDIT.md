@@ -8,6 +8,8 @@ GAPS: 0
 EXEMPT: 0  
 COVERAGE_PCT: 100.0%
 
+These numbers count top-level symbols only. A class is VERIFIED when a Rust wrapper exists for it, even if most of its methods are unwrapped; see `COVERAGE.md` for the known method-level gaps.
+
 ## Result
 
 Top-level coverage remains complete in `v0.3.0`, and the last protocol/class abstractions that were only covered indirectly are now exposed as first-class Rust wrappers.

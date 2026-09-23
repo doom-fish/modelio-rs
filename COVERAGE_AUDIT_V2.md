@@ -6,6 +6,8 @@ GAPS: 0
 EXEMPT: 0
 COVERAGE_PCT: 100
 
+These numbers count top-level symbols only; a VERIFIED class can still have unwrapped methods (see `COVERAGE.md`). `MDLVertexFormat` has been a typed `VertexFormat` since v0.4.0; before that it was a module of raw `u32` constants.
+
 Audit methodology: Enumerated SDK public surface by parsing all Objective-C headers in ModelIO.framework/Headers/ (23 header files). Extracted all @interface classes, @protocol definitions, typedef NS_ENUM/NS_OPTIONS enums, and FOUNDATION_EXPORT/MDL_EXPORT constants. Cross-referenced each symbol against the crate's Rust wrapper implementations in src/ and swift-bridge/Sources/. All 66 classes, 11 protocols, 17 enums, and 4 constant groups are fully wrapped and exposed via the crate's public API.
 
 ## 🟢 VERIFIED
@@ -64,7 +66,7 @@ Audit methodology: Enumerated SDK public surface by parsing all Objective-C head
 | MDLMeshBufferData | class | MDLMeshBuffer.h | MeshBufferData (src/mesh_buffer.rs) |
 | MDLMeshBufferZone | protocol | MDLMeshBuffer.h | MeshBufferZone (src/protocols.rs) |
 | MDLMeshBufferZoneDefault | class | MDLMeshBuffer.h | MeshBufferZoneDefault (src/mesh_buffer.rs) |
-| MDLMeshBufferAllocator | protocol | MDLMeshBuffer.h | MeshBufferAllocator (src/protocols.rs) |
+| MDLMeshBufferAllocator | protocol | MDLMeshBuffer.h | MeshBufferAllocator (src/mesh_buffer.rs) |
 | MDLMeshBufferDataAllocator | class | MDLMeshBuffer.h | MeshBufferDataAllocator (src/mesh_buffer.rs) |
 | MDLObject | class | MDLObject.h | Object (src/object.rs) |
 | MDLNamed | protocol | MDLObject.h | Named (src/protocols.rs) |
