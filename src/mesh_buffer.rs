@@ -199,13 +199,14 @@ pub extern "C" fn mdlx_mesh_buffer_allocator_new_buffer_from_zone_length(
     length: u64,
     buffer_type: u32,
 ) -> *mut core::ffi::c_void {
+    let zone = zone_from_retained_ptr(zone);
     let Some(buffer_type) = mesh_buffer_type(buffer_type) else {
         return ptr::null_mut();
     };
     buffer_ptr_from_response(callback_response(
         context,
         MeshBufferAllocatorEvent::NewBufferFromZone {
-            zone: zone_from_retained_ptr(zone),
+            zone,
             length: length as usize,
             buffer_type,
         },
@@ -220,6 +221,7 @@ pub extern "C" fn mdlx_mesh_buffer_allocator_new_buffer_from_zone_data(
     count: u64,
     buffer_type: u32,
 ) -> *mut core::ffi::c_void {
+    let zone = zone_from_retained_ptr(zone);
     let Some(buffer_type) = mesh_buffer_type(buffer_type) else {
         return ptr::null_mut();
     };
@@ -232,7 +234,7 @@ pub extern "C" fn mdlx_mesh_buffer_allocator_new_buffer_from_zone_data(
     buffer_ptr_from_response(callback_response(
         context,
         MeshBufferAllocatorEvent::NewBufferFromZoneWithData {
-            zone: zone_from_retained_ptr(zone),
+            zone,
             data,
             buffer_type,
         },

@@ -1,3 +1,6 @@
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
+
 use modelio::prelude::*;
 
 #[test]
@@ -146,4 +149,56 @@ fn fill_data_rejects_ranges_past_the_end_of_the_buffer() {
     buffer.fill_data(&[], 8).expect("empty fill at the end");
     buffer.fill_data(&[7, 7], 6).expect("fill the last two bytes");
     assert_eq!(data_buffer.data(), vec![0, 0, 0, 0, 0, 0, 7, 7]);
+}
+
+fn undersized_allocator(calls: Arc<AtomicUsize>) -> MeshBufferAllocator {
+    MeshBufferAllocator::new(move |event| {
+        calls.fetch_add(1, Ordering::SeqCst);
+        let tiny = MeshBufferData::new(4, MeshBufferType::Vertex)
+            .expect("tiny buffer")
+            .as_mesh_buffer();
+        match event {
+            MeshBufferAllocatorEvent::NewZone { .. }
+            | MeshBufferAllocatorEvent::NewZoneForBuffers { .. } => {
+                MeshBufferAllocatorResponse::None
+            }
+            _ => MeshBufferAllocatorResponse::Buffer(Some(tiny)),
+        }
+    })
+    .expect("undersized allocator")
+}
+
+#[test]
+fn custom_allocator_buffers_shorter_than_requested_fall_back() {
+    let calls = Arc::new(AtomicUsize::new(0));
+    let allocator = undersized_allocator(Arc::clone(&calls));
+
+    let buffer = allocator
+        .new_buffer(64, MeshBufferType::Vertex)
+        .expect("new buffer");
+    assert!(buffer.info().expect("info").length >= 64);
+
+    let payload = (1..=32).collect::<Vec<u8>>();
+    let with_data = allocator
+        .new_buffer_with_data(&payload, MeshBufferType::Vertex)
+        .expect("new buffer with data");
+    assert_eq!(with_data.bytes().expect("bytes"), payload);
+
+    let zone = MeshBufferDataAllocator::new()
+        .expect("data allocator")
+        .as_mesh_buffer_allocator()
+        .new_zone(256)
+        .expect("zone");
+    let from_zone = allocator
+        .new_buffer_from_zone(Some(&zone), 64, MeshBufferType::Vertex)
+        .expect("buffer from zone result")
+        .expect("buffer from zone");
+    assert!(from_zone.info().expect("info").length >= 64);
+    let from_zone_data = allocator
+        .new_buffer_from_zone_with_data(Some(&zone), &payload, MeshBufferType::Vertex)
+        .expect("buffer from zone with data result")
+        .expect("buffer from zone with data");
+    assert_eq!(from_zone_data.bytes().expect("bytes"), payload);
+
+    assert!(calls.load(Ordering::SeqCst) >= 4);
 }

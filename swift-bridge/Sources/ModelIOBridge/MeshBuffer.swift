@@ -66,7 +66,7 @@ private final class RustMeshBufferAllocator: NSObject, MDLMeshBufferAllocator {
 
     func newZone(_ capacity: Int) -> any MDLMeshBufferZone {
         guard let zone = mdl_take_retained_object(
-            mdlx_mesh_buffer_allocator_new_zone(callbackContext, UInt64(capacity))
+            mdlx_mesh_buffer_allocator_new_zone(callbackContext, UInt64(clamping: capacity))
         ) as? any MDLMeshBufferZone else {
             return fallbackAllocator.newZone(capacity)
         }
@@ -99,10 +99,12 @@ private final class RustMeshBufferAllocator: NSObject, MDLMeshBufferAllocator {
         guard let buffer = mdl_take_retained_object(
             mdlx_mesh_buffer_allocator_new_buffer(
                 callbackContext,
-                UInt64(length),
-                UInt32(type.rawValue)
+                UInt64(clamping: length),
+                UInt32(clamping: type.rawValue)
             )
-        ) as? any MDLMeshBuffer else {
+        ) as? any MDLMeshBuffer,
+            buffer.length >= length
+        else {
             return fallbackAllocator.newBuffer(length, type: type)
         }
         return buffer
@@ -114,10 +116,12 @@ private final class RustMeshBufferAllocator: NSObject, MDLMeshBufferAllocator {
                 callbackContext,
                 rawBuffer.bindMemory(to: UInt8.self).baseAddress,
                 UInt64(data.count),
-                UInt32(type.rawValue)
+                UInt32(clamping: type.rawValue)
             )
         }
-        guard let buffer = mdl_take_retained_object(handle) as? any MDLMeshBuffer else {
+        guard let buffer = mdl_take_retained_object(handle) as? any MDLMeshBuffer,
+              buffer.length >= data.count
+        else {
             return fallbackAllocator.newBuffer(with: data, type: type)
         }
         return buffer
@@ -128,10 +132,10 @@ private final class RustMeshBufferAllocator: NSObject, MDLMeshBufferAllocator {
         let handle = mdlx_mesh_buffer_allocator_new_buffer_from_zone_length(
             callbackContext,
             zoneHandle,
-            UInt64(length),
-            UInt32(type.rawValue)
+            UInt64(clamping: length),
+            UInt32(clamping: type.rawValue)
         )
-        if let buffer = mdl_take_retained_object(handle) as? any MDLMeshBuffer {
+        if let buffer = mdl_take_retained_object(handle) as? any MDLMeshBuffer, buffer.length >= length {
             return buffer
         }
         return fallbackAllocator.newBuffer(from: zone, length: length, type: type)
@@ -145,10 +149,10 @@ private final class RustMeshBufferAllocator: NSObject, MDLMeshBufferAllocator {
                 zoneHandle,
                 rawBuffer.bindMemory(to: UInt8.self).baseAddress,
                 UInt64(data.count),
-                UInt32(type.rawValue)
+                UInt32(clamping: type.rawValue)
             )
         }
-        if let buffer = mdl_take_retained_object(handle) as? any MDLMeshBuffer {
+        if let buffer = mdl_take_retained_object(handle) as? any MDLMeshBuffer, buffer.length >= data.count {
             return buffer
         }
         return fallbackAllocator.newBuffer(from: zone, data: data, type: type)
