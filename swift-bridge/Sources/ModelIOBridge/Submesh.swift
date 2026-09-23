@@ -10,13 +10,13 @@ public func mdl_submesh_index_count(_ handle: UnsafeMutableRawPointer?) -> UInt6
 @_cdecl("mdl_submesh_index_type")
 public func mdl_submesh_index_type(_ handle: UnsafeMutableRawPointer?) -> UInt32 {
     guard let submesh = mdl_borrow_object(handle) as? MDLSubmesh else { return 0 }
-    return UInt32(submesh.indexType.rawValue)
+    return UInt32(clamping: submesh.indexType.rawValue)
 }
 
 @_cdecl("mdl_submesh_geometry_type")
 public func mdl_submesh_geometry_type(_ handle: UnsafeMutableRawPointer?) -> Int32 {
     guard let submesh = mdl_borrow_object(handle) as? MDLSubmesh else { return 0 }
-    return Int32(submesh.geometryType.rawValue)
+    return Int32(clamping: submesh.geometryType.rawValue)
 }
 
 @_cdecl("mdl_submesh_name_string")
@@ -136,7 +136,7 @@ public func mdl_submesh_topology_face_count(_ handle: UnsafeMutableRawPointer?) 
 @_cdecl("mdl_submesh_topology_set_face_count")
 public func mdl_submesh_topology_set_face_count(_ handle: UnsafeMutableRawPointer?, _ count: UInt64) {
     guard let topology = mdl_borrow_object(handle) as? MDLSubmeshTopology else { return }
-    topology.faceCount = Int(count)
+    topology.faceCount = Int(clamping: count)
 }
 
 @_cdecl("mdl_submesh_topology_vertex_crease_indices")
@@ -168,7 +168,7 @@ public func mdl_submesh_topology_vertex_crease_count(_ handle: UnsafeMutableRawP
 @_cdecl("mdl_submesh_topology_set_vertex_crease_count")
 public func mdl_submesh_topology_set_vertex_crease_count(_ handle: UnsafeMutableRawPointer?, _ count: UInt64) {
     guard let topology = mdl_borrow_object(handle) as? MDLSubmeshTopology else { return }
-    topology.vertexCreaseCount = Int(count)
+    topology.vertexCreaseCount = Int(clamping: count)
 }
 
 @_cdecl("mdl_submesh_topology_edge_crease_indices")
@@ -200,5 +200,5 @@ public func mdl_submesh_topology_edge_crease_count(_ handle: UnsafeMutableRawPoi
 @_cdecl("mdl_submesh_topology_set_edge_crease_count")
 public func mdl_submesh_topology_set_edge_crease_count(_ handle: UnsafeMutableRawPointer?, _ count: UInt64) {
     guard let topology = mdl_borrow_object(handle) as? MDLSubmeshTopology else { return }
-    topology.edgeCreaseCount = Int(count)
+    topology.edgeCreaseCount = Int(clamping: count)
 }

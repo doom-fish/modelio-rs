@@ -242,7 +242,10 @@ public func mdl_animated_scalar_array_new(
         guard let outValue else {
             throw ModelIOBridgeError.invalidArgument("missing output animated scalar array pointer")
         }
-        outValue.pointee = mdl_retain(MDLAnimatedScalarArray(elementCount: Int(elementCount)))
+        guard let count = Int(exactly: elementCount) else {
+            throw ModelIOBridgeError.invalidArgument("element count \(elementCount) is out of range")
+        }
+        outValue.pointee = mdl_retain(MDLAnimatedScalarArray(elementCount: count))
     }
 }
 
@@ -274,7 +277,10 @@ public func mdl_animated_vector3_array_new(
         guard let outValue else {
             throw ModelIOBridgeError.invalidArgument("missing output animated vector3 array pointer")
         }
-        outValue.pointee = mdl_retain(MDLAnimatedVector3Array(elementCount: Int(elementCount)))
+        guard let count = Int(exactly: elementCount) else {
+            throw ModelIOBridgeError.invalidArgument("element count \(elementCount) is out of range")
+        }
+        outValue.pointee = mdl_retain(MDLAnimatedVector3Array(elementCount: count))
     }
 }
 
@@ -325,7 +331,10 @@ public func mdl_animated_quaternion_array_new(
         guard let outValue else {
             throw ModelIOBridgeError.invalidArgument("missing output animated quaternion array pointer")
         }
-        outValue.pointee = mdl_retain(MDLAnimatedQuaternionArray(elementCount: Int(elementCount)))
+        guard let count = Int(exactly: elementCount) else {
+            throw ModelIOBridgeError.invalidArgument("element count \(elementCount) is out of range")
+        }
+        outValue.pointee = mdl_retain(MDLAnimatedQuaternionArray(elementCount: count))
     }
 }
 

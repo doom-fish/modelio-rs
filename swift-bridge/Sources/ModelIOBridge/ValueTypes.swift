@@ -26,7 +26,10 @@ public func mdl_matrix4x4_array_new(
         guard let outArray else {
             throw ModelIOBridgeError.invalidArgument("missing output matrix array pointer")
         }
-        outArray.pointee = mdl_retain(MDLMatrix4x4Array(elementCount: Int(elementCount)))
+        guard let count = Int(exactly: elementCount) else {
+            throw ModelIOBridgeError.invalidArgument("element count \(elementCount) is out of range")
+        }
+        outArray.pointee = mdl_retain(MDLMatrix4x4Array(elementCount: count))
     }
 }
 

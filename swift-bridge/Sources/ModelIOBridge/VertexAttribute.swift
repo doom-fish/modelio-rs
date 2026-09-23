@@ -91,12 +91,15 @@ public func mdl_vertex_attribute_new(
         guard let name, let outAttribute else {
             throw ModelIOBridgeError.invalidArgument("missing vertex attribute name or output pointer")
         }
+        guard let offsetValue = Int(exactly: offset), let bufferIndexValue = Int(exactly: bufferIndex) else {
+            throw ModelIOBridgeError.invalidArgument("vertex attribute offset or buffer index is out of range")
+        }
         outAttribute.pointee = mdl_retain(
             MDLVertexAttribute(
                 name: String(cString: name),
                 format: try mdl_vertex_format(formatRaw),
-                offset: Int(offset),
-                bufferIndex: Int(bufferIndex)
+                offset: offsetValue,
+                bufferIndex: bufferIndexValue
             )
         )
     }
@@ -131,13 +134,13 @@ public func mdl_vertex_attribute_set_format(_ handle: UnsafeMutableRawPointer?, 
 @_cdecl("mdl_vertex_attribute_set_offset")
 public func mdl_vertex_attribute_set_offset(_ handle: UnsafeMutableRawPointer?, _ offset: UInt64) {
     guard let attribute = mdl_borrow_object(handle) as? MDLVertexAttribute else { return }
-    attribute.offset = Int(offset)
+    attribute.offset = Int(clamping: offset)
 }
 
 @_cdecl("mdl_vertex_attribute_set_buffer_index")
 public func mdl_vertex_attribute_set_buffer_index(_ handle: UnsafeMutableRawPointer?, _ bufferIndex: UInt64) {
     guard let attribute = mdl_borrow_object(handle) as? MDLVertexAttribute else { return }
-    attribute.bufferIndex = Int(bufferIndex)
+    attribute.bufferIndex = Int(clamping: bufferIndex)
 }
 
 @_cdecl("mdl_vertex_attribute_set_time")
@@ -212,7 +215,10 @@ public func mdl_vertex_buffer_layout_new(
         guard let outLayout else {
             throw ModelIOBridgeError.invalidArgument("missing output vertex buffer layout pointer")
         }
-        outLayout.pointee = mdl_retain(MDLVertexBufferLayout(stride: Int(stride)))
+        guard let strideValue = Int(exactly: stride) else {
+            throw ModelIOBridgeError.invalidArgument("vertex buffer layout stride is out of range")
+        }
+        outLayout.pointee = mdl_retain(MDLVertexBufferLayout(stride: strideValue))
     }
 }
 
@@ -225,7 +231,7 @@ public func mdl_vertex_buffer_layout_stride(_ handle: UnsafeMutableRawPointer?) 
 @_cdecl("mdl_vertex_buffer_layout_set_stride")
 public func mdl_vertex_buffer_layout_set_stride(_ handle: UnsafeMutableRawPointer?, _ stride: UInt64) {
     guard let layout = mdl_borrow_object(handle) as? MDLVertexBufferLayout else { return }
-    layout.stride = Int(stride)
+    layout.stride = Int(clamping: stride)
 }
 
 @_cdecl("mdl_vertex_descriptor_layout_count")

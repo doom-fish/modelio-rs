@@ -200,7 +200,7 @@ public func mdl_light_probe_generate_spherical_harmonics_from_irradiance(
     _ sphericalHarmonicsLevel: UInt64
 ) {
     guard let probe = mdl_borrow_object(handle) as? MDLLightProbe else { return }
-    probe.generateSphericalHarmonics(fromIrradiance: Int(sphericalHarmonicsLevel))
+    probe.generateSphericalHarmonics(fromIrradiance: Int(clamping: sphericalHarmonicsLevel))
 }
 
 @_cdecl("mdl_light_probe_reflective_texture")

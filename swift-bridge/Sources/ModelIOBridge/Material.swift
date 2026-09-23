@@ -295,7 +295,7 @@ public func mdl_material_set_name(_ handle: UnsafeMutableRawPointer?, _ name: Un
 @_cdecl("mdl_material_material_face")
 public func mdl_material_material_face(_ handle: UnsafeMutableRawPointer?) -> UInt32 {
     guard let material = mdl_borrow_object(handle) as? MDLMaterial else { return 0 }
-    return UInt32(material.materialFace.rawValue)
+    return UInt32(clamping: material.materialFace.rawValue)
 }
 
 @_cdecl("mdl_material_set_material_face")

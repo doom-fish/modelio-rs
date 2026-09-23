@@ -245,7 +245,10 @@ public func mdl_mesh_buffer_data_new(
         guard let outBuffer else {
             throw ModelIOBridgeError.invalidArgument("missing output mesh buffer pointer")
         }
-        outBuffer.pointee = mdl_retain(MDLMeshBufferData(type: try mdl_mesh_buffer_type(bufferTypeRaw), length: Int(length)))
+        guard let byteCount = Int(exactly: length) else {
+            throw ModelIOBridgeError.invalidArgument("mesh buffer length \(length) is out of range")
+        }
+        outBuffer.pointee = mdl_retain(MDLMeshBufferData(type: try mdl_mesh_buffer_type(bufferTypeRaw), length: byteCount))
     }
 }
 
@@ -341,7 +344,10 @@ public func mdl_mesh_buffer_allocator_new_zone(
         else {
             throw ModelIOBridgeError.invalidArgument("missing allocator or output zone pointer")
         }
-        outZone.pointee = mdl_retain(allocator.newZone(Int(capacity)) as AnyObject)
+        guard let zoneCapacity = Int(exactly: capacity) else {
+            throw ModelIOBridgeError.invalidArgument("zone capacity \(capacity) is out of range")
+        }
+        outZone.pointee = mdl_retain(allocator.newZone(zoneCapacity) as AnyObject)
     }
 }
 
@@ -386,7 +392,10 @@ public func mdl_mesh_buffer_allocator_new_buffer(
         else {
             throw ModelIOBridgeError.invalidArgument("missing allocator or output buffer pointer")
         }
-        outBuffer.pointee = mdl_retain(allocator.newBuffer(Int(length), type: try mdl_mesh_buffer_type(bufferTypeRaw)) as AnyObject)
+        guard let byteCount = Int(exactly: length) else {
+            throw ModelIOBridgeError.invalidArgument("mesh buffer length \(length) is out of range")
+        }
+        outBuffer.pointee = mdl_retain(allocator.newBuffer(byteCount, type: try mdl_mesh_buffer_type(bufferTypeRaw)) as AnyObject)
     }
 }
 
@@ -425,8 +434,11 @@ public func mdl_mesh_buffer_allocator_new_buffer_from_zone_length(
         else {
             throw ModelIOBridgeError.invalidArgument("missing allocator or output buffer pointer")
         }
+        guard let byteCount = Int(exactly: length) else {
+            throw ModelIOBridgeError.invalidArgument("mesh buffer length \(length) is out of range")
+        }
         let zone = mdl_mesh_buffer_zone_object(zoneHandle)
-        outBuffer.pointee = (try allocator.newBuffer(from: zone, length: Int(length), type: mdl_mesh_buffer_type(bufferTypeRaw)))
+        outBuffer.pointee = (try allocator.newBuffer(from: zone, length: byteCount, type: mdl_mesh_buffer_type(bufferTypeRaw)))
             .map { mdl_retain($0 as AnyObject) }
     }
 }

@@ -174,19 +174,19 @@ public func mdl_photometric_light_info_json(_ handle: UnsafeMutableRawPointer?) 
 @_cdecl("mdl_photometric_light_generate_spherical_harmonics_from_light")
 public func mdl_photometric_light_generate_spherical_harmonics_from_light(_ handle: UnsafeMutableRawPointer?, _ level: UInt64) {
     guard let light = mdl_borrow_object(handle) as? MDLPhotometricLight else { return }
-    light.generateSphericalHarmonics(fromLight: Int(level))
+    light.generateSphericalHarmonics(fromLight: Int(clamping: level))
 }
 
 @_cdecl("mdl_photometric_light_generate_cubemap_from_light")
 public func mdl_photometric_light_generate_cubemap_from_light(_ handle: UnsafeMutableRawPointer?, _ textureSize: UInt64) {
     guard let light = mdl_borrow_object(handle) as? MDLPhotometricLight else { return }
-    light.generateCubemap(fromLight: Int(textureSize))
+    light.generateCubemap(fromLight: Int(clamping: textureSize))
 }
 
 @_cdecl("mdl_photometric_light_generate_texture")
 public func mdl_photometric_light_generate_texture(_ handle: UnsafeMutableRawPointer?, _ textureSize: UInt64) -> UnsafeMutableRawPointer? {
     guard let light = mdl_borrow_object(handle) as? MDLPhotometricLight else { return nil }
-    return mdl_retain(light.generateTexture(Int(textureSize)))
+    return mdl_retain(light.generateTexture(Int(clamping: textureSize)))
 }
 
 @_cdecl("mdl_photometric_light_light_cube_map")

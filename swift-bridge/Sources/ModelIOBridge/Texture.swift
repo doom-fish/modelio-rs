@@ -60,11 +60,14 @@ public func mdl_checkerboard_texture_new(
         guard let outTexture else {
             throw ModelIOBridgeError.invalidArgument("missing output texture pointer")
         }
+        guard let channels = Int32(exactly: channelCount) else {
+            throw ModelIOBridgeError.invalidArgument("texture channel count \(channelCount) is out of range")
+        }
         let checkerboard = MDLCheckerboardTexture(
             divisions: divisions,
             name: name.map { String(cString: $0) },
             dimensions: vector_int2(width, height),
-            channelCount: Int32(channelCount),
+            channelCount: channels,
             channelEncoding: try mdl_texture_channel_encoding(channelEncodingRaw),
             color1: mdl_color(color1R, color1G, color1B, color1A),
             color2: mdl_color(color2R, color2G, color2B, color2A)
@@ -170,12 +173,15 @@ public func mdl_noise_texture_new_scalar(
         guard let outTexture else {
             throw ModelIOBridgeError.invalidArgument("missing output texture pointer")
         }
+        guard let channels = Int32(exactly: channelCount) else {
+            throw ModelIOBridgeError.invalidArgument("texture channel count \(channelCount) is out of range")
+        }
         outTexture.pointee = mdl_retain(
             MDLNoiseTexture(
                 scalarNoiseWithSmoothness: smoothness,
                 name: name.map { String(cString: $0) },
                 textureDimensions: vector_int2(width, height),
-                channelCount: Int32(channelCount),
+                channelCount: channels,
                 channelEncoding: try mdl_texture_channel_encoding(channelEncodingRaw),
                 grayscale: grayscale != 0
             )
