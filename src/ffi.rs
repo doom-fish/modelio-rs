@@ -16,6 +16,9 @@ extern "C" {
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_asset_new_with_url(
         path: *const c_char,
+        vertex_descriptor: *mut c_void,
+        allocator: *mut c_void,
+        preserve_topology: i32,
         out_asset: *mut *mut c_void,
         out_error_message: *mut *mut c_char,
     ) -> i32;

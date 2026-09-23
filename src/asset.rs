@@ -5,9 +5,11 @@ use crate::error::Result;
 use crate::ffi;
 use crate::handle::ObjectHandle;
 use crate::mesh::Mesh;
+use crate::mesh_buffer::MeshBufferAllocator;
 use crate::object::Object;
 use crate::types::{AssetInfo, BoundingBox};
 use crate::util::{c_string, parse_json, path_to_c_string, required_handle, take_string};
+use crate::vertex_attribute::VertexDescriptor;
 
 #[derive(Debug, Clone)]
 /// Wraps the corresponding Model I/O asset counterpart.
@@ -38,12 +40,29 @@ impl Asset {
 
     /// Calls the corresponding Model I/O method on the wrapped Model I/O asset counterpart.
     pub fn from_url(path: impl AsRef<Path>) -> Result<Self> {
+        Self::from_url_with_options(path, None, None, false)
+    }
+
+    pub fn from_url_with_options(
+        path: impl AsRef<Path>,
+        vertex_descriptor: Option<&VertexDescriptor>,
+        buffer_allocator: Option<&MeshBufferAllocator>,
+        preserve_topology: bool,
+    ) -> Result<Self> {
         let path = path_to_c_string(path.as_ref())?;
         let mut out_asset = ptr::null_mut();
         let mut out_error = ptr::null_mut();
-        let status =
-            // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-            unsafe { ffi::mdl_asset_new_with_url(path.as_ptr(), &mut out_asset, &mut out_error) };
+        // SAFETY: Output pointers are initialized and managed; optional handles are live for the call.
+        let status = unsafe {
+            ffi::mdl_asset_new_with_url(
+                path.as_ptr(),
+                vertex_descriptor.map_or(ptr::null_mut(), VertexDescriptor::as_ptr),
+                buffer_allocator.map_or(ptr::null_mut(), MeshBufferAllocator::as_ptr),
+                i32::from(preserve_topology),
+                &mut out_asset,
+                &mut out_error,
+            )
+        };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(out_asset, "MDLAsset")?))
     }

@@ -33,6 +33,9 @@ public func mdl_asset_new_empty(
 @_cdecl("mdl_asset_new_with_url")
 public func mdl_asset_new_with_url(
     _ path: UnsafePointer<CChar>?,
+    _ vertexDescriptorHandle: UnsafeMutableRawPointer?,
+    _ allocatorHandle: UnsafeMutableRawPointer?,
+    _ preserveTopology: Int32,
     _ outAsset: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
     _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
 ) -> Int32 {
@@ -40,8 +43,33 @@ public func mdl_asset_new_with_url(
         guard let path, let outAsset else {
             throw ModelIOBridgeError.invalidArgument("missing asset path or output pointer")
         }
+        var vertexDescriptor: MDLVertexDescriptor?
+        if let vertexDescriptorHandle {
+            guard let source = mdl_borrow_object(vertexDescriptorHandle) as? MDLVertexDescriptor else {
+                throw ModelIOBridgeError.invalidArgument("vertex descriptor handle is not an MDLVertexDescriptor")
+            }
+            vertexDescriptor = try mdl_checked_vertex_descriptor(source, vertexCount: nil)
+        }
+        var allocator: (any MDLMeshBufferAllocator)?
+        if let allocatorHandle {
+            guard let object = mdl_borrow_object(allocatorHandle) as? any MDLMeshBufferAllocator else {
+                throw ModelIOBridgeError.invalidArgument("allocator handle is not an MDLMeshBufferAllocator")
+            }
+            allocator = object
+        }
         let url = URL(fileURLWithPath: String(cString: path))
-        outAsset.pointee = mdl_retain(MDLAsset(url: url))
+        var loadError: NSError?
+        let asset = MDLAsset(
+            url: url,
+            vertexDescriptor: vertexDescriptor,
+            bufferAllocator: allocator,
+            preserveTopology: preserveTopology != 0,
+            error: &loadError
+        )
+        if let loadError {
+            throw ModelIOBridgeError.framework(loadError)
+        }
+        outAsset.pointee = mdl_retain(asset)
     }
 }
 

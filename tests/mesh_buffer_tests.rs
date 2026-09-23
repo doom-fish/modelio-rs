@@ -1,3 +1,5 @@
+mod common;
+
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
@@ -201,4 +203,18 @@ fn custom_allocator_buffers_shorter_than_requested_fall_back() {
     assert_eq!(from_zone_data.bytes().expect("bytes"), payload);
 
     assert!(calls.load(Ordering::SeqCst) >= 4);
+}
+
+#[test]
+fn asset_loaded_through_an_undersized_allocator_gets_full_buffers() {
+    let calls = Arc::new(AtomicUsize::new(0));
+    let allocator = undersized_allocator(Arc::clone(&calls));
+    let asset = Asset::from_url_with_options(common::fixture_obj(), None, Some(&allocator), false)
+        .expect("load fixture asset");
+    let mesh = asset.mesh_at(0).expect("fixture mesh");
+    let buffer = mesh.vertex_buffer(0).expect("vertex buffer");
+
+    assert_eq!(buffer.info().expect("info").length, 96);
+    assert_eq!(buffer.bytes().expect("bytes").len(), 96);
+    assert!(calls.load(Ordering::SeqCst) > 0);
 }

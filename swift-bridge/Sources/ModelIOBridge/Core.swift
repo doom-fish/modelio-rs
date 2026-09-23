@@ -49,7 +49,7 @@ public enum ModelIOBridgeError: Error, CustomStringConvertible {
         case .invalidArgument(let message), .nullResult(let message), .unknown(let message):
             return message
         case .framework(let error):
-            return error.localizedDescription
+            return mdl_error_description(error)
         }
     }
 
@@ -75,12 +75,20 @@ public func mdl_status(from error: Error) -> Int32 {
     return MDLX_FRAMEWORK
 }
 
+public func mdl_error_description(_ error: Error) -> String {
+    let nsError = error as NSError
+    if let detail = nsError.userInfo["MDLErrorKey"] as? String, !detail.isEmpty {
+        return detail
+    }
+    return nsError.localizedDescription
+}
+
 @inline(__always)
 public func mdl_message(from error: Error) -> String {
     if let error = error as? ModelIOBridgeError {
         return error.description
     }
-    return (error as NSError).localizedDescription
+    return mdl_error_description(error)
 }
 
 @inline(__always)
