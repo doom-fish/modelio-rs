@@ -275,7 +275,8 @@ impl ObjectContainer {
         let mut out_container = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_object_container_new(&raw mut out_container, &raw mut out_error) };
+        let status =
+            unsafe { ffi::mdl_object_container_new(&raw mut out_container, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_container,

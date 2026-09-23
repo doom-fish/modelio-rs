@@ -30,7 +30,11 @@ impl Matrix4x4Array {
         let mut out_error = ptr::null_mut();
         // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
-            ffi::mdl_matrix4x4_array_new(element_count as u64, &raw mut out_array, &raw mut out_error)
+            ffi::mdl_matrix4x4_array_new(
+                element_count as u64,
+                &raw mut out_array,
+                &raw mut out_error,
+            )
         };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(

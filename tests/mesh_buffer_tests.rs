@@ -149,7 +149,9 @@ fn fill_data_rejects_ranges_past_the_end_of_the_buffer() {
     assert_eq!(data_buffer.data(), vec![0_u8; 8]);
 
     buffer.fill_data(&[], 8).expect("empty fill at the end");
-    buffer.fill_data(&[7, 7], 6).expect("fill the last two bytes");
+    buffer
+        .fill_data(&[7, 7], 6)
+        .expect("fill the last two bytes");
     assert_eq!(data_buffer.data(), vec![0, 0, 0, 0, 0, 0, 7, 7]);
 }
 

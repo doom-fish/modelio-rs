@@ -648,7 +648,11 @@ impl Transform {
         let mut out_error = ptr::null_mut();
         // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
-            ffi::mdl_transform_new_with_matrix(matrix.as_ptr(), &raw mut out_transform, &raw mut out_error)
+            ffi::mdl_transform_new_with_matrix(
+                matrix.as_ptr(),
+                &raw mut out_transform,
+                &raw mut out_error,
+            )
         };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
@@ -1138,7 +1142,8 @@ impl TransformStack {
         let mut out_stack = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_transform_stack_new(&raw mut out_stack, &raw mut out_error) };
+        let status =
+            unsafe { ffi::mdl_transform_stack_new(&raw mut out_stack, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_stack,

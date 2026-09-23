@@ -84,7 +84,11 @@ fn from_url_with_options_conforms_meshes_to_the_descriptor() {
     let mesh = asset.mesh_at(0).expect("fixture mesh");
     assert_eq!(mesh.vertex_count(), 3);
     assert_eq!(
-        mesh.vertex_buffer(0).expect("vertex buffer").info().expect("info").length,
+        mesh.vertex_buffer(0)
+            .expect("vertex buffer")
+            .info()
+            .expect("info")
+            .length,
         36
     );
 

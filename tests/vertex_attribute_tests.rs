@@ -36,7 +36,13 @@ fn vertex_formats_are_typed_and_sized() {
         Some(vertex_format::FLOAT3)
     );
     assert_eq!(VertexFormat::from_raw(0), Some(vertex_format::INVALID));
-    for raw in [0xDEAD, vertex_format::FLOAT_BITS, vertex_format::FLOAT_BITS | 5, 0xD0001, vertex_format::FLOAT_BITS | vertex_format::PACKED_BIT | 4] {
+    for raw in [
+        0xDEAD,
+        vertex_format::FLOAT_BITS,
+        vertex_format::FLOAT_BITS | 5,
+        0xD0001,
+        vertex_format::FLOAT_BITS | vertex_format::PACKED_BIT | 4,
+    ] {
         assert_eq!(VertexFormat::from_raw(raw), None, "raw {raw:#x}");
     }
 
@@ -91,7 +97,11 @@ fn applying_a_valid_descriptor_relays_out_the_mesh() {
     assert_eq!(active[0].format_enum(), Some(vertex_format::FLOAT3));
     assert_eq!(info.layout_strides[0], 12);
     assert_eq!(
-        mesh.vertex_buffer(0).expect("vertex buffer").info().expect("info").length,
+        mesh.vertex_buffer(0)
+            .expect("vertex buffer")
+            .info()
+            .expect("info")
+            .length,
         12 * vertex_count
     );
 }
@@ -107,14 +117,28 @@ fn applying_an_inconsistent_descriptor_is_rejected() {
         .expect("info")
         .length;
 
-    for (offset, buffer_index, stride) in [(4096, 0, 12), (0, 0, 4), (4, 0, 12), (0, 20, 12), (0, 40, 12)] {
+    for (offset, buffer_index, stride) in [
+        (4096, 0, 12),
+        (0, 0, 4),
+        (4, 0, 12),
+        (0, 20, 12),
+        (0, 40, 12),
+    ] {
         let error = mesh
             .set_vertex_descriptor(&position_only_descriptor(offset, buffer_index, stride))
             .expect_err("inconsistent descriptor must be rejected");
-        assert_eq!(error.code(), -1, "offset {offset} buffer {buffer_index} stride {stride}");
+        assert_eq!(
+            error.code(),
+            -1,
+            "offset {offset} buffer {buffer_index} stride {stride}"
+        );
     }
     assert_eq!(
-        mesh.vertex_buffer(0).expect("vertex buffer").info().expect("info").length,
+        mesh.vertex_buffer(0)
+            .expect("vertex buffer")
+            .info()
+            .expect("info")
+            .length,
         original_length
     );
 }

@@ -122,7 +122,11 @@ impl VertexBufferLayout {
         let mut out_error = ptr::null_mut();
         // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
-            ffi::mdl_vertex_buffer_layout_new(stride as u64, &raw mut out_layout, &raw mut out_error)
+            ffi::mdl_vertex_buffer_layout_new(
+                stride as u64,
+                &raw mut out_layout,
+                &raw mut out_error,
+            )
         };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
@@ -165,7 +169,8 @@ impl VertexDescriptor {
         let mut out_descriptor = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_vertex_descriptor_new(&raw mut out_descriptor, &raw mut out_error) };
+        let status =
+            unsafe { ffi::mdl_vertex_descriptor_new(&raw mut out_descriptor, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_descriptor,

@@ -186,7 +186,11 @@ impl PathAssetResolver {
         let mut out_error = ptr::null_mut();
         // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
-            ffi::mdl_path_asset_resolver_new(path.as_ptr(), &raw mut out_resolver, &raw mut out_error)
+            ffi::mdl_path_asset_resolver_new(
+                path.as_ptr(),
+                &raw mut out_resolver,
+                &raw mut out_error,
+            )
         };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
@@ -236,7 +240,11 @@ impl BundleAssetResolver {
         let mut out_error = ptr::null_mut();
         // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
-            ffi::mdl_bundle_asset_resolver_new(path.as_ptr(), &raw mut out_resolver, &raw mut out_error)
+            ffi::mdl_bundle_asset_resolver_new(
+                path.as_ptr(),
+                &raw mut out_resolver,
+                &raw mut out_error,
+            )
         };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
@@ -285,7 +293,11 @@ impl RelativeAssetResolver {
         let mut out_error = ptr::null_mut();
         // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
-            ffi::mdl_relative_asset_resolver_new(asset.as_ptr(), &raw mut out_resolver, &raw mut out_error)
+            ffi::mdl_relative_asset_resolver_new(
+                asset.as_ptr(),
+                &raw mut out_resolver,
+                &raw mut out_error,
+            )
         };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(

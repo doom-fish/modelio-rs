@@ -35,10 +35,12 @@ pub extern "C" fn mdlx_light_probe_irradiance_data_source_coefficients(
     }
     // A panic unwinding across the C ABI into ModelIO is undefined behaviour;
     // contain any panic from the user closure and report zero coefficients.
-    let Some(values) = catch_user_panic_result("MDLLightProbeIrradianceDataSource callback", || {
-        // SAFETY: The unsafe operation is valid in this context.
-        (unsafe { &*context }.callback)([x, y, z])
-    }) else {
+    let Some(values) =
+        catch_user_panic_result("MDLLightProbeIrradianceDataSource callback", || {
+            // SAFETY: The unsafe operation is valid in this context.
+            (unsafe { &*context }.callback)([x, y, z])
+        })
+    else {
         return 0;
     };
     if values.len() as u64 != capacity {

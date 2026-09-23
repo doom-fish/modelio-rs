@@ -717,7 +717,8 @@ impl TextureFilter {
         let mut out_filter = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_texture_filter_new(&raw mut out_filter, &raw mut out_error) };
+        let status =
+            unsafe { ffi::mdl_texture_filter_new(&raw mut out_filter, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_filter,
@@ -793,7 +794,8 @@ impl TextureSampler {
         let mut out_sampler = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_texture_sampler_new(&raw mut out_sampler, &raw mut out_error) };
+        let status =
+            unsafe { ffi::mdl_texture_sampler_new(&raw mut out_sampler, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_sampler,
