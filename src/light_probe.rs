@@ -1,5 +1,7 @@
 use std::ptr;
 
+use doom_fish_utils::panic_safe::catch_user_panic_result;
+
 use crate::asset::Asset;
 use crate::error::Result;
 use crate::ffi;
@@ -28,22 +30,23 @@ pub extern "C" fn mdlx_light_probe_irradiance_data_source_coefficients(
     let Some(context) = (!context.is_null()).then_some(context.cast::<IrradianceCallback>()) else {
         return 0;
     };
+    if out_values.is_null() {
+        return 0;
+    }
     // A panic unwinding across the C ABI into ModelIO is undefined behaviour;
     // contain any panic from the user closure and report zero coefficients.
-    // SAFETY: The unsafe operation is valid in this context.
-    let Ok(values) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+    let Some(values) = catch_user_panic_result("MDLLightProbeIrradianceDataSource callback", || {
+        // SAFETY: The unsafe operation is valid in this context.
         (unsafe { &*context }.callback)([x, y, z])
-    })) else {
+    }) else {
         return 0;
     };
-    let total = values.len();
-    if out_values.is_null() || capacity == 0 {
-        return total as u64;
+    if values.len() as u64 != capacity {
+        return 0;
     }
-    let write_count = total.min(capacity as usize);
     // SAFETY: The unsafe operation is valid in this context.
-    unsafe { out_values.copy_from_nonoverlapping(values.as_ptr(), write_count) };
-    total as u64
+    unsafe { out_values.copy_from_nonoverlapping(values.as_ptr(), values.len()) };
+    capacity
 }
 
 #[no_mangle]
@@ -324,5 +327,92 @@ impl Asset {
             return Ok(Vec::new());
         }
         array_objects(ptr, "MDLAsset light probes", LightProbe::from_handle)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    use std::sync::Arc;
+
+    use super::{
+        mdlx_light_probe_irradiance_data_source_coefficients,
+        mdlx_light_probe_irradiance_data_source_release, IrradianceCallback,
+    };
+
+    fn context<F>(callback: F) -> *mut core::ffi::c_void
+    where
+        F: Fn([f32; 3]) -> Vec<f32> + Send + Sync + 'static,
+    {
+        Box::into_raw(Box::new(IrradianceCallback {
+            callback: Box::new(callback),
+        }))
+        .cast()
+    }
+
+    #[test]
+    fn coefficients_call_the_closure_once_and_require_the_exact_count() {
+        let calls = Arc::new(AtomicUsize::new(0));
+        let counter = Arc::clone(&calls);
+        let context = context(move |position| {
+            counter.fetch_add(1, Ordering::SeqCst);
+            vec![position[0]; 12]
+        });
+
+        let mut exact = [0.0_f32; 12];
+        let written = mdlx_light_probe_irradiance_data_source_coefficients(
+            context,
+            2.0,
+            0.0,
+            0.0,
+            exact.as_mut_ptr(),
+            12,
+        );
+        assert_eq!(written, 12);
+        assert!(exact.iter().all(|value| (value - 2.0).abs() < f32::EPSILON));
+        assert_eq!(calls.load(Ordering::SeqCst), 1);
+
+        let mut level_two = [0.0_f32; 27];
+        let written = mdlx_light_probe_irradiance_data_source_coefficients(
+            context,
+            3.0,
+            0.0,
+            0.0,
+            level_two.as_mut_ptr(),
+            27,
+        );
+        assert_eq!(written, 0);
+        assert!(level_two.iter().all(|value| value.to_bits() == 0));
+        assert_eq!(calls.load(Ordering::SeqCst), 2);
+
+        let written = mdlx_light_probe_irradiance_data_source_coefficients(
+            context,
+            3.0,
+            0.0,
+            0.0,
+            core::ptr::null_mut(),
+            12,
+        );
+        assert_eq!(written, 0);
+        assert_eq!(calls.load(Ordering::SeqCst), 2);
+
+        mdlx_light_probe_irradiance_data_source_release(context);
+    }
+
+    #[test]
+    fn a_panicking_closure_writes_no_coefficients() {
+        let context = context(|_| panic!("irradiance closure panic"));
+        let mut values = [0.0_f32; 12];
+        let written = mdlx_light_probe_irradiance_data_source_coefficients(
+            context,
+            0.0,
+            0.0,
+            0.0,
+            values.as_mut_ptr(),
+            12,
+        );
+        assert_eq!(written, 0);
+        assert!(values.iter().all(|value| value.to_bits() == 0));
+        mdlx_light_probe_irradiance_data_source_release(context);
     }
 }

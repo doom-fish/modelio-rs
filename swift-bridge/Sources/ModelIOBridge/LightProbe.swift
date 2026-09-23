@@ -43,20 +43,12 @@ private final class RustLightProbeIrradianceDataSource: NSObject, MDLLightProbeI
     }
 
     func sphericalHarmonicsCoefficients(atPosition position: SIMD3<Float>) -> Data {
-        let valueCount = Int(
-            mdlx_light_probe_irradiance_data_source_coefficients(
-                callbackContext,
-                position.x,
-                position.y,
-                position.z,
-                nil,
-                0
-            )
-        )
-        guard valueCount > 0 else { return Data() }
+        guard let valueCount = mdl_spherical_harmonics_value_count(sphericalHarmonicsLevel) else {
+            return Data()
+        }
         var values = [Float](repeating: 0, count: valueCount)
-        let written = values.withUnsafeMutableBufferPointer { buffer in
-            mdlx_light_probe_irradiance_data_source_coefficients(
+        values.withUnsafeMutableBufferPointer { buffer in
+            _ = mdlx_light_probe_irradiance_data_source_coefficients(
                 callbackContext,
                 position.x,
                 position.y,
@@ -65,11 +57,23 @@ private final class RustLightProbeIrradianceDataSource: NSObject, MDLLightProbeI
                 UInt64(buffer.count)
             )
         }
-        let clampedCount = min(valueCount, Int(written))
-        return values.withUnsafeBufferPointer { buffer in
-            Data(bytes: buffer.baseAddress!, count: clampedCount * MemoryLayout<Float>.stride)
-        }
+        return values.withUnsafeBytes { Data($0) }
     }
+}
+
+private let mdlMaxSphericalHarmonicsValueCount = 1 << 24
+
+func mdl_spherical_harmonics_value_count(_ level: UInt) -> Int? {
+    let (side, sideOverflow) = level.addingReportingOverflow(1)
+    let (square, squareOverflow) = side.multipliedReportingOverflow(by: side)
+    let (count, countOverflow) = square.multipliedReportingOverflow(by: 3)
+    guard !sideOverflow, !squareOverflow, !countOverflow,
+          let valueCount = Int(exactly: count),
+          valueCount <= mdlMaxSphericalHarmonicsValueCount
+    else {
+        return nil
+    }
+    return valueCount
 }
 
 @_cdecl("mdl_light_probe_irradiance_data_source_new")
