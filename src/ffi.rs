@@ -1224,7 +1224,8 @@ extern "C" {
         bytes: *const u8,
         count: u64,
         offset: u64,
-    );
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_mesh_buffer_map(handle: *mut c_void) -> *mut c_void;
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.

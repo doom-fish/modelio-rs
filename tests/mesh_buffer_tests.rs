@@ -26,7 +26,10 @@ fn mesh_buffer_allocator_and_data_round_trip() {
     assert_eq!(buffer.bytes().expect("bytes"), vec![1, 9, 8, 4]);
 
     let data_buffer = MeshBufferData::new(8, MeshBufferType::Index).expect("data buffer");
-    data_buffer.as_mesh_buffer().fill_data(&[5, 6, 7, 8], 0);
+    data_buffer
+        .as_mesh_buffer()
+        .fill_data(&[5, 6, 7, 8], 0)
+        .expect("fill data");
     assert_eq!(&data_buffer.data()[..4], &[5, 6, 7, 8]);
 
     let zone = generic_allocator
@@ -120,4 +123,27 @@ fn custom_mesh_buffer_allocator_callback_round_trip() {
         .expect("buffer");
     assert_eq!(buffer.bytes().expect("bytes"), vec![1, 2, 3, 4]);
     assert!(buffer.zone().is_some());
+}
+
+#[test]
+fn fill_data_rejects_ranges_past_the_end_of_the_buffer() {
+    let data_buffer = MeshBufferData::new(8, MeshBufferType::Vertex).expect("data buffer");
+    let buffer = data_buffer.as_mesh_buffer();
+
+    for (bytes, offset) in [
+        (vec![1_u8; 16], 0),
+        (vec![1_u8; 4], 6),
+        (vec![1_u8; 1], 9),
+        (vec![1_u8; 2], usize::MAX),
+    ] {
+        let error = buffer
+            .fill_data(&bytes, offset)
+            .expect_err("out-of-range fill must fail");
+        assert_eq!(error.code(), -1);
+    }
+    assert_eq!(data_buffer.data(), vec![0_u8; 8]);
+
+    buffer.fill_data(&[], 8).expect("empty fill at the end");
+    buffer.fill_data(&[7, 7], 6).expect("fill the last two bytes");
+    assert_eq!(data_buffer.data(), vec![0, 0, 0, 0, 0, 0, 7, 7]);
 }

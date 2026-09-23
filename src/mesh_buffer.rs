@@ -731,16 +731,19 @@ impl MeshBufferDataAllocator {
 
 impl MeshBuffer {
     /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer counterpart.
-    pub fn fill_data(&self, data: &[u8], offset: usize) {
+    pub fn fill_data(&self, data: &[u8], offset: usize) -> Result<()> {
+        let mut out_error = ptr::null_mut();
         // SAFETY: The unsafe operation is valid in this context.
-        unsafe {
+        let status = unsafe {
             ffi::mdl_mesh_buffer_fill_data(
                 self.as_ptr(),
                 data.as_ptr(),
                 data.len() as u64,
                 offset as u64,
-            );
-        }
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)
     }
 
     /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh buffer counterpart.

@@ -179,15 +179,28 @@ public func mdl_mesh_buffer_fill_data(
     _ handle: UnsafeMutableRawPointer?,
     _ bytes: UnsafePointer<UInt8>?,
     _ count: UInt64,
-    _ offset: UInt64
-) {
-    guard let buffer = mdl_mesh_buffer(handle),
-          let bytes,
-          count > 0
-    else {
-        return
+    _ offset: UInt64,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let buffer = mdl_mesh_buffer(handle) else {
+            throw ModelIOBridgeError.invalidArgument("missing mesh buffer")
+        }
+        guard let start = Int(exactly: offset),
+              let byteCount = Int(exactly: count),
+              start <= buffer.length,
+              byteCount <= buffer.length - start
+        else {
+            throw ModelIOBridgeError.invalidArgument(
+                "cannot fill \(count) bytes at offset \(offset) into a mesh buffer of \(buffer.length) bytes"
+            )
+        }
+        guard byteCount > 0 else { return }
+        guard let bytes else {
+            throw ModelIOBridgeError.invalidArgument("missing fill bytes")
+        }
+        buffer.fill(Data(bytes: bytes, count: byteCount), offset: start)
     }
-    buffer.fill(Data(bytes: bytes, count: Int(count)), offset: Int(offset))
 }
 
 @_cdecl("mdl_mesh_buffer_map")
