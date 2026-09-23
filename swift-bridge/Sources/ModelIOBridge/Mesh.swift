@@ -297,7 +297,12 @@ public func mdl_vertex_attribute_data_copy_bytes(
     else {
         return 0
     }
-    let byteCount = min(Int(capacity), attributeData.bufferSize)
+    let offset = attributeData.map.bytes.distance(to: attributeData.dataStart)
+    guard offset >= 0, offset <= attributeData.bufferSize else {
+        return 0
+    }
+    let byteCount = min(Int(clamping: capacity), attributeData.bufferSize - offset)
+    guard byteCount > 0 else { return 0 }
     memcpy(outBytes, attributeData.dataStart, byteCount)
     return UInt64(byteCount)
 }
