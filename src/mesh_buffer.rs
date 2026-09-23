@@ -334,8 +334,8 @@ impl MeshBufferAllocator {
         let status = unsafe {
             ffi::mdl_mesh_buffer_allocator_new_with_callback(
                 callback_ptr,
-                &mut out_allocator,
-                &mut out_error,
+                &raw mut out_allocator,
+                &raw mut out_error,
             )
         };
         if let Err(error) = crate::util::status_result(status, out_error) {
@@ -370,8 +370,8 @@ impl MeshBufferAllocator {
             ffi::mdl_mesh_buffer_allocator_new_zone(
                 self.as_ptr(),
                 capacity as u64,
-                &mut out_zone,
-                &mut out_error,
+                &raw mut out_zone,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -407,8 +407,8 @@ impl MeshBufferAllocator {
                 raw_sizes.as_ptr(),
                 raw_types.as_ptr(),
                 raw_sizes.len() as u64,
-                &mut out_zone,
-                &mut out_error,
+                &raw mut out_zone,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -428,8 +428,8 @@ impl MeshBufferAllocator {
                 self.as_ptr(),
                 length as u64,
                 buffer_type.as_raw(),
-                &mut out_buffer,
-                &mut out_error,
+                &raw mut out_buffer,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -454,8 +454,8 @@ impl MeshBufferAllocator {
                 data.as_ptr(),
                 data.len() as u64,
                 buffer_type.as_raw(),
-                &mut out_buffer,
-                &mut out_error,
+                &raw mut out_buffer,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -481,8 +481,8 @@ impl MeshBufferAllocator {
                 zone.map_or(ptr::null_mut(), MeshBufferZone::as_ptr),
                 length as u64,
                 buffer_type.as_raw(),
-                &mut out_buffer,
-                &mut out_error,
+                &raw mut out_buffer,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -507,8 +507,8 @@ impl MeshBufferAllocator {
                 data.as_ptr(),
                 data.len() as u64,
                 buffer_type.as_raw(),
-                &mut out_buffer,
-                &mut out_error,
+                &raw mut out_buffer,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -576,7 +576,7 @@ impl MeshBufferZoneDefault {
         let mut out_error = ptr::null_mut();
         let status =
             // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-            unsafe { ffi::mdl_mesh_buffer_zone_default_new(&mut out_zone, &mut out_error) };
+            unsafe { ffi::mdl_mesh_buffer_zone_default_new(&raw mut out_zone, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_zone,
@@ -627,8 +627,8 @@ impl MeshBufferData {
             ffi::mdl_mesh_buffer_data_new(
                 length as u64,
                 buffer_type.as_raw(),
-                &mut out_buffer,
-                &mut out_error,
+                &raw mut out_buffer,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -648,8 +648,8 @@ impl MeshBufferData {
                 data.as_ptr(),
                 data.len() as u64,
                 buffer_type.as_raw(),
-                &mut out_buffer,
-                &mut out_error,
+                &raw mut out_buffer,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -704,7 +704,7 @@ impl MeshBufferDataAllocator {
         let mut out_error = ptr::null_mut();
         let status =
             // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-            unsafe { ffi::mdl_mesh_buffer_data_allocator_new(&mut out_allocator, &mut out_error) };
+            unsafe { ffi::mdl_mesh_buffer_data_allocator_new(&raw mut out_allocator, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self {
             handle: required_handle(out_allocator, "MDLMeshBufferDataAllocator")?,
@@ -742,7 +742,7 @@ impl MeshBuffer {
                 data.as_ptr(),
                 data.len() as u64,
                 offset as u64,
-                &mut out_error,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)

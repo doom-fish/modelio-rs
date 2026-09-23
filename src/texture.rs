@@ -35,8 +35,8 @@ impl Texture {
             ffi::mdl_url_texture_new(
                 path.as_ptr(),
                 name.as_ref().map_or(ptr::null(), |name| name.as_ptr()),
-                &mut out_texture,
-                &mut out_error,
+                &raw mut out_texture,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -76,8 +76,8 @@ impl Texture {
                 color2[1],
                 color2[2],
                 color2[3],
-                &mut out_texture,
-                &mut out_error,
+                &raw mut out_texture,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -105,8 +105,8 @@ impl Texture {
                 name.as_ref().map_or(ptr::null(), |name| name.as_ptr()),
                 dimensions[0],
                 dimensions[1],
-                &mut out_texture,
-                &mut out_error,
+                &raw mut out_texture,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -140,8 +140,8 @@ impl Texture {
                 name.as_ref().map_or(ptr::null(), |name| name.as_ptr()),
                 dimensions[0],
                 dimensions[1],
-                &mut out_texture,
-                &mut out_error,
+                &raw mut out_texture,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -169,8 +169,8 @@ impl Texture {
                 dimensions[0],
                 dimensions[1],
                 channel_encoding.as_raw(),
-                &mut out_texture,
-                &mut out_error,
+                &raw mut out_texture,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -202,8 +202,8 @@ impl Texture {
                 channel_count as u64,
                 channel_encoding.as_raw(),
                 i32::from(grayscale),
-                &mut out_texture,
-                &mut out_error,
+                &raw mut out_texture,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -231,8 +231,8 @@ impl Texture {
                 dimensions[0],
                 dimensions[1],
                 channel_encoding.as_raw(),
-                &mut out_texture,
-                &mut out_error,
+                &raw mut out_texture,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -259,8 +259,8 @@ impl Texture {
                 name.as_ref().map_or(ptr::null(), |name| name.as_ptr()),
                 smoothness,
                 contrast,
-                &mut out_texture,
-                &mut out_error,
+                &raw mut out_texture,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -294,8 +294,8 @@ impl Texture {
                 sun_elevation,
                 upper_atmosphere_scattering,
                 ground_albedo,
-                &mut out_texture,
-                &mut out_error,
+                &raw mut out_texture,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -332,8 +332,8 @@ impl Texture {
                 sun_azimuth,
                 upper_atmosphere_scattering,
                 ground_albedo,
-                &mut out_texture,
-                &mut out_error,
+                &raw mut out_texture,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -364,7 +364,7 @@ impl Texture {
         let mut out_error = ptr::null_mut();
         // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
-            ffi::mdl_texture_write_to_url(self.handle.as_ptr(), path.as_ptr(), &mut out_error)
+            ffi::mdl_texture_write_to_url(self.handle.as_ptr(), path.as_ptr(), &raw mut out_error)
         };
         crate::util::status_result(status, out_error)
     }

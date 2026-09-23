@@ -25,7 +25,7 @@ impl Camera {
         let mut out_camera = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_camera_new(&mut out_camera, &mut out_error) };
+        let status = unsafe { ffi::mdl_camera_new(&raw mut out_camera, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(out_camera, "MDLCamera")?))
     }
@@ -141,9 +141,9 @@ impl Camera {
                 pixel[1],
                 viewport[0],
                 viewport[1],
-                &mut ray[0],
-                &mut ray[1],
-                &mut ray[2],
+                &raw mut ray[0],
+                &raw mut ray[1],
+                &raw mut ray[2],
             );
         };
         ray
@@ -182,7 +182,7 @@ impl StereoscopicCamera {
         let mut out_camera = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_stereoscopic_camera_new(&mut out_camera, &mut out_error) };
+        let status = unsafe { ffi::mdl_stereoscopic_camera_new(&raw mut out_camera, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_camera,

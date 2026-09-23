@@ -24,7 +24,7 @@ impl Light {
         let mut out_light = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_light_new(&mut out_light, &mut out_error) };
+        let status = unsafe { ffi::mdl_light_new(&raw mut out_light, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(out_light, "MDLLight")?))
     }
@@ -63,10 +63,10 @@ impl Light {
                 point[0],
                 point[1],
                 point[2],
-                &mut components[0],
-                &mut components[1],
-                &mut components[2],
-                &mut components[3],
+                &raw mut components[0],
+                &raw mut components[1],
+                &raw mut components[2],
+                &raw mut components[3],
             );
         }
         components

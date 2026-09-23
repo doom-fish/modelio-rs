@@ -28,7 +28,7 @@ impl PhysicallyPlausibleLight {
         let mut out_error = ptr::null_mut();
         let status =
             // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-            unsafe { ffi::mdl_physically_plausible_light_new(&mut out_light, &mut out_error) };
+            unsafe { ffi::mdl_physically_plausible_light_new(&raw mut out_light, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_light,
@@ -144,7 +144,7 @@ impl AreaLight {
         let mut out_light = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_area_light_new(&mut out_light, &mut out_error) };
+        let status = unsafe { ffi::mdl_area_light_new(&raw mut out_light, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_light,
@@ -217,7 +217,7 @@ impl PhotometricLight {
         let mut out_light = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_photometric_light_new(&mut out_light, &mut out_error) };
+        let status = unsafe { ffi::mdl_photometric_light_new(&raw mut out_light, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_light,
@@ -234,8 +234,8 @@ impl PhotometricLight {
         let status = unsafe {
             ffi::mdl_photometric_light_new_with_ies_profile(
                 path.as_ptr(),
-                &mut out_light,
-                &mut out_error,
+                &raw mut out_light,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;

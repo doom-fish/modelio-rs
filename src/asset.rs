@@ -33,7 +33,7 @@ impl Asset {
         let mut out_asset = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_asset_new_empty(&mut out_asset, &mut out_error) };
+        let status = unsafe { ffi::mdl_asset_new_empty(&raw mut out_asset, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(out_asset, "MDLAsset")?))
     }
@@ -59,8 +59,8 @@ impl Asset {
                 vertex_descriptor.map_or(ptr::null_mut(), VertexDescriptor::as_ptr),
                 buffer_allocator.map_or(ptr::null_mut(), MeshBufferAllocator::as_ptr),
                 i32::from(preserve_topology),
-                &mut out_asset,
-                &mut out_error,
+                &raw mut out_asset,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -100,7 +100,7 @@ impl Asset {
         let mut out_error = ptr::null_mut();
         // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
-            ffi::mdl_asset_export_to_url(self.handle.as_ptr(), path.as_ptr(), &mut out_error)
+            ffi::mdl_asset_export_to_url(self.handle.as_ptr(), path.as_ptr(), &raw mut out_error)
         };
         crate::util::status_result(status, out_error)
     }
@@ -121,12 +121,12 @@ impl Asset {
         unsafe {
             ffi::mdl_asset_bounding_box(
                 self.handle.as_ptr(),
-                &mut min[0],
-                &mut min[1],
-                &mut min[2],
-                &mut max[0],
-                &mut max[1],
-                &mut max[2],
+                &raw mut min[0],
+                &raw mut min[1],
+                &raw mut min[2],
+                &raw mut max[0],
+                &raw mut max[1],
+                &raw mut max[2],
             );
         }
         BoundingBox { min, max }
@@ -142,12 +142,12 @@ impl Asset {
             ffi::mdl_asset_bounding_box_at_time(
                 self.handle.as_ptr(),
                 time,
-                &mut min[0],
-                &mut min[1],
-                &mut min[2],
-                &mut max[0],
-                &mut max[1],
-                &mut max[2],
+                &raw mut min[0],
+                &raw mut min[1],
+                &raw mut min[2],
+                &raw mut max[0],
+                &raw mut max[1],
+                &raw mut max[2],
             );
         }
         BoundingBox { min, max }
@@ -207,9 +207,9 @@ impl Asset {
         unsafe {
             ffi::mdl_asset_up_axis(
                 self.handle.as_ptr(),
-                &mut axis[0],
-                &mut axis[1],
-                &mut axis[2],
+                &raw mut axis[0],
+                &raw mut axis[1],
+                &raw mut axis[2],
             );
         };
         axis

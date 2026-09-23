@@ -46,8 +46,8 @@ impl Mesh {
                 segments[2],
                 i32::from(inward_normals),
                 geometry_type.as_raw(),
-                &mut out_mesh,
-                &mut out_error,
+                &raw mut out_mesh,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -75,8 +75,8 @@ impl Mesh {
                 i32::from(inward_normals),
                 i32::from(hemisphere),
                 geometry_type.as_raw(),
-                &mut out_mesh,
-                &mut out_error,
+                &raw mut out_mesh,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -125,8 +125,8 @@ impl Mesh {
                 i32::from(top_cap),
                 i32::from(bottom_cap),
                 geometry_type.as_raw(),
-                &mut out_mesh,
-                &mut out_error,
+                &raw mut out_mesh,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -153,8 +153,8 @@ impl Mesh {
                 segments[0],
                 segments[1],
                 geometry_type.as_raw(),
-                &mut out_mesh,
-                &mut out_error,
+                &raw mut out_mesh,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -180,8 +180,8 @@ impl Mesh {
                 extent[2],
                 i32::from(inward_normals),
                 geometry_type.as_raw(),
-                &mut out_mesh,
-                &mut out_error,
+                &raw mut out_mesh,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -255,12 +255,12 @@ impl Mesh {
         unsafe {
             ffi::mdl_mesh_bounding_box(
                 self.handle.as_ptr(),
-                &mut min[0],
-                &mut min[1],
-                &mut min[2],
-                &mut max[0],
-                &mut max[1],
-                &mut max[2],
+                &raw mut min[0],
+                &raw mut min[1],
+                &raw mut min[2],
+                &raw mut max[0],
+                &raw mut max[1],
+                &raw mut max[2],
             );
         }
         BoundingBox { min, max }
@@ -282,7 +282,7 @@ impl Mesh {
             ffi::mdl_mesh_set_vertex_descriptor(
                 self.handle.as_ptr(),
                 descriptor.as_ptr(),
-                &mut out_error,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)

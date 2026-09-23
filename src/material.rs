@@ -74,8 +74,8 @@ impl Material {
             ffi::mdl_material_new(
                 name.as_ptr(),
                 i32::from(physically_plausible),
-                &mut out_material,
-                &mut out_error,
+                &raw mut out_material,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -98,8 +98,8 @@ impl Material {
             ffi::mdl_material_new_with_scattering_function(
                 name.as_ptr(),
                 scattering_function.as_ptr(),
-                &mut out_material,
-                &mut out_error,
+                &raw mut out_material,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -261,7 +261,7 @@ impl ScatteringFunction {
         let mut out_scattering = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: The unsafe operation is valid in this context.
-        let status = unsafe { ffi::mdl_scattering_function_new(&mut out_scattering, &mut out_error) };
+        let status = unsafe { ffi::mdl_scattering_function_new(&raw mut out_scattering, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_scattering,
@@ -384,8 +384,8 @@ impl PhysicallyPlausibleScatteringFunction {
         // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
             ffi::mdl_physically_plausible_scattering_function_new(
-                &mut out_scattering,
-                &mut out_error,
+                &raw mut out_scattering,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -537,8 +537,8 @@ impl MaterialProperty {
             ffi::mdl_material_property_new(
                 name.as_ptr(),
                 semantic as u32,
-                &mut out_property,
-                &mut out_error,
+                &raw mut out_property,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -717,7 +717,7 @@ impl TextureFilter {
         let mut out_filter = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_texture_filter_new(&mut out_filter, &mut out_error) };
+        let status = unsafe { ffi::mdl_texture_filter_new(&raw mut out_filter, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_filter,
@@ -793,7 +793,7 @@ impl TextureSampler {
         let mut out_sampler = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_texture_sampler_new(&mut out_sampler, &mut out_error) };
+        let status = unsafe { ffi::mdl_texture_sampler_new(&raw mut out_sampler, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_sampler,
@@ -907,8 +907,8 @@ impl MaterialPropertyConnection {
             ffi::mdl_material_property_connection_new(
                 output.as_ptr(),
                 input.as_ptr(),
-                &mut out_connection,
-                &mut out_error,
+                &raw mut out_connection,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -998,8 +998,8 @@ impl MaterialPropertyNode {
                 input_ptrs.len() as u64,
                 output_ptrs.as_ptr(),
                 output_ptrs.len() as u64,
-                &mut out_node,
-                &mut out_error,
+                &raw mut out_node,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -1086,8 +1086,8 @@ impl MaterialPropertyGraph {
                 node_ptrs.len() as u64,
                 connection_ptrs.as_ptr(),
                 connection_ptrs.len() as u64,
-                &mut out_graph,
-                &mut out_error,
+                &raw mut out_graph,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;

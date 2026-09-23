@@ -109,8 +109,8 @@ impl LightProbe {
             ffi::mdl_light_probe_new(
                 reflective_texture.map_or(ptr::null_mut(), Texture::as_ptr),
                 irradiance_texture.map_or(ptr::null_mut(), Texture::as_ptr),
-                &mut out_probe,
-                &mut out_error,
+                &raw mut out_probe,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -236,8 +236,8 @@ impl LightProbeIrradianceDataSource {
                 bounding_box.max[2],
                 spherical_harmonics_level as u64,
                 callback_ptr,
-                &mut out_data_source,
-                &mut out_error,
+                &raw mut out_data_source,
+                &raw mut out_error,
             )
         };
         if let Err(error) = crate::util::status_result(status, out_error) {
@@ -262,12 +262,12 @@ impl LightProbeIrradianceDataSource {
         unsafe {
             ffi::mdl_light_probe_irradiance_data_source_bounding_box(
                 self.handle.as_ptr(),
-                &mut min[0],
-                &mut min[1],
-                &mut min[2],
-                &mut max[0],
-                &mut max[1],
-                &mut max[2],
+                &raw mut min[0],
+                &raw mut min[1],
+                &raw mut min[2],
+                &raw mut max[0],
+                &raw mut max[1],
+                &raw mut max[2],
             );
         }
         BoundingBox { min, max }

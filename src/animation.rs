@@ -46,8 +46,8 @@ impl PackedJointAnimation {
                 name.as_ptr(),
                 raw_joint_paths.as_ptr(),
                 raw_joint_paths.len() as u64,
-                &mut out_animation,
-                &mut out_error,
+                &raw mut out_animation,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -123,7 +123,7 @@ impl AnimationBindComponent {
         let mut out_error = ptr::null_mut();
         let status =
             // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-            unsafe { ffi::mdl_animation_bind_component_new(&mut out_component, &mut out_error) };
+            unsafe { ffi::mdl_animation_bind_component_new(&raw mut out_component, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_component,

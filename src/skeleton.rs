@@ -65,8 +65,8 @@ impl Skeleton {
                 name.as_ptr(),
                 raw_joint_paths.as_ptr(),
                 raw_joint_paths.len() as u64,
-                &mut out_skeleton,
-                &mut out_error,
+                &raw mut out_skeleton,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;

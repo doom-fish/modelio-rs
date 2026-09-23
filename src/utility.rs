@@ -22,7 +22,7 @@ impl Utility {
             ffi::mdl_utility_convert_to_usdz(
                 input_url.as_ptr(),
                 output_url.as_ptr(),
-                &mut out_error,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)

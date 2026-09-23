@@ -79,7 +79,7 @@ impl AnimatedScalar {
         let mut out_value = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_animated_scalar_new(&mut out_value, &mut out_error) };
+        let status = unsafe { ffi::mdl_animated_scalar_new(&raw mut out_value, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_value,
@@ -133,7 +133,7 @@ impl AnimatedVector2 {
         let mut out_value = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_animated_vector2_new(&mut out_value, &mut out_error) };
+        let status = unsafe { ffi::mdl_animated_vector2_new(&raw mut out_value, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_value,
@@ -173,8 +173,8 @@ impl AnimatedVector2 {
             ffi::mdl_animated_vector2_copy_float2_value(
                 self.handle.as_ptr(),
                 time,
-                &mut value[0],
-                &mut value[1],
+                &raw mut value[0],
+                &raw mut value[1],
             );
         };
         value
@@ -198,7 +198,7 @@ impl AnimatedVector3 {
         let mut out_value = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_animated_vector3_new(&mut out_value, &mut out_error) };
+        let status = unsafe { ffi::mdl_animated_vector3_new(&raw mut out_value, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_value,
@@ -244,9 +244,9 @@ impl AnimatedVector3 {
             ffi::mdl_animated_vector3_copy_float3_value(
                 self.handle.as_ptr(),
                 time,
-                &mut value[0],
-                &mut value[1],
-                &mut value[2],
+                &raw mut value[0],
+                &raw mut value[1],
+                &raw mut value[2],
             );
         };
         value
@@ -270,7 +270,7 @@ impl AnimatedVector4 {
         let mut out_value = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_animated_vector4_new(&mut out_value, &mut out_error) };
+        let status = unsafe { ffi::mdl_animated_vector4_new(&raw mut out_value, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_value,
@@ -317,10 +317,10 @@ impl AnimatedVector4 {
             ffi::mdl_animated_vector4_copy_float4_value(
                 self.handle.as_ptr(),
                 time,
-                &mut value[0],
-                &mut value[1],
-                &mut value[2],
-                &mut value[3],
+                &raw mut value[0],
+                &raw mut value[1],
+                &raw mut value[2],
+                &raw mut value[3],
             );
         };
         value
@@ -344,7 +344,7 @@ impl AnimatedQuaternion {
         let mut out_value = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_animated_quaternion_new(&mut out_value, &mut out_error) };
+        let status = unsafe { ffi::mdl_animated_quaternion_new(&raw mut out_value, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_value,
@@ -415,7 +415,7 @@ impl AnimatedMatrix4x4 {
         let mut out_value = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_animated_matrix4x4_new(&mut out_value, &mut out_error) };
+        let status = unsafe { ffi::mdl_animated_matrix4x4_new(&raw mut out_value, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_value,
@@ -480,7 +480,7 @@ impl AnimatedScalarArray {
         let mut out_error = ptr::null_mut();
         // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
-            ffi::mdl_animated_scalar_array_new(element_count as u64, &mut out_value, &mut out_error)
+            ffi::mdl_animated_scalar_array_new(element_count as u64, &raw mut out_value, &raw mut out_error)
         };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
@@ -558,8 +558,8 @@ impl AnimatedVector3Array {
         let status = unsafe {
             ffi::mdl_animated_vector3_array_new(
                 element_count as u64,
-                &mut out_value,
-                &mut out_error,
+                &raw mut out_value,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -642,8 +642,8 @@ impl AnimatedQuaternionArray {
         let status = unsafe {
             ffi::mdl_animated_quaternion_array_new(
                 element_count as u64,
-                &mut out_value,
-                &mut out_error,
+                &raw mut out_value,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;

@@ -154,7 +154,7 @@ impl SubmeshTopology {
         let mut out_error = std::ptr::null_mut();
         // SAFETY: The unsafe operation is valid in this context.
         let status = unsafe {
-            ffi::mdl_submesh_topology_new(submesh.as_ptr(), &mut out_topology, &mut out_error)
+            ffi::mdl_submesh_topology_new(submesh.as_ptr(), &raw mut out_topology, &raw mut out_error)
         };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(crate::util::required_handle(

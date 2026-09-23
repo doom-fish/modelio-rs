@@ -46,7 +46,7 @@ impl Object {
         let mut out_object = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_object_new(&mut out_object, &mut out_error) };
+        let status = unsafe { ffi::mdl_object_new(&raw mut out_object, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(out_object, "MDLObject")?))
     }
@@ -172,12 +172,12 @@ impl Object {
             ffi::mdl_object_bounding_box_at_time(
                 self.handle.as_ptr(),
                 time,
-                &mut min[0],
-                &mut min[1],
-                &mut min[2],
-                &mut max[0],
-                &mut max[1],
-                &mut max[2],
+                &raw mut min[0],
+                &raw mut min[1],
+                &raw mut min[2],
+                &raw mut max[0],
+                &raw mut max[1],
+                &raw mut max[2],
             );
         }
         BoundingBox { min, max }
@@ -275,7 +275,7 @@ impl ObjectContainer {
         let mut out_container = ptr::null_mut();
         let mut out_error = ptr::null_mut();
         // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
-        let status = unsafe { ffi::mdl_object_container_new(&mut out_container, &mut out_error) };
+        let status = unsafe { ffi::mdl_object_container_new(&raw mut out_container, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
         Ok(Self::from_handle(required_handle(
             out_container,

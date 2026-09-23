@@ -46,8 +46,8 @@ impl VoxelArray {
                 bounding_box.max[1],
                 bounding_box.max[2],
                 voxel_extent,
-                &mut out_voxel_array,
-                &mut out_error,
+                &raw mut out_voxel_array,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -67,8 +67,8 @@ impl VoxelArray {
                 asset.as_ptr(),
                 divisions,
                 patch_radius,
-                &mut out_voxel_array,
-                &mut out_error,
+                &raw mut out_voxel_array,
+                &raw mut out_error,
             )
         };
         crate::util::status_result(status, out_error)?;
@@ -249,9 +249,9 @@ impl VoxelArray {
                 index[1],
                 index[2],
                 index[3],
-                &mut values[0],
-                &mut values[1],
-                &mut values[2],
+                &raw mut values[0],
+                &raw mut values[1],
+                &raw mut values[2],
             );
         };
         values
@@ -270,12 +270,12 @@ impl VoxelArray {
                 index[1],
                 index[2],
                 index[3],
-                &mut min[0],
-                &mut min[1],
-                &mut min[2],
-                &mut max[0],
-                &mut max[1],
-                &mut max[2],
+                &raw mut min[0],
+                &raw mut min[1],
+                &raw mut min[2],
+                &raw mut max[0],
+                &raw mut max[1],
+                &raw mut max[2],
             );
         };
         BoundingBox { min, max }
