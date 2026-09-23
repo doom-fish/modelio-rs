@@ -51,7 +51,7 @@ private func mdl_object_info(_ object: MDLObject) -> [String: Any] {
     ]
 }
 
-private func mdl_object_at_path_impl(_ object: MDLObject, _ path: String) -> MDLObject? {
+func mdl_object_at_path_impl(_ object: NSObject, _ path: String) -> MDLObject? {
     let selector = NSSelectorFromString("objectAtPath:")
     guard object.responds(to: selector),
           let unmanaged = object.perform(selector, with: NSString(string: path)),

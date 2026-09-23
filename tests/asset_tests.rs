@@ -47,6 +47,26 @@ fn from_url_reports_missing_corrupt_and_unknown_files() {
 }
 
 #[test]
+fn object_at_path_returns_none_for_missing_paths() {
+    let asset = Asset::from_url(common::fixture_obj()).expect("load fixture asset");
+    assert!(asset
+        .object_at_path("/does/not/exist")
+        .expect("lookup")
+        .is_none());
+
+    let path = asset
+        .object_at(0)
+        .expect("first object")
+        .path()
+        .expect("object path");
+    let found = asset
+        .object_at_path(&path)
+        .expect("lookup")
+        .expect("object at its own path");
+    assert_eq!(found.path().as_deref(), Some(path.as_str()));
+}
+
+#[test]
 fn from_url_with_options_conforms_meshes_to_the_descriptor() {
     let descriptor = VertexDescriptor::new().expect("vertex descriptor");
     let position = VertexAttribute::new(

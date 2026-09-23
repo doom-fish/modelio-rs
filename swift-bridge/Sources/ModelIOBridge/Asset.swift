@@ -181,11 +181,12 @@ public func mdl_asset_object_at_path(
     _ path: UnsafePointer<CChar>?
 ) -> UnsafeMutableRawPointer? {
     guard let asset = mdl_borrow_object(handle) as? MDLAsset,
-          let path
+          let path,
+          let object = mdl_object_at_path_impl(asset, String(cString: path))
     else {
         return nil
     }
-    return mdl_retain(asset.object(atPath: String(cString: path)))
+    return mdl_retain(object)
 }
 
 @_cdecl("mdl_asset_add_object")
