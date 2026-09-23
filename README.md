@@ -4,6 +4,13 @@ Safe Rust bindings for Apple's [ModelIO](https://developer.apple.com/documentati
 
 > **Status:** v0.4.0 fixes buffer overruns in `VertexAttributeData::bytes` and `MeshBuffer::fill_data`, makes `Asset::from_url` report load errors, adds a typed `VertexFormat`, and lets a validated `VertexDescriptor` be applied to meshes and asset loads. The SDK audit covers 117/117 top-level ModelIO symbols; that figure counts classes, protocols, enums and constants, not methods (see `COVERAGE.md`).
 
+## Installation
+
+```toml
+[dependencies]
+modelio-rs = "0.4"
+```
+
 ## Requirements
 
 - macOS 11 or newer (the Swift bridge's deployment target). `Utility::convert_to_usdz` needs macOS 15 and returns an error on older systems.
