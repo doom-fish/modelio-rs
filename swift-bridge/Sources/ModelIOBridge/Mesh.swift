@@ -241,6 +241,22 @@ public func mdl_mesh_vertex_descriptor(_ handle: UnsafeMutableRawPointer?) -> Un
     return mdl_retain(mesh.vertexDescriptor)
 }
 
+@_cdecl("mdl_mesh_set_vertex_descriptor")
+public func mdl_mesh_set_vertex_descriptor(
+    _ handle: UnsafeMutableRawPointer?,
+    _ descriptorHandle: UnsafeMutableRawPointer?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let mesh = mdl_borrow_object(handle) as? MDLMesh,
+              let descriptor = mdl_borrow_object(descriptorHandle) as? MDLVertexDescriptor
+        else {
+            throw ModelIOBridgeError.invalidArgument("missing mesh or vertex descriptor")
+        }
+        mesh.vertexDescriptor = try mdl_checked_vertex_descriptor(descriptor, vertexCount: mesh.vertexCount)
+    }
+}
+
 @_cdecl("mdl_mesh_vertex_attribute_data")
 public func mdl_mesh_vertex_attribute_data(
     _ handle: UnsafeMutableRawPointer?,

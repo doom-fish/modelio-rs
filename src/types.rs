@@ -584,6 +584,13 @@ pub struct VertexAttributeInfo {
     pub buffer_size: usize,
 }
 
+impl VertexAttributeInfo {
+    #[must_use]
+    pub fn format_enum(&self) -> Option<VertexFormat> {
+        VertexFormat::from_raw(self.format)
+    }
+}
+
 #[derive(Debug, Clone, Deserialize)]
 /// Wraps the corresponding Model I/O texture info counterpart.
 pub struct TextureInfo {
@@ -978,6 +985,13 @@ pub struct VertexAttributeDescriptorInfo {
     pub initialization_value: [f32; 4],
 }
 
+impl VertexAttributeDescriptorInfo {
+    #[must_use]
+    pub fn format_enum(&self) -> Option<VertexFormat> {
+        VertexFormat::from_raw(self.format)
+    }
+}
+
 #[derive(Debug, Clone, Deserialize)]
 /// Wraps the corresponding Model I/O vertex descriptor info counterpart.
 pub struct VertexDescriptorInfo {
@@ -986,10 +1000,82 @@ pub struct VertexDescriptorInfo {
     pub layout_strides: Vec<usize>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct VertexFormat(u32);
+
+impl VertexFormat {
+    #[must_use]
+    pub const fn from_raw(raw: u32) -> Option<Self> {
+        if raw == 0 || vertex_format_byte_size(raw) != 0 {
+            Some(Self(raw))
+        } else {
+            None
+        }
+    }
+
+    #[must_use]
+    pub const fn as_raw(self) -> u32 {
+        self.0
+    }
+
+    #[must_use]
+    pub const fn byte_size(self) -> usize {
+        vertex_format_byte_size(self.0)
+    }
+
+    #[must_use]
+    pub const fn component_count(self) -> usize {
+        if self.0 == 0 {
+            0
+        } else {
+            (self.0 & 0xFFF) as usize
+        }
+    }
+
+    #[must_use]
+    pub const fn is_packed(self) -> bool {
+        self.0 & vertex_format::PACKED_BIT != 0
+    }
+}
+
+const fn vertex_format_byte_size(raw: u32) -> usize {
+    let component_count = (raw & 0xFFF) as usize;
+    let base = raw & !0x1FFF;
+    if raw & vertex_format::PACKED_BIT != 0 {
+        return if component_count == 4
+            && (base == vertex_format::INT_BITS || base == vertex_format::UINT_BITS)
+        {
+            4
+        } else {
+            0
+        };
+    }
+    if component_count < 1 || component_count > 4 {
+        return 0;
+    }
+    match base {
+        vertex_format::UCHAR_BITS
+        | vertex_format::CHAR_BITS
+        | vertex_format::UCHAR_NORMALIZED_BITS
+        | vertex_format::CHAR_NORMALIZED_BITS => component_count,
+        vertex_format::USHORT_BITS
+        | vertex_format::SHORT_BITS
+        | vertex_format::USHORT_NORMALIZED_BITS
+        | vertex_format::SHORT_NORMALIZED_BITS
+        | vertex_format::HALF_BITS => component_count * 2,
+        vertex_format::UINT_BITS | vertex_format::INT_BITS | vertex_format::FLOAT_BITS => {
+            component_count * 4
+        }
+        _ => 0,
+    }
+}
+
 /// Groups helper APIs for the corresponding Model I/O vertex format symbols.
 pub mod vertex_format {
-    /// Exposes the corresponding Model I/O constant for invalid: u32.
-    pub const INVALID: u32 = 0;
+    use super::VertexFormat;
+
+    /// Exposes the corresponding Model I/O constant for invalid: VertexFormat.
+    pub const INVALID: VertexFormat = VertexFormat(0);
     /// Exposes the corresponding Model I/O constant for packed bit: u32.
     pub const PACKED_BIT: u32 = 0x1000;
 
@@ -1018,116 +1104,116 @@ pub mod vertex_format {
     /// Exposes the corresponding Model I/O constant for float bits: u32.
     pub const FLOAT_BITS: u32 = 0xC0000;
 
-    /// Exposes the corresponding Model I/O constant for uchar: u32.
-    pub const UCHAR: u32 = UCHAR_BITS | 1;
-    /// Exposes the corresponding Model I/O constant for uchar2: u32.
-    pub const UCHAR2: u32 = UCHAR_BITS | 2;
-    /// Exposes the corresponding Model I/O constant for uchar3: u32.
-    pub const UCHAR3: u32 = UCHAR_BITS | 3;
-    /// Exposes the corresponding Model I/O constant for uchar4: u32.
-    pub const UCHAR4: u32 = UCHAR_BITS | 4;
+    /// Exposes the corresponding Model I/O constant for uchar: VertexFormat.
+    pub const UCHAR: VertexFormat = VertexFormat(UCHAR_BITS | 1);
+    /// Exposes the corresponding Model I/O constant for uchar2: VertexFormat.
+    pub const UCHAR2: VertexFormat = VertexFormat(UCHAR_BITS | 2);
+    /// Exposes the corresponding Model I/O constant for uchar3: VertexFormat.
+    pub const UCHAR3: VertexFormat = VertexFormat(UCHAR_BITS | 3);
+    /// Exposes the corresponding Model I/O constant for uchar4: VertexFormat.
+    pub const UCHAR4: VertexFormat = VertexFormat(UCHAR_BITS | 4);
 
-    /// Exposes the corresponding Model I/O constant for char: u32.
-    pub const CHAR: u32 = CHAR_BITS | 1;
-    /// Exposes the corresponding Model I/O constant for char2: u32.
-    pub const CHAR2: u32 = CHAR_BITS | 2;
-    /// Exposes the corresponding Model I/O constant for char3: u32.
-    pub const CHAR3: u32 = CHAR_BITS | 3;
-    /// Exposes the corresponding Model I/O constant for char4: u32.
-    pub const CHAR4: u32 = CHAR_BITS | 4;
+    /// Exposes the corresponding Model I/O constant for char: VertexFormat.
+    pub const CHAR: VertexFormat = VertexFormat(CHAR_BITS | 1);
+    /// Exposes the corresponding Model I/O constant for char2: VertexFormat.
+    pub const CHAR2: VertexFormat = VertexFormat(CHAR_BITS | 2);
+    /// Exposes the corresponding Model I/O constant for char3: VertexFormat.
+    pub const CHAR3: VertexFormat = VertexFormat(CHAR_BITS | 3);
+    /// Exposes the corresponding Model I/O constant for char4: VertexFormat.
+    pub const CHAR4: VertexFormat = VertexFormat(CHAR_BITS | 4);
 
-    /// Exposes the corresponding Model I/O constant for uchar normalized: u32.
-    pub const UCHAR_NORMALIZED: u32 = UCHAR_NORMALIZED_BITS | 1;
-    /// Exposes the corresponding Model I/O constant for uchar2 normalized: u32.
-    pub const UCHAR2_NORMALIZED: u32 = UCHAR_NORMALIZED_BITS | 2;
-    /// Exposes the corresponding Model I/O constant for uchar3 normalized: u32.
-    pub const UCHAR3_NORMALIZED: u32 = UCHAR_NORMALIZED_BITS | 3;
-    /// Exposes the corresponding Model I/O constant for uchar4 normalized: u32.
-    pub const UCHAR4_NORMALIZED: u32 = UCHAR_NORMALIZED_BITS | 4;
+    /// Exposes the corresponding Model I/O constant for uchar normalized: VertexFormat.
+    pub const UCHAR_NORMALIZED: VertexFormat = VertexFormat(UCHAR_NORMALIZED_BITS | 1);
+    /// Exposes the corresponding Model I/O constant for uchar2 normalized: VertexFormat.
+    pub const UCHAR2_NORMALIZED: VertexFormat = VertexFormat(UCHAR_NORMALIZED_BITS | 2);
+    /// Exposes the corresponding Model I/O constant for uchar3 normalized: VertexFormat.
+    pub const UCHAR3_NORMALIZED: VertexFormat = VertexFormat(UCHAR_NORMALIZED_BITS | 3);
+    /// Exposes the corresponding Model I/O constant for uchar4 normalized: VertexFormat.
+    pub const UCHAR4_NORMALIZED: VertexFormat = VertexFormat(UCHAR_NORMALIZED_BITS | 4);
 
-    /// Exposes the corresponding Model I/O constant for char normalized: u32.
-    pub const CHAR_NORMALIZED: u32 = CHAR_NORMALIZED_BITS | 1;
-    /// Exposes the corresponding Model I/O constant for char2 normalized: u32.
-    pub const CHAR2_NORMALIZED: u32 = CHAR_NORMALIZED_BITS | 2;
-    /// Exposes the corresponding Model I/O constant for char3 normalized: u32.
-    pub const CHAR3_NORMALIZED: u32 = CHAR_NORMALIZED_BITS | 3;
-    /// Exposes the corresponding Model I/O constant for char4 normalized: u32.
-    pub const CHAR4_NORMALIZED: u32 = CHAR_NORMALIZED_BITS | 4;
+    /// Exposes the corresponding Model I/O constant for char normalized: VertexFormat.
+    pub const CHAR_NORMALIZED: VertexFormat = VertexFormat(CHAR_NORMALIZED_BITS | 1);
+    /// Exposes the corresponding Model I/O constant for char2 normalized: VertexFormat.
+    pub const CHAR2_NORMALIZED: VertexFormat = VertexFormat(CHAR_NORMALIZED_BITS | 2);
+    /// Exposes the corresponding Model I/O constant for char3 normalized: VertexFormat.
+    pub const CHAR3_NORMALIZED: VertexFormat = VertexFormat(CHAR_NORMALIZED_BITS | 3);
+    /// Exposes the corresponding Model I/O constant for char4 normalized: VertexFormat.
+    pub const CHAR4_NORMALIZED: VertexFormat = VertexFormat(CHAR_NORMALIZED_BITS | 4);
 
-    /// Exposes the corresponding Model I/O constant for ushort: u32.
-    pub const USHORT: u32 = USHORT_BITS | 1;
-    /// Exposes the corresponding Model I/O constant for ushort2: u32.
-    pub const USHORT2: u32 = USHORT_BITS | 2;
-    /// Exposes the corresponding Model I/O constant for ushort3: u32.
-    pub const USHORT3: u32 = USHORT_BITS | 3;
-    /// Exposes the corresponding Model I/O constant for ushort4: u32.
-    pub const USHORT4: u32 = USHORT_BITS | 4;
+    /// Exposes the corresponding Model I/O constant for ushort: VertexFormat.
+    pub const USHORT: VertexFormat = VertexFormat(USHORT_BITS | 1);
+    /// Exposes the corresponding Model I/O constant for ushort2: VertexFormat.
+    pub const USHORT2: VertexFormat = VertexFormat(USHORT_BITS | 2);
+    /// Exposes the corresponding Model I/O constant for ushort3: VertexFormat.
+    pub const USHORT3: VertexFormat = VertexFormat(USHORT_BITS | 3);
+    /// Exposes the corresponding Model I/O constant for ushort4: VertexFormat.
+    pub const USHORT4: VertexFormat = VertexFormat(USHORT_BITS | 4);
 
-    /// Exposes the corresponding Model I/O constant for short: u32.
-    pub const SHORT: u32 = SHORT_BITS | 1;
-    /// Exposes the corresponding Model I/O constant for short2: u32.
-    pub const SHORT2: u32 = SHORT_BITS | 2;
-    /// Exposes the corresponding Model I/O constant for short3: u32.
-    pub const SHORT3: u32 = SHORT_BITS | 3;
-    /// Exposes the corresponding Model I/O constant for short4: u32.
-    pub const SHORT4: u32 = SHORT_BITS | 4;
+    /// Exposes the corresponding Model I/O constant for short: VertexFormat.
+    pub const SHORT: VertexFormat = VertexFormat(SHORT_BITS | 1);
+    /// Exposes the corresponding Model I/O constant for short2: VertexFormat.
+    pub const SHORT2: VertexFormat = VertexFormat(SHORT_BITS | 2);
+    /// Exposes the corresponding Model I/O constant for short3: VertexFormat.
+    pub const SHORT3: VertexFormat = VertexFormat(SHORT_BITS | 3);
+    /// Exposes the corresponding Model I/O constant for short4: VertexFormat.
+    pub const SHORT4: VertexFormat = VertexFormat(SHORT_BITS | 4);
 
-    /// Exposes the corresponding Model I/O constant for ushort normalized: u32.
-    pub const USHORT_NORMALIZED: u32 = USHORT_NORMALIZED_BITS | 1;
-    /// Exposes the corresponding Model I/O constant for ushort2 normalized: u32.
-    pub const USHORT2_NORMALIZED: u32 = USHORT_NORMALIZED_BITS | 2;
-    /// Exposes the corresponding Model I/O constant for ushort3 normalized: u32.
-    pub const USHORT3_NORMALIZED: u32 = USHORT_NORMALIZED_BITS | 3;
-    /// Exposes the corresponding Model I/O constant for ushort4 normalized: u32.
-    pub const USHORT4_NORMALIZED: u32 = USHORT_NORMALIZED_BITS | 4;
+    /// Exposes the corresponding Model I/O constant for ushort normalized: VertexFormat.
+    pub const USHORT_NORMALIZED: VertexFormat = VertexFormat(USHORT_NORMALIZED_BITS | 1);
+    /// Exposes the corresponding Model I/O constant for ushort2 normalized: VertexFormat.
+    pub const USHORT2_NORMALIZED: VertexFormat = VertexFormat(USHORT_NORMALIZED_BITS | 2);
+    /// Exposes the corresponding Model I/O constant for ushort3 normalized: VertexFormat.
+    pub const USHORT3_NORMALIZED: VertexFormat = VertexFormat(USHORT_NORMALIZED_BITS | 3);
+    /// Exposes the corresponding Model I/O constant for ushort4 normalized: VertexFormat.
+    pub const USHORT4_NORMALIZED: VertexFormat = VertexFormat(USHORT_NORMALIZED_BITS | 4);
 
-    /// Exposes the corresponding Model I/O constant for short normalized: u32.
-    pub const SHORT_NORMALIZED: u32 = SHORT_NORMALIZED_BITS | 1;
-    /// Exposes the corresponding Model I/O constant for short2 normalized: u32.
-    pub const SHORT2_NORMALIZED: u32 = SHORT_NORMALIZED_BITS | 2;
-    /// Exposes the corresponding Model I/O constant for short3 normalized: u32.
-    pub const SHORT3_NORMALIZED: u32 = SHORT_NORMALIZED_BITS | 3;
-    /// Exposes the corresponding Model I/O constant for short4 normalized: u32.
-    pub const SHORT4_NORMALIZED: u32 = SHORT_NORMALIZED_BITS | 4;
+    /// Exposes the corresponding Model I/O constant for short normalized: VertexFormat.
+    pub const SHORT_NORMALIZED: VertexFormat = VertexFormat(SHORT_NORMALIZED_BITS | 1);
+    /// Exposes the corresponding Model I/O constant for short2 normalized: VertexFormat.
+    pub const SHORT2_NORMALIZED: VertexFormat = VertexFormat(SHORT_NORMALIZED_BITS | 2);
+    /// Exposes the corresponding Model I/O constant for short3 normalized: VertexFormat.
+    pub const SHORT3_NORMALIZED: VertexFormat = VertexFormat(SHORT_NORMALIZED_BITS | 3);
+    /// Exposes the corresponding Model I/O constant for short4 normalized: VertexFormat.
+    pub const SHORT4_NORMALIZED: VertexFormat = VertexFormat(SHORT_NORMALIZED_BITS | 4);
 
-    /// Exposes the corresponding Model I/O constant for uint: u32.
-    pub const UINT: u32 = UINT_BITS | 1;
-    /// Exposes the corresponding Model I/O constant for uint2: u32.
-    pub const UINT2: u32 = UINT_BITS | 2;
-    /// Exposes the corresponding Model I/O constant for uint3: u32.
-    pub const UINT3: u32 = UINT_BITS | 3;
-    /// Exposes the corresponding Model I/O constant for uint4: u32.
-    pub const UINT4: u32 = UINT_BITS | 4;
+    /// Exposes the corresponding Model I/O constant for uint: VertexFormat.
+    pub const UINT: VertexFormat = VertexFormat(UINT_BITS | 1);
+    /// Exposes the corresponding Model I/O constant for uint2: VertexFormat.
+    pub const UINT2: VertexFormat = VertexFormat(UINT_BITS | 2);
+    /// Exposes the corresponding Model I/O constant for uint3: VertexFormat.
+    pub const UINT3: VertexFormat = VertexFormat(UINT_BITS | 3);
+    /// Exposes the corresponding Model I/O constant for uint4: VertexFormat.
+    pub const UINT4: VertexFormat = VertexFormat(UINT_BITS | 4);
 
-    /// Exposes the corresponding Model I/O constant for int: u32.
-    pub const INT: u32 = INT_BITS | 1;
-    /// Exposes the corresponding Model I/O constant for int2: u32.
-    pub const INT2: u32 = INT_BITS | 2;
-    /// Exposes the corresponding Model I/O constant for int3: u32.
-    pub const INT3: u32 = INT_BITS | 3;
-    /// Exposes the corresponding Model I/O constant for int4: u32.
-    pub const INT4: u32 = INT_BITS | 4;
+    /// Exposes the corresponding Model I/O constant for int: VertexFormat.
+    pub const INT: VertexFormat = VertexFormat(INT_BITS | 1);
+    /// Exposes the corresponding Model I/O constant for int2: VertexFormat.
+    pub const INT2: VertexFormat = VertexFormat(INT_BITS | 2);
+    /// Exposes the corresponding Model I/O constant for int3: VertexFormat.
+    pub const INT3: VertexFormat = VertexFormat(INT_BITS | 3);
+    /// Exposes the corresponding Model I/O constant for int4: VertexFormat.
+    pub const INT4: VertexFormat = VertexFormat(INT_BITS | 4);
 
-    /// Exposes the corresponding Model I/O constant for half: u32.
-    pub const HALF: u32 = HALF_BITS | 1;
-    /// Exposes the corresponding Model I/O constant for half2: u32.
-    pub const HALF2: u32 = HALF_BITS | 2;
-    /// Exposes the corresponding Model I/O constant for half3: u32.
-    pub const HALF3: u32 = HALF_BITS | 3;
-    /// Exposes the corresponding Model I/O constant for half4: u32.
-    pub const HALF4: u32 = HALF_BITS | 4;
+    /// Exposes the corresponding Model I/O constant for half: VertexFormat.
+    pub const HALF: VertexFormat = VertexFormat(HALF_BITS | 1);
+    /// Exposes the corresponding Model I/O constant for half2: VertexFormat.
+    pub const HALF2: VertexFormat = VertexFormat(HALF_BITS | 2);
+    /// Exposes the corresponding Model I/O constant for half3: VertexFormat.
+    pub const HALF3: VertexFormat = VertexFormat(HALF_BITS | 3);
+    /// Exposes the corresponding Model I/O constant for half4: VertexFormat.
+    pub const HALF4: VertexFormat = VertexFormat(HALF_BITS | 4);
 
-    /// Exposes the corresponding Model I/O constant for float: u32.
-    pub const FLOAT: u32 = FLOAT_BITS | 1;
-    /// Exposes the corresponding Model I/O constant for float2: u32.
-    pub const FLOAT2: u32 = FLOAT_BITS | 2;
-    /// Exposes the corresponding Model I/O constant for float3: u32.
-    pub const FLOAT3: u32 = FLOAT_BITS | 3;
-    /// Exposes the corresponding Model I/O constant for float4: u32.
-    pub const FLOAT4: u32 = FLOAT_BITS | 4;
+    /// Exposes the corresponding Model I/O constant for float: VertexFormat.
+    pub const FLOAT: VertexFormat = VertexFormat(FLOAT_BITS | 1);
+    /// Exposes the corresponding Model I/O constant for float2: VertexFormat.
+    pub const FLOAT2: VertexFormat = VertexFormat(FLOAT_BITS | 2);
+    /// Exposes the corresponding Model I/O constant for float3: VertexFormat.
+    pub const FLOAT3: VertexFormat = VertexFormat(FLOAT_BITS | 3);
+    /// Exposes the corresponding Model I/O constant for float4: VertexFormat.
+    pub const FLOAT4: VertexFormat = VertexFormat(FLOAT_BITS | 4);
 
-    /// Exposes the corresponding Model I/O constant for int1010102 normalized: u32.
-    pub const INT1010102_NORMALIZED: u32 = INT_BITS | PACKED_BIT | 4;
-    /// Exposes the corresponding Model I/O constant for uint1010102 normalized: u32.
-    pub const UINT1010102_NORMALIZED: u32 = UINT_BITS | PACKED_BIT | 4;
+    /// Exposes the corresponding Model I/O constant for int1010102 normalized: VertexFormat.
+    pub const INT1010102_NORMALIZED: VertexFormat = VertexFormat(INT_BITS | PACKED_BIT | 4);
+    /// Exposes the corresponding Model I/O constant for uint1010102 normalized: VertexFormat.
+    pub const UINT1010102_NORMALIZED: VertexFormat = VertexFormat(UINT_BITS | PACKED_BIT | 4);
 }

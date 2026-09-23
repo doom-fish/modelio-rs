@@ -275,6 +275,19 @@ impl Mesh {
         unsafe { ObjectHandle::from_retained_ptr(ptr) }.map(VertexDescriptor::from_handle)
     }
 
+    pub fn set_vertex_descriptor(&self, descriptor: &VertexDescriptor) -> Result<()> {
+        let mut out_error = ptr::null_mut();
+        // SAFETY: Both ObjectHandles wrap valid opaque pointers from Swift; FFI function accepts them safely.
+        let status = unsafe {
+            ffi::mdl_mesh_set_vertex_descriptor(
+                self.handle.as_ptr(),
+                descriptor.as_ptr(),
+                &mut out_error,
+            )
+        };
+        crate::util::status_result(status, out_error)
+    }
+
     /// Calls the corresponding Model I/O method on the wrapped Model I/O mesh counterpart.
     pub fn vertex_attribute_data_named(
         &self,

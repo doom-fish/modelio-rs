@@ -3,7 +3,7 @@ use std::ptr;
 use crate::error::Result;
 use crate::ffi;
 use crate::handle::ObjectHandle;
-use crate::types::{VertexAttributeDescriptorInfo, VertexDescriptorInfo};
+use crate::types::{VertexAttributeDescriptorInfo, VertexDescriptorInfo, VertexFormat};
 use crate::util::{c_string, parse_json, required_handle};
 
 #[derive(Debug, Clone)]
@@ -19,7 +19,12 @@ impl VertexAttribute {
     }
 
     /// Wraps the corresponding Model I/O initializer for the wrapped Model I/O vertex attribute counterpart.
-    pub fn new(name: &str, format: u32, offset: usize, buffer_index: usize) -> Result<Self> {
+    pub fn new(
+        name: &str,
+        format: VertexFormat,
+        offset: usize,
+        buffer_index: usize,
+    ) -> Result<Self> {
         let name = c_string(name)?;
         let mut out_attribute = ptr::null_mut();
         let mut out_error = ptr::null_mut();
@@ -27,7 +32,7 @@ impl VertexAttribute {
         let status = unsafe {
             ffi::mdl_vertex_attribute_new(
                 name.as_ptr(),
-                format,
+                format.as_raw(),
                 offset as u64,
                 buffer_index as u64,
                 &mut out_attribute,
@@ -59,9 +64,9 @@ impl VertexAttribute {
     }
 
     /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex attribute counterpart.
-    pub fn set_format(&self, format: u32) {
+    pub fn set_format(&self, format: VertexFormat) {
         // SAFETY: ObjectHandle wraps a valid opaque pointer from Swift; FFI function accepts it safely.
-        unsafe { ffi::mdl_vertex_attribute_set_format(self.handle.as_ptr(), format) };
+        unsafe { ffi::mdl_vertex_attribute_set_format(self.handle.as_ptr(), format.as_raw()) };
     }
 
     /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex attribute counterpart.
@@ -150,6 +155,32 @@ impl VertexDescriptor {
     /// Builds this wrapper from the retained handle of the wrapped Model I/O vertex descriptor counterpart.
     pub(crate) fn from_handle(handle: ObjectHandle) -> Self {
         Self { handle }
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut core::ffi::c_void {
+        self.handle.as_ptr()
+    }
+
+    pub fn new() -> Result<Self> {
+        let mut out_descriptor = ptr::null_mut();
+        let mut out_error = ptr::null_mut();
+        // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
+        let status = unsafe { ffi::mdl_vertex_descriptor_new(&mut out_descriptor, &mut out_error) };
+        crate::util::status_result(status, out_error)?;
+        Ok(Self::from_handle(required_handle(
+            out_descriptor,
+            "MDLVertexDescriptor",
+        )?))
+    }
+
+    pub fn add_or_replace_attribute(&self, attribute: &VertexAttribute) {
+        // SAFETY: Both ObjectHandles wrap valid opaque pointers from Swift; FFI function accepts them safely.
+        unsafe {
+            ffi::mdl_vertex_descriptor_add_or_replace_attribute(
+                self.handle.as_ptr(),
+                attribute.handle.as_ptr(),
+            );
+        }
     }
 
     /// Calls the corresponding Model I/O method on the wrapped Model I/O vertex descriptor counterpart.

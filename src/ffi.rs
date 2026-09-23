@@ -173,6 +173,11 @@ extern "C" {
     );
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_mesh_vertex_descriptor(handle: *mut c_void) -> *mut c_void;
+    pub fn mdl_mesh_set_vertex_descriptor(
+        handle: *mut c_void,
+        descriptor: *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_mesh_vertex_attribute_data(
         handle: *mut c_void,
@@ -1135,6 +1140,11 @@ extern "C" {
         out_layout: *mut *mut c_void,
         out_error_message: *mut *mut c_char,
     ) -> i32;
+    pub fn mdl_vertex_descriptor_new(
+        out_descriptor: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn mdl_vertex_descriptor_add_or_replace_attribute(handle: *mut c_void, attribute: *mut c_void);
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.
     pub fn mdl_vertex_buffer_layout_stride(handle: *mut c_void) -> u64;
     /// Calls the corresponding Model I/O method on the corresponding Model I/O counterpart.

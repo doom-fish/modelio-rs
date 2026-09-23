@@ -23,6 +23,61 @@ private func mdl_vertex_descriptor_info(_ descriptor: MDLVertexDescriptor) -> [S
     ]
 }
 
+func mdl_checked_vertex_descriptor(_ source: MDLVertexDescriptor, vertexCount: Int?) throws -> MDLVertexDescriptor {
+    let descriptor = MDLVertexDescriptor(vertexDescriptor: source)
+    let strides = descriptor.layouts.map { ($0 as? MDLVertexBufferLayout)?.stride ?? 0 }
+    for case let attribute as MDLVertexAttribute in descriptor.attributes where attribute.format != .invalid {
+        guard let size = mdl_vertex_format_byte_size(attribute.format.rawValue) else {
+            throw ModelIOBridgeError.invalidArgument(
+                "vertex attribute \(attribute.name) has unknown format \(attribute.format.rawValue)"
+            )
+        }
+        guard attribute.bufferIndex >= 0, attribute.bufferIndex < strides.count else {
+            throw ModelIOBridgeError.invalidArgument(
+                "vertex attribute \(attribute.name) uses buffer index \(attribute.bufferIndex), but the descriptor has \(strides.count) layouts"
+            )
+        }
+        let stride = strides[attribute.bufferIndex]
+        guard attribute.offset >= 0, stride >= size, attribute.offset <= stride - size else {
+            throw ModelIOBridgeError.invalidArgument(
+                "vertex attribute \(attribute.name) needs \(size) bytes at offset \(attribute.offset), but layout \(attribute.bufferIndex) has stride \(stride)"
+            )
+        }
+        if let vertexCount, stride.multipliedReportingOverflow(by: vertexCount).overflow {
+            throw ModelIOBridgeError.invalidArgument(
+                "layout \(attribute.bufferIndex) stride \(stride) overflows for \(vertexCount) vertices"
+            )
+        }
+    }
+    return descriptor
+}
+
+@_cdecl("mdl_vertex_descriptor_new")
+public func mdl_vertex_descriptor_new(
+    _ outDescriptor: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    mdl_run(outError) {
+        guard let outDescriptor else {
+            throw ModelIOBridgeError.invalidArgument("missing output vertex descriptor pointer")
+        }
+        outDescriptor.pointee = mdl_retain(MDLVertexDescriptor())
+    }
+}
+
+@_cdecl("mdl_vertex_descriptor_add_or_replace_attribute")
+public func mdl_vertex_descriptor_add_or_replace_attribute(
+    _ handle: UnsafeMutableRawPointer?,
+    _ attributeHandle: UnsafeMutableRawPointer?
+) {
+    guard let descriptor = mdl_borrow_object(handle) as? MDLVertexDescriptor,
+          let attribute = mdl_borrow_object(attributeHandle) as? MDLVertexAttribute
+    else {
+        return
+    }
+    descriptor.addOrReplaceAttribute(attribute)
+}
+
 @_cdecl("mdl_vertex_attribute_new")
 public func mdl_vertex_attribute_new(
     _ name: UnsafePointer<CChar>?,

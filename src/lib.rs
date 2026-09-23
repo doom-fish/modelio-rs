@@ -89,8 +89,8 @@ pub use types::{
     ObjectKind, PackedJointAnimationInfo, PhotometricLightInfo, PhysicallyPlausibleLightInfo,
     ProbePlacement, SkeletonInfo, StereoscopicCameraInfo, TextureChannelEncoding,
     TextureFilterInfo, TextureInfo, TextureSamplerInfo, TransformOpRotationOrder,
-    VertexAttributeDescriptorInfo, VertexAttributeInfo, VertexDescriptorInfo, VoxelArrayInfo,
-    VoxelIndexExtent,
+    VertexAttributeDescriptorInfo, VertexAttributeInfo, VertexDescriptorInfo, VertexFormat,
+    VoxelArrayInfo, VoxelIndexExtent,
 };
 pub use utility::Utility;
 pub use value_types::Matrix4x4Array;
@@ -128,6 +128,7 @@ pub mod prelude {
         TransformRotateXOp, TransformRotateYOp, TransformRotateZOp, TransformScaleOp,
         TransformStack, TransformTranslateOp, Utility, VertexAttribute, VertexAttributeData,
         VertexAttributeDescriptorInfo, VertexAttributeInfo, VertexBufferLayout,
-        VertexDescriptor, VertexDescriptorInfo, VoxelArray, VoxelArrayInfo, VoxelIndexExtent,
+        VertexDescriptor, VertexDescriptorInfo, VertexFormat, VoxelArray, VoxelArrayInfo,
+        VoxelIndexExtent,
     };
 }

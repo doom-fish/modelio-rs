@@ -338,9 +338,34 @@ public func mdl_interpolation(_ rawValue: UInt32) throws -> MDLAnimatedValueInte
     return interpolation
 }
 
+public func mdl_vertex_format_byte_size(_ rawValue: UInt) -> Int? {
+    let componentCount = Int(rawValue & 0xFFF)
+    let base = rawValue & ~UInt(0x1FFF)
+    if rawValue & MDLVertexFormat.packedBit.rawValue != 0 {
+        let packedBase = base == MDLVertexFormat.intBits.rawValue || base == MDLVertexFormat.uIntBits.rawValue
+        return packedBase && componentCount == 4 ? 4 : nil
+    }
+    guard (1...4).contains(componentCount) else { return nil }
+    switch base {
+    case MDLVertexFormat.uCharBits.rawValue, MDLVertexFormat.charBits.rawValue,
+         MDLVertexFormat.uCharNormalizedBits.rawValue, MDLVertexFormat.charNormalizedBits.rawValue:
+        return componentCount
+    case MDLVertexFormat.uShortBits.rawValue, MDLVertexFormat.shortBits.rawValue,
+         MDLVertexFormat.uShortNormalizedBits.rawValue, MDLVertexFormat.shortNormalizedBits.rawValue,
+         MDLVertexFormat.halfBits.rawValue:
+        return componentCount * 2
+    case MDLVertexFormat.uIntBits.rawValue, MDLVertexFormat.intBits.rawValue, MDLVertexFormat.floatBits.rawValue:
+        return componentCount * 4
+    default:
+        return nil
+    }
+}
+
 @inline(__always)
 public func mdl_vertex_format(_ rawValue: UInt32) throws -> MDLVertexFormat {
-    guard let format = MDLVertexFormat(rawValue: UInt(rawValue)) else {
+    guard rawValue == 0 || mdl_vertex_format_byte_size(UInt(rawValue)) != nil,
+          let format = MDLVertexFormat(rawValue: UInt(rawValue))
+    else {
         throw ModelIOBridgeError.invalidArgument("invalid MDLVertexFormat: \(rawValue)")
     }
     return format
