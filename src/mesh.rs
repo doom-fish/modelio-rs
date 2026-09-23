@@ -277,7 +277,6 @@ impl Mesh {
 
     pub fn set_vertex_descriptor(&self, descriptor: &VertexDescriptor) -> Result<()> {
         let mut out_error = ptr::null_mut();
-        // SAFETY: Both ObjectHandles wrap valid opaque pointers from Swift; FFI function accepts them safely.
         let status = unsafe {
             ffi::mdl_mesh_set_vertex_descriptor(
                 self.handle.as_ptr(),

@@ -168,7 +168,6 @@ impl VertexDescriptor {
     pub fn new() -> Result<Self> {
         let mut out_descriptor = ptr::null_mut();
         let mut out_error = ptr::null_mut();
-        // SAFETY: Output pointers are initialized and managed; FFI function is called safely.
         let status =
             unsafe { ffi::mdl_vertex_descriptor_new(&raw mut out_descriptor, &raw mut out_error) };
         crate::util::status_result(status, out_error)?;
@@ -179,7 +178,6 @@ impl VertexDescriptor {
     }
 
     pub fn add_or_replace_attribute(&self, attribute: &VertexAttribute) {
-        // SAFETY: Both ObjectHandles wrap valid opaque pointers from Swift; FFI function accepts them safely.
         unsafe {
             ffi::mdl_vertex_descriptor_add_or_replace_attribute(
                 self.handle.as_ptr(),
