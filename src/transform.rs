@@ -1,5 +1,6 @@
-use std::panic::AssertUnwindSafe;
 use std::ptr;
+
+use doom_fish_utils::panic_safe::catch_user_panic_result;
 
 use crate::animated_value_types::{
     AnimatedMatrix4x4, AnimatedQuaternion, AnimatedScalar, AnimatedValue, AnimatedVector3,
@@ -171,11 +172,10 @@ fn transform_component_response(
     event: TransformComponentEvent,
 ) -> Option<TransformComponentResponse> {
     let context = (!context.is_null()).then_some(context.cast::<TransformComponentCallback>())?;
-    std::panic::catch_unwind(AssertUnwindSafe(|| {
+    catch_user_panic_result("MDLTransformComponent callback", || {
         // SAFETY: The unsafe operation is valid in this context.
         (unsafe { &*context }.callback)(event)
-    }))
-    .ok()
+    })
 }
 
 fn transform_component_matrix_response(context: *mut core::ffi::c_void) -> [f32; 16] {
@@ -197,11 +197,10 @@ fn transform_op_response(
     event: TransformOpEvent,
 ) -> Option<TransformOpResponse> {
     let context = (!context.is_null()).then_some(context.cast::<TransformOpCallback>())?;
-    std::panic::catch_unwind(AssertUnwindSafe(|| {
+    catch_user_panic_result("MDLTransformOp callback", || {
         // SAFETY: The unsafe operation is valid in this context.
         (unsafe { &*context }.callback)(event)
-    }))
-    .ok()
+    })
 }
 
 fn transform_op_matrix_f32(context: *mut core::ffi::c_void, time: f64) -> [f32; 16] {

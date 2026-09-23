@@ -1,5 +1,6 @@
-use std::panic::AssertUnwindSafe;
 use std::ptr;
+
+use doom_fish_utils::panic_safe::catch_user_panic_result;
 
 use crate::error::{ModelIoError, Result};
 use crate::ffi;
@@ -65,11 +66,10 @@ fn callback_response(
     event: MeshBufferAllocatorEvent,
 ) -> Option<MeshBufferAllocatorResponse> {
     let context = (!context.is_null()).then_some(context.cast::<MeshBufferAllocatorCallback>())?;
-    std::panic::catch_unwind(AssertUnwindSafe(|| {
+    catch_user_panic_result("MDLMeshBufferAllocator callback", || {
         // SAFETY: The unsafe operation is valid in this context.
         (unsafe { &*context }.callback)(event)
-    }))
-    .ok()
+    })
 }
 
 fn zone_from_retained_ptr(ptr: *mut core::ffi::c_void) -> Option<MeshBufferZone> {

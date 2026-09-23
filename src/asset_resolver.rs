@@ -1,6 +1,7 @@
 use std::ffi::CStr;
-use std::panic::AssertUnwindSafe;
 use std::ptr;
+
+use doom_fish_utils::panic_safe::catch_user_panic_result;
 
 use crate::asset::Asset;
 use crate::error::Result;
@@ -53,11 +54,10 @@ fn callback_response(
     event: AssetResolverEvent,
 ) -> Option<AssetResolverResponse> {
     let context = (!context.is_null()).then_some(context.cast::<AssetResolverCallback>())?;
-    std::panic::catch_unwind(AssertUnwindSafe(|| {
+    catch_user_panic_result("MDLAssetResolver callback", || {
         // SAFETY: The unsafe operation is valid in this context.
         (unsafe { &*context }.callback)(event)
-    }))
-    .ok()
+    })
 }
 
 #[no_mangle]
