@@ -9,12 +9,14 @@ fn submesh_sets_material_and_exposes_index_buffers() {
     submesh.set_material(Some(&material));
 
     assert!(submesh.index_count() > 0);
-    assert!(!submesh
-        .index_buffer()
-        .expect("index buffer")
-        .bytes()
-        .expect("bytes")
-        .is_empty());
+    assert_ne!(
+        submesh
+            .index_buffer()
+            .expect("index buffer")
+            .bytes()
+            .expect("bytes"),
+        [] as [u8; 0]
+    );
     assert!(submesh
         .index_buffer_as_type(IndexBitDepth::UInt32)
         .is_some());

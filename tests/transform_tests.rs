@@ -119,7 +119,7 @@ fn transform_and_transform_stack_round_trip() {
         .expect("animated value");
     let animated_info = animated_value.info().expect("animated value info");
     assert!(animated_info.minimum_time <= animated_info.maximum_time);
-    assert!(!animated_info.key_times.is_empty());
+    assert_ne!(animated_info.key_times, [] as [f64; 0]);
 
     object.set_transform_component(Some(&stack.as_transform_component()));
     let stack_component = object.transform_component().expect("stack component");

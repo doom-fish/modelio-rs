@@ -33,17 +33,17 @@ fn empty_asset_adds_mesh_object() {
 fn from_url_reports_missing_corrupt_and_unknown_files() {
     let missing = Asset::from_url(common::output_dir("asset").join("missing.obj"))
         .expect_err("missing file must fail");
-    assert!(!missing.message().is_empty());
+    assert_ne!(missing.message(), "");
 
     let corrupt_path = common::output_dir("asset").join("corrupt.obj");
     std::fs::write(&corrupt_path, b"this is not a mesh\n").expect("write corrupt fixture");
     let corrupt = Asset::from_url(&corrupt_path).expect_err("corrupt file must fail");
-    assert!(!corrupt.message().is_empty());
+    assert_ne!(corrupt.message(), "");
 
     let unknown_path = common::output_dir("asset").join("unknown.xyz");
     std::fs::write(&unknown_path, b"hello").expect("write unknown fixture");
     let unknown = Asset::from_url(&unknown_path).expect_err("unknown extension must fail");
-    assert!(!unknown.message().is_empty());
+    assert_ne!(unknown.message(), "");
 }
 
 #[test]
