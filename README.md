@@ -2,13 +2,15 @@
 
 Safe Rust bindings for Apple's [ModelIO](https://developer.apple.com/documentation/modelio) framework on macOS. The published Cargo package is `modelio-rs`; the Rust library target is `modelio`.
 
-> **Status:** v0.4.0 fixes buffer overruns in `VertexAttributeData::bytes` and `MeshBuffer::fill_data`, makes `Asset::from_url` report load errors, adds a typed `VertexFormat`, and lets a validated `VertexDescriptor` be applied to meshes and asset loads. The SDK audit covers 117/117 top-level ModelIO symbols; that figure counts classes, protocols, enums and constants, not methods (see `COVERAGE.md`).
+> **Status:** Version 0.4.3 retains the 0.4 API. The [SDK audit](COVERAGE.md) covers 117 top-level Model I/O symbols. It counts classes, protocols, enums, and constants, not methods.
+
+Version 0.4.0 fixed buffer overruns in `VertexAttributeData::bytes` and `MeshBuffer::fill_data`. It also added `Asset::from_url` error reporting and typed vertex formats.
 
 ## Installation
 
 ```toml
 [dependencies]
-modelio-rs = "0.4"
+modelio-rs = "0.4.3"
 ```
 
 ## Requirements
